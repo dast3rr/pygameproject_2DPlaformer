@@ -1,16 +1,19 @@
-from graphics import Platform, platforms, screen, fps
+from graphics import Platform, platforms, screen, fps, size
+from data import cords
+
 import pygame
-from screeninfo import get_monitors
 import os
 
+
 if __name__ == '__main__':
-    monitor = get_monitors()[0]
-    size = monitor.width, monitor.height
     os.environ['SDL_VIDEO_CENTERED'] = '1'
 
     pygame.init()
     pygame.display.set_mode(size)
     clock = pygame.time.Clock()
+
+    for cord in cords:
+        Platform(*cord)
 
     running = True
     while running:
@@ -18,7 +21,7 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 running = False
 
-        screen.fill('grey')
+        screen.fill(pygame.color.Color(200, 200, 200))
         platforms.draw(screen)
         platforms.update()
         pygame.display.flip()

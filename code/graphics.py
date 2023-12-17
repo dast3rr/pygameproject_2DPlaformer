@@ -1,10 +1,14 @@
 import pygame
 import os
 import sys
+from screeninfo import get_monitors
 
 cube = pygame.sprite.Group()
 platforms = pygame.sprite.Group()
-size = width, height = 500, 500
+
+monitor = get_monitors()[0]
+size = monitor.width, monitor.height
+
 screen = pygame.display.set_mode(size)
 fps = 60
 
@@ -43,13 +47,15 @@ class MainCharacter(pygame.sprite.Sprite):
 
 
 class Platform(pygame.sprite.Sprite):
-    def __init__(self, a, b, x, y):
+    def __init__(self, x, y, a, b):
+        w, h = screen.get_size()
         super().__init__(platforms)
-        self.cords = (x, y, a, b)
+        self.small_image = False
+        self.cords = (w // 3 + x * 2, h // 6 + y * 2, a * 2, b * 2)
         self.image = pygame.Surface((a, b),
                                     pygame.SRCALPHA, 32)
-        self.rect = pygame.Rect(x, y, a, b)
-        pygame.draw.rect(screen, (100, 100, 100), (x, y, a, b))
+        self.rect = pygame.Rect(w // 3 + x * 2, h // 3 + y * 2, a * 2, b * 2)
+        pygame.draw.rect(screen, 'black', self.rect)
 
     def update(self):
-        pygame.draw.rect(screen, (100, 100, 100), self.cords)
+        pygame.draw.rect(screen, 'black', self.cords)
