@@ -3,8 +3,12 @@ import os
 import sys
 from screeninfo import get_monitors
 
+CAN_MOVE = True
+CAN_FALL = False
+
 # группы спрайтов
 platforms = pygame.sprite.Group()
+character = pygame.sprite.Group()
 
 # получаю параметры монитора, по ним делаю окно игры
 monitor = get_monitors()[0]
@@ -32,19 +36,40 @@ fps = 60
 #         image = image.convert_alpha()
 #     return image
 
+# класс для горизонтальных пересечений и картинки
+class MainCharacterForHorizontal(pygame.sprite.Sprite):
+    def __init__(self, x, y, a, b):
+        # всякие кординаты
+        super().__init__(character)
+        w, h = screen.get_size()
+        self.image = pygame.Surface((a, b),
+                                    pygame.SRCALPHA, 32)
+        self.cords = (w // 3 + x * 2 + (b - a // 2), h // 6 + y * 2, a, b)
+        self.rect = pygame.Rect(w // 3 + x * 2, h // 6 + y * 2, b, b)
+        pygame.draw.rect(screen, 'white', self.rect)
 
-# class MainCharacter(pygame.sprite.Sprite):
-#     def __init__(self, a, x, y):
-#         super().__init__(cube)
-#         self.a = a
-#         self.image = pygame.Surface((a, a),
-#                                     pygame.SRCALPHA, 32)
-#         self.rect = pygame.Rect(x, y, a, a)
-#         pygame.draw.rect(screen, 'blue', (x, y, a, a))
-#         self.v = 50
-#
-#     def update(self):
-#         pygame.draw.rect(screen, 'blue', (self.rect.x, self.rect.y, self.a, self.a))
+    def update(self):
+        pygame.draw.rect(screen, 'white', self.rect)
+
+    # есть ли перисечение
+    def get_condition(self):
+        return pygame.sprite.spritecollideany(self, platforms)
+
+# класс только для вертикальных перемещений
+class MainCharacterForVertical(pygame.sprite.Sprite):
+    def __init__(self, x, y, a, b):
+        super().__init__(character)
+        # всякие кординаты
+        w, h = screen.get_size()
+        self.image = pygame.Surface((a, b),
+                                    pygame.SRCALPHA, 32)
+        self.cords = (w // 3 + x * 2, h // 6 + y * 2 + (a - b // 2), a, b)
+        self.rect = pygame.Rect(w // 3 + x * 2, h // 6 + y * 2, a, a)
+
+    # есть ли пересечение
+    def get_condition(self):
+        return pygame.sprite.spritecollideany(self, platforms)
+
 
 # класс стен
 class Platform(pygame.sprite.Sprite):
@@ -57,7 +82,7 @@ class Platform(pygame.sprite.Sprite):
                                     pygame.SRCALPHA, 32)
 
         # начальное положение. Чтобы поменять self.rect.x = 100 или self.rect.y = 200
-        self.rect = pygame.Rect(w // 3 + x * 2, h // 3 + y * 2, a * 2, b * 2)
+        self.rect = pygame.Rect(w // 3 + x * 2, h // 6 + y * 2, a * 2, b * 2)
         pygame.draw.rect(screen, 'black', self.rect)
 
     # обновление положения
