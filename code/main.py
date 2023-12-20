@@ -103,6 +103,7 @@ if __name__ == '__main__':
         else:
             fall_speed = 120
         if jump:
+            # при прыжке, на самой верхней точке скорость меньше
             fall_speed = -(60 - start_jump_altitude + main_character.rect.y) * 5
             print(fall_speed)
             if not fall_speed:
