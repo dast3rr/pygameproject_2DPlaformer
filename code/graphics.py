@@ -47,7 +47,7 @@ class MainCharacter(pygame.sprite.Sprite):
         self.image = pygame.Surface((a + 2, b + 2),
                                     pygame.SRCALPHA, 32)
         self.cords = (w // 3 + x * 2, h // 6 + y * 2, a, b)
-        self.rect = pygame.Rect(w // 3 + x * 2 - 1, h // 6 + y * 2 - 1, a + 2, b + 3)
+        self.rect = pygame.Rect(w // 3 + x * 2 - 1, h // 6 + y * 2 - 1, a + 2, b + 2)
         pygame.draw.rect(screen, 'white', self.rect)
 
     def update(self):
@@ -59,9 +59,6 @@ class MainCharacter(pygame.sprite.Sprite):
 
     def get_ver(self):
         return pygame.sprite.spritecollideany(self, vertical_platforms)
-
-
-
 
 
 # класс стен

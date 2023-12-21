@@ -21,7 +21,10 @@ if __name__ == '__main__':
 
     # пустое значение
     start_jump_altitude = -100000
+    start_jump_from_wall_position = 0
     jump = False
+    jump_from_wall = False
+    speeds_before_jump = [0, 0]
 
     # Создаю чёрные прямоугольники стен по кординатам из data.py
     for cord in cords:
@@ -45,11 +48,16 @@ if __name__ == '__main__':
             # если нажаты клавиши
             elif event.type == pygame.KEYDOWN:
                 keys = pygame.key.get_pressed()
-
                 if keys[pygame.K_d]:
-                    right = 1
+                    if not jump_from_wall:
+                        right = 1
+                    else:
+                        speeds_before_jump[0] = 1
                 if keys[pygame.K_a]:
-                    left = -1
+                    if not jump_from_wall:
+                        left = -1
+                    else:
+                        speeds_before_jump[1] = -1
 
                 # если нажат shift то ускоряется
                 if keys[pygame.K_LSHIFT]:
@@ -58,14 +66,28 @@ if __name__ == '__main__':
                     move_speed = 80
 
                 # при нажатии на пробел - прыжок
-                if keys[pygame.K_SPACE] and (main_character.get_hor() or main_character.get_ver()):
+                if event.key == pygame.K_SPACE and (main_character.get_hor() or main_character.get_ver()):
                     start_jump_altitude = main_character.rect.y + 1
                     main_character.rect.y -= 2
                     if main_character.get_ver() and main_character.get_hor():
+                        main_character.rect.x += 1
+                        if main_character.get_ver():
+                            main_character.rect.x -= 2
+                    jump = True
+                    if main_character.get_ver():
+                        jump_from_wall = True
+                        speeds_before_jump = [0, 0]
                         main_character.rect.x -= 1
                         if main_character.get_ver():
-                            main_character.rect.x += 2
-                    jump = True
+                            right = 1
+                            left = 0
+                        else:
+                            right = 0
+                            left = -1
+                        main_character.rect.x += 1
+                        start_jump_from_wall_position = main_character.rect.x
+                    else:
+                        jump_from_wall = False
 
             # если отпускается какая-либо клавиша
             elif event.type == pygame.KEYUP:
@@ -96,20 +118,25 @@ if __name__ == '__main__':
             if main_character.get_ver():
                 if condition:
                     main_character.rect.x -= move_hor
+                jump = False
                 break
 
-        if main_character.get_ver():
+        if main_character.get_ver() and not jump:
             fall_speed = 60
-        else:
+        elif not jump:
             fall_speed = 120
         if jump:
             # при прыжке, на самой верхней точке скорость меньше
             fall_speed = -(60 - start_jump_altitude + main_character.rect.y) * 5
-            print(fall_speed)
             if not fall_speed:
                 jump = False
                 fall_speed = 120
 
+        if jump_from_wall:
+            if abs(main_character.rect.x - start_jump_from_wall_position) > 20:
+                jump_from_wall = False
+                right, left = speeds_before_jump
+                speeds_before_jump = [0, 0]
 
         if fall_speed:
             # падение и скольжение
@@ -129,8 +156,6 @@ if __name__ == '__main__':
                     if condition:
                         main_character.rect.y -= fall_speed // abs(fall_speed)
                     break
-
-
 
         # отрисовываю все группы спрайтов
         platforms.draw(screen)
