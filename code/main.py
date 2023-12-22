@@ -5,6 +5,50 @@ from data import cords
 import pygame
 import os
 
+def initialization():
+    for cord in cords:
+        x, y, a, b = cord
+        Platform(x + 1, y, a - 2, b, platforms, horizontal_platforms)
+        Platform(x, y + 1, a, b - 2, platforms, vertical_platforms)
+
+    # главный герой
+    main_character = MainCharacter(0, 0, 20, 40)
+    return main_character
+
+
+class Camera:
+    # зададим начальный сдвиг камеры
+    def __init__(self):
+        self.x = size[0] // 2
+        self.y = size[1] // 2
+
+    # сдвинуть объект obj на смещение камеры
+    def apply(self, obj):
+        obj.rect.x += self.x
+        obj.rect.y += self.y
+
+    # позиционировать камеру на объекте target
+    def update(self, target):
+        d_x = main_character.rect.x - self.x
+        d_y = main_character.rect.y - self.y
+        if d_x > 50:
+            for platform in platforms:
+                platform.rect.x -= d_x - 50
+                self.x -= d_x - 50
+        elif d_x < -50:
+            for platform in platforms:
+                platform.rect.x -= d_x + 50
+                self.x -= d_x + 50
+        if d_y > 50:
+            for platform in platforms:
+                platform.rect.y -= d_y - 50
+                self.y -= d_y - 50
+        elif d_y < -50:
+            for platform in platforms:
+                platform.rect.y -= d_y + 50
+                self.y -= d_y + 50
+
+
 if __name__ == '__main__':
     # Перемещаю экран на центр
     os.environ['SDL_VIDEO_CENTERED'] = '1'
@@ -26,19 +70,13 @@ if __name__ == '__main__':
     jump_from_wall = False
     speeds_before_jump = [0, 0]
 
-    # Создаю чёрные прямоугольники стен по кординатам из data.py
-    for cord in cords:
-        x, y, a, b = cord
-        Platform(x + 1, y, a - 2, b, platforms, horizontal_platforms)
-        Platform(x, y + 1, a, b - 2, platforms, vertical_platforms)
-
-
-    # создаю два прямоугольника, один отвечает за пересечение по вертикали, другой - по горизонтали
-    main_character = MainCharacter(100, 185, 20, 40)
+    # инициализация главного героя и платформ.
+    main_character = initialization()
 
     # перемещение в стороны
     right = left = 0
 
+    camera = Camera()
     running = True
     while running:
         for event in pygame.event.get():
@@ -156,6 +194,8 @@ if __name__ == '__main__':
                     if condition:
                         main_character.rect.y -= fall_speed // abs(fall_speed)
                     break
+
+        camera.update(main_character)
 
         # отрисовываю все группы спрайтов
         platforms.draw(screen)
