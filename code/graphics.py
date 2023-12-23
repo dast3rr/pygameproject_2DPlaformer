@@ -40,11 +40,14 @@ class MainCharacter(pygame.sprite.Sprite):
         # всякие кординаты
         super().__init__(character)
         w, h = screen.get_size()
-        self.a, self.b = a, b
-        self.image = pygame.Surface((a + 2, b + 2),
+        self.a, self.b = a * 4, b * 4
+        x *= 2
+        y *= 2
+
+        self.image = pygame.Surface((self.a + 2, self.b + 2),
                                     pygame.SRCALPHA, 32)
-        self.cords = (w // 2 + x * 2, h // 2 + y * 2, a, b)
-        self.rect = pygame.Rect(w // 2 + x * 2 - 1, h // 2 + y * 2 - 1, a + 2, b + 2)
+        self.cords = (w // 2 + x, h // 2 + y, self.a, self.b)
+        self.rect = pygame.Rect(w // 2 + x - 1, h // 2 + y - 1, self.a + 2, self.b + 2)
         pygame.draw.rect(screen, 'white', self.rect)
 
     # рисование
@@ -64,14 +67,17 @@ class MainCharacter(pygame.sprite.Sprite):
 class Platform(pygame.sprite.Sprite):
     def __init__(self, x, y, a, b, *groups):
         w, h = screen.get_size()  # ширина и высота окна
+        self.a, self.b = a * 4, b * 4
+        x *= 4
+        y *= 4
         super().__init__(*groups)
         # кординаты и картинка. Картинка для последующей обработки столкновений
-        self.cords = (w // 2 + x * 2, h // 2 + y * 2, a * 2, b * 2)
-        self.image = pygame.Surface((a * 2, b * 2),
+        self.cords = (w // 2 + x, h // 2 + y, self.a, self.b)
+        self.image = pygame.Surface((self.a, self.b),
                                     pygame.SRCALPHA, 32)
 
         # начальное положение. Чтобы поменять self.rect.x = 100 или self.rect.y = 200
-        self.rect = pygame.Rect(w // 2 + x * 2, h // 2 + y * 2, a * 2, b * 2)
+        self.rect = pygame.Rect(w // 2 + x, h // 2 + y, self.a, self.b)
         pygame.draw.rect(screen, 'black', self.rect)
 
     # обновление положения

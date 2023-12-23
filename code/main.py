@@ -12,7 +12,7 @@ def initialization():
         Platform(x, y + 1, a, b - 2, platforms, vertical_platforms)
 
     # главный герой
-    main_character = MainCharacter(0, 0, 20, 40)
+    main_character = MainCharacter(0, 0, 10, 20)
     return main_character
 
 
