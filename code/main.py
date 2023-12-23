@@ -1,5 +1,5 @@
 from graphics import Platform, platforms, screen, fps, size, MainCharacter, vertical_platforms, horizontal_platforms, \
-    character
+    character, N
 from data import cords
 
 import pygame
@@ -8,8 +8,8 @@ import os
 def initialization():
     for cord in cords:
         x, y, a, b = cord
-        Platform(x + 1, y, a - 2, b, platforms, horizontal_platforms)
-        Platform(x, y + 1, a, b - 2, platforms, vertical_platforms)
+        Platform(x + 1 / N, y, a - 2 / N, b, platforms, horizontal_platforms)
+        Platform(x, y + 1 / N, a, b - 2 / N, platforms, vertical_platforms)
 
     # главный герой
     main_character = MainCharacter(0, 0, 10, 20)
@@ -27,30 +27,32 @@ class Camera:
         global start_jump_altitude, start_jump_from_wall_position
         d_x = main_character.rect.x - self.x
         d_y = main_character.rect.y - self.y
-        if d_x > 50:
+
+        r = 50 * N
+        if d_x > r:
             for platform in platforms:
-                platform.rect.x -= (d_x - 50)
-            main_character.rect.x -= d_x - 50
-            self.x = main_character.rect.x - 50
-            start_jump_from_wall_position -= (d_x - 50)
-        elif d_x < -50:
+                platform.rect.x -= (d_x - r)
+            main_character.rect.x -= d_x - r
+            self.x = main_character.rect.x - r
+            start_jump_from_wall_position -= (d_x - r)
+        elif d_x < -r:
             for platform in platforms:
-                platform.rect.x -= (d_x + 50)
-            main_character.rect.x -= d_x + 50
-            self.x = main_character.rect.x + 50
-            start_jump_from_wall_position -= (d_x + 50)
-        if d_y > 50:
+                platform.rect.x -= (d_x + r)
+            main_character.rect.x -= d_x + r
+            self.x = main_character.rect.x + r
+            start_jump_from_wall_position -= (d_x + r)
+        if d_y > r:
             for platform in platforms:
-                platform.rect.y -= (d_y - 50)
-            main_character.rect.y -= d_y - 50
-            self.y = main_character.rect.y - 50
-            start_jump_altitude -= (d_y - 50)
-        elif d_y < -50:
+                platform.rect.y -= (d_y - r)
+            main_character.rect.y -= d_y - r
+            self.y = main_character.rect.y - r
+            start_jump_altitude -= (d_y - r)
+        elif d_y < -r:
             for platform in platforms:
-                platform.rect.y -= (d_y + 50)
-            main_character.rect.y -= d_y + 50
-            self.y = main_character.rect.y + 50
-            start_jump_altitude -= (d_y + 50)
+                platform.rect.y -= (d_y + r)
+            main_character.rect.y -= d_y + r
+            self.y = main_character.rect.y + r
+            start_jump_altitude -= (d_y + r)
 
 
 
@@ -64,9 +66,9 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
 
     # скорость падения, прыжка и передвижения
-    move_speed = 80
-    fall_speed = 120
-    jump_speed = 120
+    move_speed = 40 * N
+    fall_speed = 60 * N
+    jump_speed = 60 * N
 
     # пустое значение
     start_jump_altitude = -100000
@@ -104,9 +106,9 @@ if __name__ == '__main__':
 
                 # если нажат shift то ускоряется
                 if keys[pygame.K_LSHIFT]:
-                    move_speed = 120
+                    move_speed = 60 * N
                 else:
-                    move_speed = 80
+                    move_speed = 40 * N
 
                 # при нажатии на пробел - прыжок
                 if event.key == pygame.K_SPACE and (main_character.get_hor() or main_character.get_ver()):
@@ -143,7 +145,7 @@ if __name__ == '__main__':
                 if event.key == pygame.K_a:
                     left = 0
                 if event.key == pygame.K_LSHIFT:
-                    move_speed = 80
+                    move_speed = 40 * N
 
         # цвет можно поменять. Это будет цвет фона
         screen.fill(pygame.color.Color(200, 200, 200))
@@ -168,24 +170,27 @@ if __name__ == '__main__':
                 jump = False
                 break
 
+
         # определение скорости падения
         if main_character.get_ver() and not jump:
-            fall_speed = 60
+            fall_speed = 30 * N
         elif not jump:
-            fall_speed = 120
+            fall_speed = 60 * N
         if jump:
             # при прыжке, на самой верхней точке скорость меньше
-            fall_speed = -(60 - start_jump_altitude + main_character.rect.y) * 5
+            fall_speed = -(30 * N - start_jump_altitude + main_character.rect.y) * 5
             if not fall_speed:
                 jump = False
-                fall_speed = 120
+                fall_speed = 60 * N
         # если совершается прыжок от стены
         if jump_from_wall:
             # если уже далеко от стены
-            if abs(main_character.rect.x - start_jump_from_wall_position) > 20:
+            if abs(main_character.rect.x - start_jump_from_wall_position) > 10 * N:
                 jump_from_wall = False
                 right, left = speeds_before_jump
                 speeds_before_jump = [0, 0]
+
+
 
         if fall_speed:
             # падение и скольжение
@@ -205,6 +210,8 @@ if __name__ == '__main__':
                     if condition:
                         main_character.rect.y -= fall_speed // abs(fall_speed)
                     break
+
+
 
         camera.update()
 

@@ -17,6 +17,8 @@ size = monitor.width, monitor.height
 screen = pygame.display.set_mode(size)
 # частота обноления экрана
 fps = 60
+# коэфициент масштабирования
+N = 4
 
 # def load_image(name, colorkey=None):
 #     fullname = os.path.join('data', name)
@@ -40,11 +42,11 @@ class MainCharacter(pygame.sprite.Sprite):
         # всякие кординаты
         super().__init__(character)
         w, h = screen.get_size()
-        self.a, self.b = a * 4, b * 4
-        x *= 2
-        y *= 2
+        self.a, self.b = a * N, b * N
+        x *= N
+        y *= N
 
-        self.image = pygame.Surface((self.a + 2, self.b + 2),
+        self.image = pygame.Surface((self.a, self.b),
                                     pygame.SRCALPHA, 32)
         self.cords = (w // 2 + x, h // 2 + y, self.a, self.b)
         self.rect = pygame.Rect(w // 2 + x - 1, h // 2 + y - 1, self.a + 2, self.b + 2)
@@ -67,9 +69,9 @@ class MainCharacter(pygame.sprite.Sprite):
 class Platform(pygame.sprite.Sprite):
     def __init__(self, x, y, a, b, *groups):
         w, h = screen.get_size()  # ширина и высота окна
-        self.a, self.b = a * 4, b * 4
-        x *= 4
-        y *= 4
+        self.a, self.b = a * N, b * N
+        x *= N
+        y *= N
         super().__init__(*groups)
         # кординаты и картинка. Картинка для последующей обработки столкновений
         self.cords = (w // 2 + x, h // 2 + y, self.a, self.b)
