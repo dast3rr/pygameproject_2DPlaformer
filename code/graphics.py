@@ -3,9 +3,6 @@ import os
 import sys
 from screeninfo import get_monitors
 
-CAN_MOVE = True
-CAN_FALL = False
-
 # группы спрайтов
 platforms = pygame.sprite.Group()
 character = pygame.sprite.Group()
@@ -50,10 +47,12 @@ class MainCharacter(pygame.sprite.Sprite):
         self.rect = pygame.Rect(w // 2 + x * 2 - 1, h // 2 + y * 2 - 1, a + 2, b + 2)
         pygame.draw.rect(screen, 'white', self.rect)
 
+    # рисование
     def update(self):
         self.cords = (self.rect.x + 1, self.rect.y + 1, self.a, self.b)
         pygame.draw.rect(screen, 'white', self.cords)
 
+    # возвращает соприкосновение с вертикальными или горизонтальными блоками
     def get_hor(self):
         return pygame.sprite.spritecollideany(self, horizontal_platforms)
 

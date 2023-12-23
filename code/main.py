@@ -111,22 +111,26 @@ if __name__ == '__main__':
                 # при нажатии на пробел - прыжок
                 if event.key == pygame.K_SPACE and (main_character.get_hor() or main_character.get_ver()):
                     start_jump_altitude = main_character.rect.y + 1
+                    # проверка на зацепление за текстуры(был баг без этого)
                     main_character.rect.y -= 2
                     if main_character.get_ver() and main_character.get_hor():
                         main_character.rect.x += 1
                         if main_character.get_ver():
                             main_character.rect.x -= 2
+                    # объявляю прыжок
                     jump = True
-                    if main_character.get_ver():
+                    if main_character.get_ver():  # если есть касани вертикально стены, то объявляю прыжок от стены
                         jump_from_wall = True
                         speeds_before_jump = [0, 0]
                         main_character.rect.x -= 1
+                        # запоминаю скорости
                         if main_character.get_ver():
                             right = 1
                             left = 0
                         else:
                             right = 0
                             left = -1
+
                         main_character.rect.x += 1
                         start_jump_from_wall_position = main_character.rect.x
                     else:
@@ -164,6 +168,7 @@ if __name__ == '__main__':
                 jump = False
                 break
 
+        # определение скорости падения
         if main_character.get_ver() and not jump:
             fall_speed = 60
         elif not jump:
@@ -174,8 +179,9 @@ if __name__ == '__main__':
             if not fall_speed:
                 jump = False
                 fall_speed = 120
-
+        # если совершается прыжок от стены
         if jump_from_wall:
+            # если уже далеко от стены
             if abs(main_character.rect.x - start_jump_from_wall_position) > 20:
                 jump_from_wall = False
                 right, left = speeds_before_jump
