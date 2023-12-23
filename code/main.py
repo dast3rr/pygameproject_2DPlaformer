@@ -22,31 +22,36 @@ class Camera:
         self.x = size[0] // 2
         self.y = size[1] // 2
 
-    # сдвинуть объект obj на смещение камеры
-    def apply(self, obj):
-        obj.rect.x += self.x
-        obj.rect.y += self.y
-
     # позиционировать камеру на объекте target
-    def update(self, target):
+    def update(self):
+        global start_jump_altitude, start_jump_from_wall_position
         d_x = main_character.rect.x - self.x
         d_y = main_character.rect.y - self.y
         if d_x > 50:
             for platform in platforms:
-                platform.rect.x -= d_x - 50
-                self.x -= d_x - 50
+                platform.rect.x -= (d_x - 50)
+            main_character.rect.x -= d_x - 50
+            self.x = main_character.rect.x - 50
+            start_jump_from_wall_position -= (d_x - 50)
         elif d_x < -50:
             for platform in platforms:
-                platform.rect.x -= d_x + 50
-                self.x -= d_x + 50
+                platform.rect.x -= (d_x + 50)
+            main_character.rect.x -= d_x + 50
+            self.x = main_character.rect.x + 50
+            start_jump_from_wall_position -= (d_x + 50)
         if d_y > 50:
             for platform in platforms:
-                platform.rect.y -= d_y - 50
-                self.y -= d_y - 50
+                platform.rect.y -= (d_y - 50)
+            main_character.rect.y -= d_y - 50
+            self.y = main_character.rect.y - 50
+            start_jump_altitude -= (d_y - 50)
         elif d_y < -50:
             for platform in platforms:
-                platform.rect.y -= d_y + 50
-                self.y -= d_y + 50
+                platform.rect.y -= (d_y + 50)
+            main_character.rect.y -= d_y + 50
+            self.y = main_character.rect.y + 50
+            start_jump_altitude -= (d_y + 50)
+
 
 
 if __name__ == '__main__':
@@ -195,7 +200,7 @@ if __name__ == '__main__':
                         main_character.rect.y -= fall_speed // abs(fall_speed)
                     break
 
-        camera.update(main_character)
+        camera.update()
 
         # отрисовываю все группы спрайтов
         platforms.draw(screen)
