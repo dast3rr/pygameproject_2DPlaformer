@@ -41,7 +41,7 @@ class Character(pygame.sprite.Sprite):
         self.image.fill(color)
         self.cords = (w // 2 + x, h // 2 + y, self.a, self.b)
         self.rect = pygame.Rect(w // 2 + x - 1, h // 2 + y - 1, self.a + 2, self.b + 2)
-        pygame.draw.rect(screen, self.color, self.rect)
+        pygame.draw.rect(self.image, self.color, self.rect)
 
     def get_hor(self):
         return pygame.sprite.spritecollideany(self, horizontal_platforms)
@@ -108,16 +108,12 @@ class Platform(pygame.sprite.Sprite):
         super().__init__(*groups)
         # кординаты и картинка. Картинка для последующей обработки столкновений
         self.cords = (w // 2 + x, h // 2 + y, self.a, self.b)
-        self.image = pygame.Surface((self.a, self.b),
-                                    pygame.SRCALPHA, 32)
+        self.image = pygame.Surface((self.a, self.b),)
 
         # начальное положение. Чтобы поменять self.rect.x = 100 или self.rect.y = 200
         self.rect = pygame.Rect(w // 2 + x, h // 2 + y, self.a, self.b)
-        pygame.draw.rect(screen, 'black', self.rect)
+        pygame.draw.rect(self.image, 'black', self.rect)
 
-    # обновление положения
-    def update(self):
-        pygame.draw.rect(screen, 'black', self.rect)
 
 def initialization():
     cords = [(-100, -185, 69, 391), (-100, -185, 191, 68), (-100, 20, 102, 186), (-100, 20, 227, 34),
@@ -135,6 +131,7 @@ def initialization():
     main_character = MainCharacter(0, 0, 10, 20, 'white')
 
     return main_character
+
 
 # получаю параметры монитора, по ним делаю окно игры
 monitor = get_monitors()[0]
