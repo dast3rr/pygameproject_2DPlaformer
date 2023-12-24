@@ -3,23 +3,11 @@ import os
 import sys
 from screeninfo import get_monitors
 
-# группы спрайтов
-platforms = pygame.sprite.Group()
-character = pygame.sprite.Group()
-horizontal_platforms = pygame.sprite.Group()
-vertical_platforms = pygame.sprite.Group()
 
-# коэфициент масштабирования
-N = 6
 
-# получаю параметры монитора, по ним делаю окно игры
-monitor = get_monitors()[0]
-size = monitor.width, monitor.height
 
-# сам экран
-screen = pygame.display.set_mode(size)
-# частота обноления экрана
-fps = 60
+
+
 
 
 # def load_image(name, colorkey=None):
@@ -40,10 +28,10 @@ fps = 60
 
 # класс для горизонтальных пересечений и картинки
 class Character(pygame.sprite.Sprite):
-    def __init__(self, x, y, a, b, color):
+    def __init__(self, x, y, a, b, color, *groups):
         # всякие кординаты
         self.color = color
-        super().__init__(character)
+        super().__init__(character, *groups)
         w, h = screen.get_size()
         self.a, self.b = a * N, b * N
         x *= N
@@ -110,7 +98,6 @@ class Enemy(Character):
         pass
 
 
-
 # класс стен
 class Platform(pygame.sprite.Sprite):
     def __init__(self, x, y, a, b, *groups):
@@ -131,5 +118,42 @@ class Platform(pygame.sprite.Sprite):
     # обновление положения
     def update(self):
         pygame.draw.rect(screen, 'black', self.rect)
+
+def initialization():
+    cords = [(-100, -185, 69, 391), (-100, -185, 191, 68), (-100, 20, 102, 186), (-100, 20, 227, 34),
+             (-100, 144, 647, 62),
+             (-100, -185, 300, 31), (245, -185, 302, 68), (81, -185, 10, 180), (81, -68, 170, 17), (482, -185, 65, 391),
+             (162, 40, 166, 66), (245, -185, 302, 31), (352, 38, 192, 74), (290, -72, 160, 17), (402, -17, 48, 30),
+             (110, -115, 50, 20), (180, -130, 30, 10)]
+    for cord in cords:
+        x, y, a, b = cord
+        Platform(x + 1 / N, y, a - 2 / N, b, platforms, horizontal_platforms)
+        Platform(x, y + 1 / N, a, b - 2 / N, platforms, vertical_platforms)
+
+    # главный герой
+    Enemy(-30, 10, 10, 10, 'red', enemies)
+    main_character = MainCharacter(0, 0, 10, 20, 'white')
+
+    return main_character
+
+# получаю параметры монитора, по ним делаю окно игры
+monitor = get_monitors()[0]
+size = monitor.width, monitor.height
+
+# сам экран
+screen = pygame.display.set_mode(size)
+# частота обноления экрана
+fps = 60
+
+# группы спрайтов
+platforms = pygame.sprite.Group()
+character = pygame.sprite.Group()
+horizontal_platforms = pygame.sprite.Group()
+vertical_platforms = pygame.sprite.Group()
+enemies = pygame.sprite.Group()
+N = 6
+main_character = initialization()
+
+
 
 

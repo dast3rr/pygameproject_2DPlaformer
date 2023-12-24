@@ -1,19 +1,10 @@
-from graphics import Platform, platforms, screen, fps, size, MainCharacter, vertical_platforms, horizontal_platforms, \
-    character, N
-from data import cords
+from graphics import platforms, screen, fps, size, \
+    character, enemies, main_character
+from data import move_speed, start_jump_from_wall_position, start_jump_altitude, jump, jump_from_wall, \
+    jump_speed, fall_speed
 
 import pygame
 import os
-
-def initialization():
-    for cord in cords:
-        x, y, a, b = cord
-        Platform(x + 1 / N, y, a - 2 / N, b, platforms, horizontal_platforms)
-        Platform(x, y + 1 / N, a, b - 2 / N, platforms, vertical_platforms)
-
-    # главный герой
-    main_character = MainCharacter(0, 0, 10, 20, 'white')
-    return main_character
 
 
 class Camera:
@@ -30,43 +21,49 @@ class Camera:
 
         r = 30 * N
         if d_x > r:
-            for platform in platforms:
-                platform.rect.x -= (d_x - r)
+            for sprite in platforms:
+                sprite.rect.x -= (d_x - r)
+            for sprite in enemies:
+                sprite.rect.x -= (d_x - r)
             main_character.rect.x -= d_x - r
             self.x = main_character.rect.x - r
             start_jump_from_wall_position -= (d_x - r)
         elif d_x < -r:
-            for platform in platforms:
-                platform.rect.x -= (d_x + r)
+            for sprite in platforms:
+                sprite.rect.x -= (d_x + r)
+            for sprite in enemies:
+                sprite.rect.x -= (d_x + r)
             main_character.rect.x -= d_x + r
             self.x = main_character.rect.x + r
             start_jump_from_wall_position -= (d_x + r)
         if d_y > r:
-            for platform in platforms:
-                platform.rect.y -= (d_y - r)
+            for sprite in platforms:
+                sprite.rect.y -= (d_y - r)
+            for sprite in enemies:
+                sprite.rect.y -= (d_y - r)
             main_character.rect.y -= d_y - r
             self.y = main_character.rect.y - r
             start_jump_altitude -= (d_y - r)
         elif d_y < -r:
-            for platform in platforms:
-                platform.rect.y -= (d_y + r)
+            for sprite in platforms:
+                sprite.rect.y -= (d_y + r)
+            for sprite in enemies:
+                sprite.rect.y -= (d_y + r)
             main_character.rect.y -= d_y + r
             self.y = main_character.rect.y + r
             start_jump_altitude -= (d_y + r)
-
 
 
 if __name__ == '__main__':
     # Перемещаю экран на центр
     os.environ['SDL_VIDEO_CENTERED'] = '1'
 
+    N = 6
+
     pygame.init()
     pygame.display.set_mode(size)
     # таймер для обновления фпс - 60
     clock = pygame.time.Clock()
-
-    # скорость падения, прыжка и передвижения
-
 
     # пустое значение
     start_jump_altitude = -100000
@@ -79,9 +76,6 @@ if __name__ == '__main__':
     move_speed = 40 * N
     fall_speed = 60 * N
     jump_speed = 60 * N
-
-    # инициализация главного героя и платформ.
-    main_character = initialization()
 
     # перемещение в стороны
     right = left = 0
