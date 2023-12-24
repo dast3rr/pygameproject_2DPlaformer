@@ -9,6 +9,9 @@ character = pygame.sprite.Group()
 horizontal_platforms = pygame.sprite.Group()
 vertical_platforms = pygame.sprite.Group()
 
+# коэфициент масштабирования
+N = 6
+
 # получаю параметры монитора, по ним делаю окно игры
 monitor = get_monitors()[0]
 size = monitor.width, monitor.height
@@ -17,8 +20,7 @@ size = monitor.width, monitor.height
 screen = pygame.display.set_mode(size)
 # частота обноления экрана
 fps = 60
-# коэфициент масштабирования
-N = 4
+
 
 # def load_image(name, colorkey=None):
 #     fullname = os.path.join('data', name)
@@ -37,7 +39,7 @@ N = 4
 #     return image
 
 # класс для горизонтальных пересечений и картинки
-class MainCharacter(pygame.sprite.Sprite):
+class Character(pygame.sprite.Sprite):
     def __init__(self, x, y, a, b):
         # всякие кординаты
         super().__init__(character)
@@ -52,17 +54,65 @@ class MainCharacter(pygame.sprite.Sprite):
         self.rect = pygame.Rect(w // 2 + x - 1, h // 2 + y - 1, self.a + 2, self.b + 2)
         pygame.draw.rect(screen, 'white', self.rect)
 
-    # рисование
-    def update(self):
+    def update(self, *args):
         self.cords = (self.rect.x + 1, self.rect.y + 1, self.a, self.b)
         pygame.draw.rect(screen, 'white', self.cords)
 
-    # возвращает соприкосновение с вертикальными или горизонтальными блоками
     def get_hor(self):
         return pygame.sprite.spritecollideany(self, horizontal_platforms)
 
     def get_ver(self):
         return pygame.sprite.spritecollideany(self, vertical_platforms)
+
+
+class MainCharacter(Character):
+    # рисование
+    def update(self, *args):
+        move_hor, jump, move_speed, fall_speed = args
+
+        if move_hor < 0:
+            # если движение влево, то изначально значение отрицательно
+            r = range(-(move_hor * move_speed) // fps)
+        else:
+            r = range((move_hor * move_speed) // fps)
+        for i in r:
+            # начально условие
+            condition = self.get_ver()
+            # потом двигаю персонажа
+            self.rect.x += move_hor
+            # если условие не поменялось, то возвращаю обратно, и в любом случаю прекращаю движение
+            if self.get_ver():
+                if condition:
+                    self.rect.x -= move_hor
+                jump = False
+                break
+
+        if fall_speed:
+            # падение и скольжение
+            if fall_speed < 0:
+                # отрицательно при прыжке
+                r = range(-(fall_speed // fps))
+            else:
+                r = range(fall_speed // fps)
+            for i in r:
+                condition = self.get_hor()
+                self.rect.y += fall_speed // abs(fall_speed)
+                if self.get_ver():
+                    if jump:
+                        self.rect.y += 3
+                        jump = False
+                        break
+                    if condition:
+                        self.rect.y -= fall_speed // abs(fall_speed)
+                    break
+
+        self.cords = (self.rect.x + 1, self.rect.y + 1, self.a, self.b)
+        pygame.draw.rect(screen, 'white', self.cords)
+
+        return jump
+
+    # возвращает соприкосновение с вертикальными или горизонтальными блоками
+
 
 
 # класс стен

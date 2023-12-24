@@ -28,7 +28,7 @@ class Camera:
         d_x = main_character.rect.x - self.x
         d_y = main_character.rect.y - self.y
 
-        r = 50 * N
+        r = 30 * N
         if d_x > r:
             for platform in platforms:
                 platform.rect.x -= (d_x - r)
@@ -66,9 +66,7 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
 
     # скорость падения, прыжка и передвижения
-    move_speed = 40 * N
-    fall_speed = 60 * N
-    jump_speed = 60 * N
+
 
     # пустое значение
     start_jump_altitude = -100000
@@ -76,6 +74,11 @@ if __name__ == '__main__':
     jump = False
     jump_from_wall = False
     speeds_before_jump = [0, 0]
+
+    # скорости
+    move_speed = 40 * N
+    fall_speed = 60 * N
+    jump_speed = 60 * N
 
     # инициализация главного героя и платформ.
     main_character = initialization()
@@ -153,24 +156,6 @@ if __name__ == '__main__':
         # перемещение в стороны
         move_hor = right + left
 
-        if move_hor < 0:
-            # если движение влево, то изначально значение отрицательно
-            r = range(-(move_hor * move_speed) // fps)
-        else:
-            r = range((move_hor * move_speed) // fps)
-        for i in r:
-            # начально условие
-            condition = main_character.get_ver()
-            # потом двигаю персонажа
-            main_character.rect.x += move_hor
-            # если условие не поменялось, то возвращаю обратно, и в любом случаю прекращаю движение
-            if main_character.get_ver():
-                if condition:
-                    main_character.rect.x -= move_hor
-                jump = False
-                break
-
-
         # определение скорости падения
         if main_character.get_ver() and not jump:
             fall_speed = 30 * N
@@ -190,29 +175,6 @@ if __name__ == '__main__':
                 right, left = speeds_before_jump
                 speeds_before_jump = [0, 0]
 
-
-
-        if fall_speed:
-            # падение и скольжение
-            if fall_speed < 0:
-                # отрицательно при прыжке
-                r = range(-(fall_speed // fps))
-            else:
-                r = range(fall_speed // fps)
-            for i in r:
-                condition = main_character.get_hor()
-                main_character.rect.y += fall_speed // abs(fall_speed)
-                if main_character.get_ver():
-                    if jump:
-                        main_character.rect.y += 3
-                        jump = False
-                        break
-                    if condition:
-                        main_character.rect.y -= fall_speed // abs(fall_speed)
-                    break
-
-
-
         camera.update()
 
         # отрисовываю все группы спрайтов
@@ -220,7 +182,7 @@ if __name__ == '__main__':
         platforms.update()
 
         character.draw(screen)
-        character.update()
+        jump = main_character.update(move_hor, jump, move_speed, fall_speed)
 
         pygame.display.flip()
         clock.tick(fps)
