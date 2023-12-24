@@ -1,5 +1,5 @@
 from graphics import Platform, platforms, screen, fps, size, MainCharacter, vertical_platforms, horizontal_platforms, \
-    character, N
+    character, N, InGameMenu, menu
 from data import cords
 
 import pygame
@@ -82,12 +82,14 @@ if __name__ == '__main__':
 
     # инициализация главного героя и платформ.
     main_character = initialization()
+    paused_menu = InGameMenu()
 
     # перемещение в стороны
     right = left = 0
 
     camera = Camera()
     running = True
+    game_paused = False
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -112,6 +114,12 @@ if __name__ == '__main__':
                     move_speed = 60 * N
                 else:
                     move_speed = 40 * N
+
+                if keys[pygame.K_ESCAPE]:
+                    if game_paused:
+                        game_paused = False
+                    else:
+                        game_paused = True
 
                 # при нажатии на пробел - прыжок
                 if event.key == pygame.K_SPACE and (main_character.get_hor() or main_character.get_ver()):
@@ -183,6 +191,12 @@ if __name__ == '__main__':
 
         character.draw(screen)
         jump = main_character.update(move_hor, jump, move_speed, fall_speed)
+
+        if game_paused:
+            menu.draw(screen)
+            InGameMenu.draw_menu_buttons(paused_menu)
+            if paused_menu.resume_button.get_pressed():
+                game_paused = False
 
         pygame.display.flip()
         clock.tick(fps)
