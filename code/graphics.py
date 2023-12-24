@@ -40,23 +40,20 @@ fps = 60
 
 # класс для горизонтальных пересечений и картинки
 class Character(pygame.sprite.Sprite):
-    def __init__(self, x, y, a, b):
+    def __init__(self, x, y, a, b, color):
         # всякие кординаты
+        self.color = color
         super().__init__(character)
         w, h = screen.get_size()
         self.a, self.b = a * N, b * N
         x *= N
         y *= N
 
-        self.image = pygame.Surface((self.a, self.b),
-                                    pygame.SRCALPHA, 32)
+        self.image = pygame.Surface([self.a, self.b])
+        self.image.fill(color)
         self.cords = (w // 2 + x, h // 2 + y, self.a, self.b)
         self.rect = pygame.Rect(w // 2 + x - 1, h // 2 + y - 1, self.a + 2, self.b + 2)
-        pygame.draw.rect(screen, 'white', self.rect)
-
-    def update(self, *args):
-        self.cords = (self.rect.x + 1, self.rect.y + 1, self.a, self.b)
-        pygame.draw.rect(screen, 'white', self.cords)
+        pygame.draw.rect(screen, self.color, self.rect)
 
     def get_hor(self):
         return pygame.sprite.spritecollideany(self, horizontal_platforms)
@@ -105,13 +102,12 @@ class MainCharacter(Character):
                     if condition:
                         self.rect.y -= fall_speed // abs(fall_speed)
                     break
-
-        self.cords = (self.rect.x + 1, self.rect.y + 1, self.a, self.b)
-        pygame.draw.rect(screen, 'white', self.cords)
-
         return jump
 
-    # возвращает соприкосновение с вертикальными или горизонтальными блоками
+
+class Enemy(Character):
+    def update(self):
+        pass
 
 
 
