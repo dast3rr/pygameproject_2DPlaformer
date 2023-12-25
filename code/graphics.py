@@ -91,6 +91,7 @@ class MainCharacter(Character):
 
 class Enemy(Character):
     def update(self):
+        # если враг и гг находятся на одной платформе, то враг движется к гг. В противном случае - нет.
         if set(pygame.sprite.spritecollide(self, platforms, False)) & set(
                 pygame.sprite.spritecollide(main_character, platforms, False)):
             if main_character.rect.x < self.rect.x:
