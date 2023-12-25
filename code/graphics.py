@@ -2,7 +2,7 @@ import pygame
 import os
 import sys
 from screeninfo import get_monitors
-from data import enemy_speed
+from data import enemy_speed, enemy_agressive_radius
 
 
 def load_image(name, colorkey=None):
@@ -94,9 +94,11 @@ class Enemy(Character):
         if set(pygame.sprite.spritecollide(self, platforms, False)) & set(
                 pygame.sprite.spritecollide(main_character, platforms, False)):
             if main_character.rect.x < self.rect.x:
-                self.rect.x += enemy_speed / fps
+                if enemy_agressive_radius > abs(main_character.rect.x - self.rect.x) > 15 * N:
+                    self.rect.x -= enemy_speed / fps
             else:
-                self.rect.x -= enemy_speed / fps
+                if enemy_agressive_radius > abs(main_character.rect.x - self.rect.x) > 15 * N:
+                    self.rect.x += enemy_speed / fps
 
 
 # класс стен
@@ -109,7 +111,7 @@ class Platform(pygame.sprite.Sprite):
         super().__init__(*groups)
         # кординаты и картинка. Картинка для последующей обработки столкновений
         self.cords = (w // 2 + x, h // 2 + y, self.a, self.b)
-        self.image = pygame.Surface((self.a, self.b), )
+        self.image = pygame.Surface((self.a, self.b))
 
         # начальное положение. Чтобы поменять self.rect.x = 100 или self.rect.y = 200
         self.rect = pygame.Rect(w // 2 + x, h // 2 + y, self.a, self.b)
@@ -170,13 +172,19 @@ def initialization():
              (-100, -185, 300, 31), (245, -185, 302, 68), (81, -185, 10, 180), (81, -68, 170, 17), (482, -185, 65, 391),
              (162, 40, 166, 66), (245, -185, 302, 31), (352, 38, 192, 74), (290, -72, 160, 17), (402, -17, 48, 30),
              (110, -115, 50, 20), (180, -130, 30, 10)]
+
+
     for cord in cords:
         x, y, a, b = cord
         Platform(x + 1 / N, y, a - 2 / N, b, platforms, horizontal_platforms)
         Platform(x, y + 1 / N, a, b - 2 / N, platforms, vertical_platforms)
 
+    enemy_cords = [(-30, 10, 10, 10), (200, 30, 10, 10)]
+    for cords in enemy_cords:
+        Enemy(*cords, 'red', enemies)
+
     # главный герой
-    Enemy(-30, 10, 10, 10, 'red', enemies)
+
     main_character = MainCharacter(0, 0, 10, 20, 'white')
 
     return main_character

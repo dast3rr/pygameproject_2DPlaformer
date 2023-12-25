@@ -182,6 +182,7 @@ if __name__ == '__main__':
 
         character.draw(screen)
         jump = main_character.update(move_hor, jump, move_speed, fall_speed)
+        enemies.update()
 
         if game_paused:
             menu.draw(screen)
