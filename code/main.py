@@ -7,6 +7,7 @@ import pygame
 import os
 
 
+# класс камеры
 class Camera:
     # зададим начальный сдвиг камеры
     def __init__(self):
