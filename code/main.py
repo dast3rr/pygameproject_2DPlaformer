@@ -20,38 +20,34 @@ class Camera:
         d_y = main_character.rect.y - self.y
 
         r = 30 * N
+        k = 0
         if d_x > r:
-            for sprite in platforms:
-                sprite.rect.x -= (d_x - r)
-            for sprite in enemies:
-                sprite.rect.x -= (d_x - r)
-            main_character.rect.x -= d_x - r
-            self.x = main_character.rect.x - r
-            start_jump_from_wall_position -= (d_x - r)
+            k = -1
         elif d_x < -r:
+            k = 1
+        if k:
+            main_character.rect.x -= d_x + r * k
+            self.x = main_character.rect.x + r * k
+            start_jump_from_wall_position -= (d_x + r * k)
             for sprite in platforms:
-                sprite.rect.x -= (d_x + r)
+                sprite.rect.x -= (d_x + r * k)
             for sprite in enemies:
-                sprite.rect.x -= (d_x + r)
-            main_character.rect.x -= d_x + r
-            self.x = main_character.rect.x + r
-            start_jump_from_wall_position -= (d_x + r)
+                sprite.rect.x -= (d_x + r * k)
+
+        k = 0
         if d_y > r:
-            for sprite in platforms:
-                sprite.rect.y -= (d_y - r)
-            for sprite in enemies:
-                sprite.rect.y -= (d_y - r)
-            main_character.rect.y -= d_y - r
-            self.y = main_character.rect.y - r
-            start_jump_altitude -= (d_y - r)
+            k = -1
         elif d_y < -r:
+            k = 1
+
+        if k:
+            main_character.rect.y -= d_y + r * k
+            self.y = main_character.rect.y + r * k
+            start_jump_altitude -= (d_y + r * k)
             for sprite in platforms:
-                sprite.rect.y -= (d_y + r)
+                sprite.rect.y -= (d_y + r * k)
             for sprite in enemies:
-                sprite.rect.y -= (d_y + r)
-            main_character.rect.y -= d_y + r
-            self.y = main_character.rect.y + r
-            start_jump_altitude -= (d_y + r)
+                sprite.rect.y -= (d_y + r * k)
 
 
 if __name__ == '__main__':

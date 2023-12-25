@@ -2,6 +2,7 @@ import pygame
 import os
 import sys
 from screeninfo import get_monitors
+from data import enemy_speed
 
 
 def load_image(name, colorkey=None):
@@ -90,7 +91,12 @@ class MainCharacter(Character):
 
 class Enemy(Character):
     def update(self):
-        pass
+        if set(pygame.sprite.spritecollide(self, platforms, False)) & set(
+                pygame.sprite.spritecollide(main_character, platforms, False)):
+            if main_character.rect.x < self.rect.x:
+                self.rect.x += enemy_speed / fps
+            else:
+                self.rect.x -= enemy_speed / fps
 
 
 # класс стен
@@ -103,7 +109,7 @@ class Platform(pygame.sprite.Sprite):
         super().__init__(*groups)
         # кординаты и картинка. Картинка для последующей обработки столкновений
         self.cords = (w // 2 + x, h // 2 + y, self.a, self.b)
-        self.image = pygame.Surface((self.a, self.b),)
+        self.image = pygame.Surface((self.a, self.b), )
 
         # начальное положение. Чтобы поменять self.rect.x = 100 или self.rect.y = 200
         self.rect = pygame.Rect(w // 2 + x, h // 2 + y, self.a, self.b)
