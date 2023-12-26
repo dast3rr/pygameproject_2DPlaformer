@@ -163,8 +163,7 @@ class Button:
         if self.x < pygame.mouse.get_pos()[0] < self.x + self.width and \
                 self.y < pygame.mouse.get_pos()[1] < self.y + self.height and pygame.mouse.get_pressed()[0] == 1:
             return True
-        else:
-            return False
+        return False
 
 
 def initialization():
