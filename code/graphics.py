@@ -92,14 +92,19 @@ class MainCharacter(Character):
 class Enemy(Character):
     def update(self):
         # если враг и гг находятся на одной платформе, то враг движется к гг. В противном случае - нет.
-        if set(pygame.sprite.spritecollide(self, platforms, False)) & set(
-                pygame.sprite.spritecollide(main_character, platforms, False)):
+        if abs(self.rect.y - main_character.rect.y) < enemy_agressive_radius:
             if main_character.rect.x < self.rect.x:
-                if enemy_agressive_radius > abs(main_character.rect.x - self.rect.x) > 15 * N:
-                    self.rect.x -= enemy_speed / fps
+                if enemy_agressive_radius > abs(main_character.rect.x - self.rect.x) > 5 * N:
+                    self.rect.x -= self.rect.w
+                    if self.get_hor():
+                        self.rect.x -= enemy_speed / fps
+                    self.rect.x += self.rect.w
             else:
-                if enemy_agressive_radius > abs(main_character.rect.x - self.rect.x) > 15 * N:
-                    self.rect.x += enemy_speed / fps
+                if enemy_agressive_radius > abs(main_character.rect.x - self.rect.x) > 5 * N:
+                    self.rect.x += self.rect.w
+                    if self.get_hor():
+                        self.rect.x += enemy_speed / fps
+                    self.rect.x -= self.rect.w
 
 
 # класс стен
