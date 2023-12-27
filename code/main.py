@@ -79,6 +79,10 @@ if __name__ == '__main__':
 
     paused_menu = InGameMenu()
 
+    smooth_surface = pygame.Surface(size)
+    smooth_surface.set_alpha(60)
+
+
     camera = Camera()
     running = True
     game_paused = False
@@ -182,14 +186,16 @@ if __name__ == '__main__':
         platforms.update()
 
         character.draw(screen)
-        jump = main_character.update(move_hor, jump, move_speed, fall_speed)
-        enemies.update()
 
         if game_paused:
+            screen.blit(smooth_surface, (0, 0))
             menu.draw(screen)
             InGameMenu.draw_menu_buttons(paused_menu)
             if paused_menu.resume_button.get_pressed():
                 game_paused = False
+        else:
+            jump = main_character.update(move_hor, jump, move_speed, fall_speed)
+            enemies.update()
 
         pygame.display.flip()
         clock.tick(fps)
