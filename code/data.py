@@ -11,6 +11,4 @@ fall_speed = 60 * N
 jump_speed = 60 * N
 enemy_speed = 30 * N
 enemy_agressive_radius = 80 * N
-
-# инициализация главного героя и платформ.
-
+enemy_attack_radius = 20 * N

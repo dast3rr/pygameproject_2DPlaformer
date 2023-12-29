@@ -2,11 +2,11 @@ import pygame
 import os
 import sys
 from screeninfo import get_monitors
-from data import enemy_speed, enemy_agressive_radius
+from data import enemy_speed, enemy_agressive_radius, enemy_attack_radius
 
 
 def load_image(name, colorkey=None):
-    fullname = os.path.join('data', name)
+    fullname = os.path.join('..\data', name)
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
         sys.exit()
@@ -47,6 +47,14 @@ class Character(pygame.sprite.Sprite):
 
 
 class MainCharacter(Character):
+    def __init__(self, x, y, a, b, color, *groups):
+        super().__init__(x, y, a, b, color, *groups)
+        self.health = 5
+        heart_image = load_image('heart.png')
+        self.heart_image = pygame.transform.scale(heart_image, (100, 60))
+        self.non_damage_count = 0
+        self.damage = False
+
     # рисование
     def update(self, *args):
         move_hor, jump, move_speed, fall_speed = args
@@ -56,7 +64,7 @@ class MainCharacter(Character):
             r = range(-(move_hor * move_speed) // fps)
         else:
             r = range((move_hor * move_speed) // fps)
-        for i in r:
+        for _ in r:
             # начально условие
             condition = self.get_ver()
             # потом двигаю персонажа
@@ -75,7 +83,7 @@ class MainCharacter(Character):
                 r = range(-(fall_speed // fps))
             else:
                 r = range(fall_speed // fps)
-            for i in r:
+            for _ in r:
                 condition = self.get_hor()
                 self.rect.y += fall_speed // abs(fall_speed)
                 if self.get_ver():
@@ -86,26 +94,70 @@ class MainCharacter(Character):
                     if condition:
                         self.rect.y -= fall_speed // abs(fall_speed)
                     break
+
+        self.update_healthbar()
         return jump
+
+    def update_healthbar(self):
+        for i in range(self.health):
+            x = 50 + i * 30
+            y = 20
+            screen.blit(self.heart_image, (x, y))
+        if self.damage:
+            self.non_damage_count += 2 / fps
+        if self.non_damage_count > 2:
+            self.damage = False
+            self.non_damage_count = 0
+        print(self.non_damage_count)
 
 
 class Enemy(Character):
+    def __init__(self, x, y, a, b, color, *groups):
+        super().__init__(x, y, a, b, color, *groups)
+        self.condition = 0
+        self.count = 0
+
     def update(self):
         # если враг и гг находятся на одной платформе, то враг движется к гг. В противном случае - нет.
-        if abs(self.rect.y - main_character.rect.y) < enemy_agressive_radius:
+
+        if abs(self.rect.y - main_character.rect.y) < enemy_agressive_radius and self.condition == 0:
             if main_character.rect.x < self.rect.x:
-                if enemy_agressive_radius > abs(main_character.rect.x - self.rect.x) > 5 * N:
+                if enemy_agressive_radius > abs(main_character.rect.x - self.rect.x) > enemy_attack_radius:
                     self.rect.x -= self.rect.w
                     if self.get_hor():
                         self.rect.x -= enemy_speed / fps
                     self.rect.x += self.rect.w
             else:
-                if enemy_agressive_radius > abs(main_character.rect.x - self.rect.x) > 5 * N:
+                if enemy_agressive_radius > abs(main_character.rect.x - self.rect.x) > enemy_attack_radius:
                     self.rect.x += self.rect.w
                     if self.get_hor():
                         self.rect.x += enemy_speed / fps
                     self.rect.x -= self.rect.w
 
+        if abs(self.rect.y - main_character.rect.y) <= enemy_attack_radius and abs(
+                self.rect.x - main_character.rect.x) <= enemy_attack_radius:
+            self.condition = 1
+
+
+        if self.condition == 1:
+            self.count += 1 / fps
+            pygame.draw.rect(screen, 'white', self.rect)
+
+            if self.count >= 1:
+                if abs(self.rect.y - main_character.rect.y) <= enemy_attack_radius and abs(
+                        self.rect.x - main_character.rect.x) <= enemy_attack_radius:
+                    self.condition = 2
+                else:
+                    self.condition = 0
+                self.count = 0
+
+        if self.condition == 2:
+            if not main_character.damage:
+                main_character.health -= 1
+                main_character.damage = True
+                main_character.non_damage_count = 0
+            pygame.draw.rect(self.image, self.color, self.rect)
+            self.condition = 0
 
 # класс стен
 class Platform(pygame.sprite.Sprite):
@@ -124,60 +176,12 @@ class Platform(pygame.sprite.Sprite):
         pygame.draw.rect(self.image, 'black', self.rect)
 
 
-class InGameMenu(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__(menu)
-        self.image = pygame.Surface((screen.get_width() // 5, screen.get_height() // 3), pygame.SRCALPHA, 32)
-        x, y = screen.get_width() // 2 - screen.get_width() // 10, screen.get_height() // 2 - screen.get_height() // 6
-        pygame.draw.rect(self.image, pygame.Color('blue'), self.image.get_rect())
-        self.rect = pygame.Rect(x, y, self.image.get_width(), self.image.get_height())
-
-        self.resume_button = Button(self.image.get_width() // 2, self.image.get_height() // 6,
-                                    self.rect.x + self.rect.width // 4, self.rect.y + self.rect.height // 5,
-                                    pygame.Color('Black'), pygame.Color('Grey'), self.image)
-        self.back_to_main_menu_button = Button(self.image.get_width() // 2, self.image.get_height() // 6,
-                                               self.rect.x + self.rect.width // 4,
-                                               self.rect.y + self.rect.height - self.rect.height // 5 -
-                                               self.image.get_height() // 6,
-                                               pygame.Color('Black'), pygame.Color('Grey'), self.image)
-
-    def draw_menu_buttons(self):
-        self.resume_button.draw()
-        self.back_to_main_menu_button.draw()
-
-
-class Button:
-    def __init__(self, width, height, x, y, inactive_color, active_color, surface):
-        self.width = width
-        self.height = height
-        self.inactive_color = inactive_color
-        self.active_color = active_color
-        self.x = x
-        self.y = y
-
-    def draw(self, message=None, action=None):
-        mouse = pygame.mouse.get_pos()
-        clicked = pygame.mouse.get_pressed()
-
-        if self.x < mouse[0] < self.x + self.width and self.y < mouse[1] < self.y + self.height:
-            pygame.draw.rect(screen, self.active_color, (self.x, self.y, self.width, self.height))
-        else:
-            pygame.draw.rect(screen, self.inactive_color, (self.x, self.y, self.width, self.height))
-
-    def get_pressed(self):
-        if self.x < pygame.mouse.get_pos()[0] < self.x + self.width and \
-                self.y < pygame.mouse.get_pos()[1] < self.y + self.height and pygame.mouse.get_pressed()[0] == 1:
-            return True
-        return False
-
-
 def initialization():
     cords = [(-100, -185, 69, 391), (-100, -185, 191, 68), (-100, 20, 102, 186), (-100, 20, 227, 34),
              (-100, 144, 647, 62),
              (-100, -185, 300, 31), (245, -185, 302, 68), (81, -185, 10, 180), (81, -68, 170, 17), (482, -185, 65, 391),
              (162, 40, 166, 66), (245, -185, 302, 31), (352, 38, 192, 74), (290, -72, 160, 17), (402, -17, 48, 30),
              (110, -115, 50, 20), (180, -130, 30, 10)]
-
 
     for cord in cords:
         x, y, a, b = cord

@@ -1,7 +1,8 @@
 from graphics import platforms, screen, fps, size, \
-    character, enemies, main_character, InGameMenu, menu
+    character, enemies, main_character, menu
 from data import move_speed, start_jump_from_wall_position, start_jump_altitude, jump, jump_from_wall, \
     jump_speed, fall_speed
+from menu import InGameMenu
 
 import pygame
 import os
