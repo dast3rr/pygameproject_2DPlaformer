@@ -50,8 +50,11 @@ class MainCharacter(Character):
     def __init__(self, x, y, a, b, color, *groups):
         super().__init__(x, y, a, b, color, *groups)
         self.health = 5
+        self.healings = 6
         heart_image = load_image('heart.png')
+        heal_image = load_image('heal.png')
         self.heart_image = pygame.transform.scale(heart_image, (100, 60))
+        self.heal_image = pygame.transform.scale(heal_image, (60, 60))
         self.non_damage_count = 0
         self.damage = False
 
@@ -96,6 +99,7 @@ class MainCharacter(Character):
                     break
 
         self.update_healthbar()
+        self.update_heals()
         return jump
 
     def update_healthbar(self):
@@ -108,7 +112,17 @@ class MainCharacter(Character):
         if self.non_damage_count > 2:
             self.damage = False
             self.non_damage_count = 0
-        print(self.non_damage_count)
+
+    def heal(self):
+        if self.healings > 0 and self.health < 5:
+            self.health += 1
+            self.healings -= 1
+
+    def update_heals(self):
+        screen.blit(self.heal_image, (60, 80))
+        font = pygame.font.Font(None, 60)
+        text = font.render(str(self.healings), True, pygame.Color('White'))
+        screen.blit(text, (130, 80))
 
 
 class Enemy(Character):

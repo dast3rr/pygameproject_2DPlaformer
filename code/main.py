@@ -105,6 +105,8 @@ if __name__ == '__main__':
                         left = -1
                     else:
                         speeds_before_jump[1] = -1
+                if keys[pygame.K_h]:
+                    main_character.heal()
 
                 # если нажат shift то ускоряется
                 if keys[pygame.K_LSHIFT]:
