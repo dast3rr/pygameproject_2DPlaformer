@@ -167,7 +167,7 @@ if __name__ == '__main__':
         if jump:
             # при прыжке, на самой верхней точке скорость меньше
             fall_speed = -(30 * N - start_jump_altitude + main_character.rect.y) * 5
-            if not fall_speed:
+            if fall_speed == -40:
                 counter_fall = 0
                 count_fall = True
                 jump = False

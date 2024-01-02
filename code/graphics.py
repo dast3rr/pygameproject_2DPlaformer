@@ -24,20 +24,32 @@ def load_image(name, colorkey=None):
 
 # класс для горизонтальных пересечений и картинки
 class Character(pygame.sprite.Sprite):
-    def __init__(self, x, y, a, b, color, *groups):
+    def __init__(self, x, y, graphics, *groups):
         # всякие кординаты
-        self.color = color
         super().__init__(character, *groups)
         w, h = screen.get_size()
-        self.a, self.b = a * N, b * N
         x *= N
         y *= N
 
-        self.image = pygame.Surface([self.a, self.b])
-        self.image.fill(color)
-        self.cords = (w // 2 + x, h // 2 + y, self.a, self.b)
-        self.rect = pygame.Rect(w // 2 + x - 1, h // 2 + y - 1, self.a + 2, self.b + 2)
-        pygame.draw.rect(self.image, self.color, self.rect)
+        # графика
+        sheet, columns, rows = graphics
+        self.frames = []
+        self.cut_sheet(sheet, columns, rows, x, y)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.image.get_rect()
+        self.rect = self.rect.move(x + w // 2, y + h // 2)
+        self.mask = pygame.mask.from_surface(self.image)
+
+    # создание анимации
+    def cut_sheet(self, sheet, columns, rows, x, y):
+        self.rect = pygame.Rect(x, y, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, (self.rect.w - 12, self.rect.h))))
 
     def get_hor(self):
         return pygame.sprite.spritecollideany(self, horizontal_platforms)
@@ -46,9 +58,9 @@ class Character(pygame.sprite.Sprite):
         return pygame.sprite.spritecollideany(self, vertical_platforms)
 
 
-class MainCharacter(Character):
-    def __init__(self, x, y, a, b, color, *groups):
-        super().__init__(x, y, a, b, color, *groups)
+class Knight(Character):
+    def __init__(self, x, y, graphics, *groups):
+        super().__init__(x, y, graphics, *groups)
         self.health = 5
         self.healings = 6
         heart_image = load_image('heart.png')
@@ -57,6 +69,8 @@ class MainCharacter(Character):
         self.heal_image = pygame.transform.scale(heal_image, (60, 60))
         self.non_damage_count = 0
         self.damage = False
+        self.count_flip = 0
+        self.old_move_hor = 0
 
     # рисование
     def update(self, *args):
@@ -100,6 +114,23 @@ class MainCharacter(Character):
 
         self.update_healthbar()
         self.update_heals()
+
+        if self.count_flip == 5:
+            self.count_flip = 0
+            if move_hor == 0:
+                self.cur_frame = 0
+            else:
+                self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+            self.image = self.frames[self.cur_frame]
+            if move_hor == -1 or self.old_move_hor == -1:
+                self.image = pygame.transform.flip(self.image, True, False)
+
+            self.mask = pygame.mask.from_surface(self.image)
+
+
+        self.count_flip += 1
+        if move_hor:
+            self.old_move_hor = move_hor
         return jump
 
     def update_healthbar(self):
@@ -126,8 +157,8 @@ class MainCharacter(Character):
 
 
 class Enemy(Character):
-    def __init__(self, x, y, a, b, color, *groups):
-        super().__init__(x, y, a, b, color, *groups)
+    def __init__(self, x, y, a, b, graphics, *groups):
+        super().__init__(x, y, a, b, graphics, *groups)
         self.condition = 0
         self.count = 0
 
@@ -202,13 +233,9 @@ def initialization():
         Platform(x + 1 / N, y, a - 2 / N, b, platforms, horizontal_platforms)
         Platform(x, y + 1 / N, a, b - 2 / N, platforms, vertical_platforms)
 
-    enemy_cords = [(-30, 10, 10, 10), (200, 30, 10, 10)]
-    for cords in enemy_cords:
-        Enemy(*cords, 'red', enemies)
 
     # главный герой
-
-    main_character = MainCharacter(0, 0, 10, 20, 'white')
+    main_character = Knight(0, 0, (load_image('The_Knight_spritelist.png'), 8, 1))
 
     return main_character
 
