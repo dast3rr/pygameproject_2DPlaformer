@@ -1,5 +1,5 @@
 from graphics import platforms, screen, fps, size, \
-    character, enemies, main_character, menu
+    character, enemies, main_character, menu, money
 from data import move_speed, start_jump_from_wall_position, start_jump_altitude, jump, jump_from_wall, \
     jump_speed, fall_speed
 from menu import InGameMenu
@@ -186,6 +186,8 @@ if __name__ == '__main__':
         # отрисовываю все группы спрайтов
         platforms.draw(screen)
         platforms.update()
+        money.draw(screen)
+        money.update()
 
         character.draw(screen)
 

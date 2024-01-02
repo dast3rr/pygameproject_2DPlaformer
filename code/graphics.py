@@ -51,10 +51,13 @@ class MainCharacter(Character):
         super().__init__(x, y, a, b, color, *groups)
         self.health = 5
         self.healings = 6
+        self.money = 0
         heart_image = load_image('heart.png')
         heal_image = load_image('heal.png')
+        money_image = load_image('money.png')
         self.heart_image = pygame.transform.scale(heart_image, (100, 60))
         self.heal_image = pygame.transform.scale(heal_image, (60, 60))
+        self.money_image = pygame.transform.scale(money_image, (60, 60))
         self.non_damage_count = 0
         self.damage = False
 
@@ -100,6 +103,7 @@ class MainCharacter(Character):
 
         self.update_healthbar()
         self.update_heals()
+        self.update_money()
         return jump
 
     def update_healthbar(self):
@@ -123,6 +127,15 @@ class MainCharacter(Character):
         font = pygame.font.Font(None, 60)
         text = font.render(str(self.healings), True, pygame.Color('White'))
         screen.blit(text, (130, 80))
+
+    def add_money(self, amount):
+        self.money += amount
+
+    def update_money(self):
+        screen.blit(self.money_image, (60, 140))
+        font = pygame.font.Font(None, 60)
+        text = font.render(str(self.money), True, pygame.Color('White'))
+        screen.blit(text, (130, 140))
 
 
 class Enemy(Character):
@@ -173,6 +186,22 @@ class Enemy(Character):
             pygame.draw.rect(self.image, self.color, self.rect)
             self.condition = 0
 
+
+class Money(pygame.sprite.Sprite):
+    def __init__(self, x, y, amount):
+        super().__init__(money)
+        self.amount = amount
+        image = load_image('money.png')
+        self.image = pygame.transform.scale(image, (40, 40))
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = x, y
+
+    def update(self):
+        if pygame.sprite.spritecollideany(self, character):
+            main_character.add_money(self.amount)
+            self.kill()
+
+
 # класс стен
 class Platform(pygame.sprite.Sprite):
     def __init__(self, x, y, a, b, *groups):
@@ -196,6 +225,8 @@ def initialization():
              (-100, -185, 300, 31), (245, -185, 302, 68), (81, -185, 10, 180), (81, -68, 170, 17), (482, -185, 65, 391),
              (162, 40, 166, 66), (245, -185, 302, 31), (352, 38, 192, 74), (290, -72, 160, 17), (402, -17, 48, 30),
              (110, -115, 50, 20), (180, -130, 30, 10)]
+
+    Money(1100, 900, 25)
 
     for cord in cords:
         x, y, a, b = cord
@@ -229,5 +260,6 @@ horizontal_platforms = pygame.sprite.Group()
 vertical_platforms = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 menu = pygame.sprite.Group()
+money = pygame.sprite.Group()
 N = 6
 main_character = initialization()
