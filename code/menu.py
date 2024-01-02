@@ -11,16 +11,16 @@ class InGameMenu(pygame.sprite.Sprite):
 
         self.resume_button = Button(self.rect.width // 2, self.rect.height // 8,
                                     self.rect.x + self.rect.width // 4, self.rect.y + self.rect.height // 4,
-                                    pygame.Color('Black'), pygame.Color('Grey'), self.image)
+                                    (0, 0, 0, 0), (255, 255, 255, 20), self.image)
         self.back_to_main_menu_button = Button(self.rect.width // 2, self.rect.height // 8,
                                                self.rect.x + self.rect.width // 4,
                                                self.rect.y + self.rect.height - self.rect.height // 5 -
                                                self.rect.height // 8,
-                                               pygame.Color('Black'), pygame.Color('Grey'), self.image)
+                                               (0, 0, 0, 0), (255, 255, 255, 20), self.image)
 
     def draw_menu_buttons(self):
-        self.resume_button.draw()
-        self.back_to_main_menu_button.draw()
+        self.resume_button.draw('Вернуться в игру', 25)
+        self.back_to_main_menu_button.draw('Главное меню', 25)
 
 
 class Button:
@@ -32,14 +32,24 @@ class Button:
         self.x = x
         self.y = y
 
-    def draw(self, message=None):
+    def draw(self, message=None, font_size=None):
         mouse = pygame.mouse.get_pos()
         clicked = pygame.mouse.get_pressed()
 
         if self.x < mouse[0] < self.x + self.width and self.y < mouse[1] < self.y + self.height:
-            pygame.draw.rect(screen, self.active_color, (self.x, self.y, self.width, self.height), border_radius=10)
+            self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA, 32)
+            pygame.draw.rect(self.image, self.active_color, self.image.get_rect(), border_radius=10)
+            screen.blit(self.image, (self.x, self.y))
         else:
-            pygame.draw.rect(screen, self.inactive_color, (self.x, self.y, self.width, self.height), border_radius=10)
+            self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA, 32)
+            pygame.draw.rect(self.image, self.inactive_color, self.image.get_rect(), border_radius=10)
+            screen.blit(self.image, (self.x, self.y))
+
+        if message:
+            font = pygame.font.Font(None, font_size)
+            text = font.render(message, True, pygame.Color('White'))
+            screen.blit(text, (self.x + (self.width / 2 - text.get_width() / 2),
+                                         self.y + (self.height / 2 - text.get_height() / 2)))
 
     def get_pressed(self):
         if self.x < pygame.mouse.get_pos()[0] < self.x + self.width and \
