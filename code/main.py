@@ -78,6 +78,9 @@ if __name__ == '__main__':
     smooth_surface = pygame.Surface(size)
     smooth_surface.set_alpha(60)
 
+    count_fall = False
+    counter_fall = 0
+
 
     camera = Camera()
     running = True
@@ -143,24 +146,30 @@ if __name__ == '__main__':
                     right = 0
                 if event.key == pygame.K_a:
                     left = 0
-                if event.key == pygame.K_LSHIFT:
-                    move_speed = 40 * N
 
         # цвет можно поменять. Это будет цвет фона
         screen.fill(pygame.color.Color(200, 200, 200))
 
         # перемещение в стороны
         move_hor = right + left
+        if main_character.get_hor() or main_character.get_ver():
+            count_fall = False
+
+        if not main_character.get_hor() and not jump and not count_fall:
+            count_fall = True
+            counter_fall = 0
 
         # определение скорости падения
         if main_character.get_ver() and not jump:
-            fall_speed = 30 * N
+            fall_speed = 30 * N + counter_fall
         elif not jump:
-            fall_speed = 60 * N
+            fall_speed = 90 * N + counter_fall
         if jump:
             # при прыжке, на самой верхней точке скорость меньше
             fall_speed = -(30 * N - start_jump_altitude + main_character.rect.y) * 5
             if not fall_speed:
+                counter_fall = 0
+                count_fall = True
                 jump = False
                 fall_speed = 60 * N
         # если совершается прыжок от стены
@@ -170,6 +179,7 @@ if __name__ == '__main__':
                 jump_from_wall = False
                 right, left = speeds_before_jump
                 speeds_before_jump = [0, 0]
+
 
         camera.update()
 
@@ -188,6 +198,9 @@ if __name__ == '__main__':
         else:
             jump = main_character.update(move_hor, jump, move_speed, fall_speed)
             enemies.update()
+
+        if count_fall:
+            counter_fall += 5
 
         pygame.display.flip()
         clock.tick(fps)
