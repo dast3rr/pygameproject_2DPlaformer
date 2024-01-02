@@ -6,7 +6,7 @@ jump_from_wall = False
 speeds_before_jump = [0, 0]
 
 # скорости
-move_speed = 40 * N
+move_speed = 60 * N
 fall_speed = 60 * N
 jump_speed = 60 * N
 enemy_speed = 30 * N

@@ -70,11 +70,6 @@ if __name__ == '__main__':
     jump_from_wall = False
     speeds_before_jump = [0, 0]
 
-    # скорости
-    move_speed = 40 * N
-    fall_speed = 60 * N
-    jump_speed = 60 * N
-
     # перемещение в стороны
     right = left = 0
 
@@ -107,12 +102,6 @@ if __name__ == '__main__':
                         speeds_before_jump[1] = -1
                 if keys[pygame.K_h]:
                     main_character.heal()
-
-                # если нажат shift то ускоряется
-                if keys[pygame.K_LSHIFT]:
-                    move_speed = 60 * N
-                else:
-                    move_speed = 40 * N
 
                 if keys[pygame.K_ESCAPE]:
                     if game_paused:
