@@ -31,25 +31,30 @@ class Character(pygame.sprite.Sprite):
         x *= N
         y *= N
 
-        # графика
-        sheet, columns, rows = graphics
         self.frames = []
-        self.cut_sheet(sheet, columns, rows, x, y)
+        # графика
+        for i in range(len(graphics)):
+            sheet, columns, rows = graphics[i]
+            self.cut_sheet(sheet, columns, rows, x, y)
+
         self.cur_frame = 0
-        self.image = self.frames[self.cur_frame]
+        self.cur_sheet = 0
+        self.image = self.frames[self.cur_sheet][self.cur_frame]
         self.rect = self.image.get_rect()
         self.rect = self.rect.move(x + w // 2, y + h // 2)
         self.mask = pygame.mask.from_surface(self.image)
 
     # создание анимации
     def cut_sheet(self, sheet, columns, rows, x, y):
+        res = []
         self.rect = pygame.Rect(x, y, sheet.get_width() // columns,
                                 sheet.get_height() // rows)
         for j in range(rows):
-            for i in range(columns):
-                frame_location = (self.rect.w * i, self.rect.h * j)
-                self.frames.append(sheet.subsurface(pygame.Rect(
+            for x in range(columns):
+                frame_location = (self.rect.w * x, self.rect.h * j)
+                res.append(sheet.subsurface(pygame.Rect(
                     frame_location, (self.rect.w - 12, self.rect.h))))
+        self.frames.append(res)
 
     def get_hor(self):
         return pygame.sprite.spritecollideany(self, horizontal_platforms)
@@ -120,8 +125,8 @@ class Knight(Character):
             if move_hor == 0:
                 self.cur_frame = 0
             else:
-                self.cur_frame = (self.cur_frame + 1) % len(self.frames)
-            self.image = self.frames[self.cur_frame]
+                self.cur_frame = (self.cur_frame + 1) % len(self.frames[self.cur_sheet])
+            self.image = self.frames[self.cur_sheet][self.cur_frame]
             if move_hor == -1 or self.old_move_hor == -1:
                 self.image = pygame.transform.flip(self.image, True, False)
 
@@ -233,10 +238,14 @@ def initialization():
         Platform(x, y + 1 / N, a, b - 2 / N, platforms, vertical_platforms)
 
     running_knight_image = load_image('knight_running.png')
-    running_knight_image = pygame.transform.scale(running_knight_image, (running_knight_image.get_width() / 2.5, running_knight_image.get_height() / 2.5))
+    falling_knight_image = load_image('knight_falling.png')
+    running_knight_image = pygame.transform.scale(running_knight_image, (
+        running_knight_image.get_width() / 2.5, running_knight_image.get_height() / 2.5))
+    falling_knight_image = pygame.transform.scale(falling_knight_image, (
+        falling_knight_image.get_width() / 2.5, falling_knight_image.get_height() / 2.5))
 
     # главный герой
-    main_character = Knight(0, 0, (running_knight_image, 8, 1))
+    main_character = Knight(0, 0, ((running_knight_image, 8, 1), (falling_knight_image, 12, 1)), )
 
     return main_character
 
