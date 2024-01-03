@@ -162,6 +162,8 @@ if __name__ == '__main__':
         # определение скорости падения
         if main_character.get_ver() and not jump:
             fall_speed = 15 * N + counter_fall
+            count_fall = False
+            counter_fall = 0
         elif not jump:
             fall_speed = 45 * N + counter_fall
         if jump:
@@ -206,6 +208,9 @@ if __name__ == '__main__':
                 main_character.cur_frame = 0
         else:
             main_character.cur_sheet = 0
+
+        if jump:
+            main_character.cur_sheet = 2
 
         pygame.display.flip()
         clock.tick(fps)

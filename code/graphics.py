@@ -47,13 +47,20 @@ class Character(pygame.sprite.Sprite):
     # создание анимации
     def cut_sheet(self, sheet, columns, rows, x, y):
         res = []
+        if not self.frames:
+            count = 2
+        else:
+            count = 1
         self.rect = pygame.Rect(x, y, sheet.get_width() // columns,
                                 sheet.get_height() // rows)
         for j in range(rows):
             for x in range(columns):
                 frame_location = (self.rect.w * x, self.rect.h * j)
-                res.append(sheet.subsurface(pygame.Rect(
-                    frame_location, (self.rect.w - 12, self.rect.h))))
+                image = sheet.subsurface(pygame.Rect(
+                    frame_location, (self.rect.w - 12, self.rect.h)))
+                for _ in range(count):
+                    res.append(image)
+
         self.frames.append(res)
 
     def get_hor(self):
@@ -120,7 +127,7 @@ class Knight(Character):
         self.update_healthbar()
         self.update_heals()
 
-        if self.count_flip == 5:
+        if self.count_flip == 3:
             self.count_flip = 0
             if move_hor == 0 and self.cur_sheet == 0:
                 self.cur_frame = 0
@@ -239,15 +246,20 @@ def initialization():
 
     running_knight_image = load_image('knight_running.png')
     falling_knight_image = load_image('knight_falling.png')
+    jumping_knight_image = load_image('knight_in_jump.png', 'white')
     k = 130 / running_knight_image.get_height()
     running_knight_image = pygame.transform.scale(running_knight_image, (
         running_knight_image.get_width() * k, running_knight_image.get_height() * k))
     k = 130 / falling_knight_image.get_height()
     falling_knight_image = pygame.transform.scale(falling_knight_image, (
         falling_knight_image.get_width() * k, falling_knight_image.get_height() * k))
+    k = 130 / jumping_knight_image.get_height()
+    jumping_knight_image = pygame.transform.scale(jumping_knight_image, (
+        jumping_knight_image.get_width() * k, jumping_knight_image.get_height() * k))
+
 
     # главный герой
-    main_character = Knight(0, 0, ((running_knight_image, 8, 1), (falling_knight_image, 12, 1)), )
+    main_character = Knight(0, 0, ((running_knight_image, 8, 1), (falling_knight_image, 7, 1), (jumping_knight_image, 1, 1)))
 
     return main_character
 
