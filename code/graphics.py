@@ -127,7 +127,6 @@ class Knight(Character):
 
             self.mask = pygame.mask.from_surface(self.image)
 
-
         self.count_flip += 1
         if move_hor:
             self.old_move_hor = move_hor
@@ -183,7 +182,6 @@ class Enemy(Character):
                 self.rect.x - main_character.rect.x) <= enemy_attack_radius:
             self.condition = 1
 
-
         if self.condition == 1:
             self.count += 1 / fps
             pygame.draw.rect(screen, 'white', self.rect)
@@ -203,6 +201,7 @@ class Enemy(Character):
                 main_character.non_damage_count = 0
             pygame.draw.rect(self.image, self.color, self.rect)
             self.condition = 0
+
 
 # класс стен
 class Platform(pygame.sprite.Sprite):
@@ -233,9 +232,11 @@ def initialization():
         Platform(x + 1 / N, y, a - 2 / N, b, platforms, horizontal_platforms)
         Platform(x, y + 1 / N, a, b - 2 / N, platforms, vertical_platforms)
 
+    running_knight_image = load_image('knight_running.png')
+    running_knight_image = pygame.transform.scale(running_knight_image, (running_knight_image.get_width() / 2.5, running_knight_image.get_height() / 2.5))
 
     # главный герой
-    main_character = Knight(0, 0, (load_image('The_Knight_spritelist.png'), 8, 1))
+    main_character = Knight(0, 0, (running_knight_image, 8, 1))
 
     return main_character
 
@@ -256,5 +257,5 @@ horizontal_platforms = pygame.sprite.Group()
 vertical_platforms = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 menu = pygame.sprite.Group()
-N = 6
+N = 10
 main_character = initialization()
