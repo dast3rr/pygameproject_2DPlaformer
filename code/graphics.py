@@ -122,7 +122,7 @@ class Knight(Character):
 
         if self.count_flip == 5:
             self.count_flip = 0
-            if move_hor == 0:
+            if move_hor == 0 and self.cur_sheet == 0:
                 self.cur_frame = 0
             else:
                 self.cur_frame = (self.cur_frame + 1) % len(self.frames[self.cur_sheet])
@@ -239,10 +239,12 @@ def initialization():
 
     running_knight_image = load_image('knight_running.png')
     falling_knight_image = load_image('knight_falling.png')
+    k = 130 / running_knight_image.get_height()
     running_knight_image = pygame.transform.scale(running_knight_image, (
-        running_knight_image.get_width() / 2.5, running_knight_image.get_height() / 2.5))
+        running_knight_image.get_width() * k, running_knight_image.get_height() * k))
+    k = 130 / falling_knight_image.get_height()
     falling_knight_image = pygame.transform.scale(falling_knight_image, (
-        falling_knight_image.get_width() / 2.5, falling_knight_image.get_height() / 2.5))
+        falling_knight_image.get_width() * k, falling_knight_image.get_height() * k))
 
     # главный герой
     main_character = Knight(0, 0, ((running_knight_image, 8, 1), (falling_knight_image, 12, 1)), )

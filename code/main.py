@@ -201,6 +201,11 @@ if __name__ == '__main__':
 
         if count_fall:
             counter_fall += 6
+            if counter_fall == 6:
+                main_character.cur_sheet = 1
+                main_character.cur_frame = 0
+        else:
+            main_character.cur_sheet = 0
 
         pygame.display.flip()
         clock.tick(fps)
