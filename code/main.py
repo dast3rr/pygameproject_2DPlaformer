@@ -8,6 +8,12 @@ import pygame
 import os
 
 
+SLIDING_SHEET = 3
+JUMPING_SHEET = 2
+FALLING_SHEET = 1
+RUNNING_SHEET = 0
+
+
 # класс камеры
 class Camera:
     # зададим начальный сдвиг камеры
@@ -21,7 +27,7 @@ class Camera:
         d_x = main_character.rect.x - self.x
         d_y = main_character.rect.y - self.y
 
-        r = 30 * N
+        r = 15 * N
         k = 0
         if d_x > r:
             k = -1
@@ -58,7 +64,7 @@ if __name__ == '__main__':
     # Перемещаю экран на центр
     os.environ['SDL_VIDEO_CENTERED'] = '1'
 
-    N = 6
+    N = 10
 
     pygame.init()
     pygame.display.set_mode(size)
@@ -163,21 +169,24 @@ if __name__ == '__main__':
 
         # определение скорости падения
         if main_character.get_ver() and not jump:
-            fall_speed = 30 * N + counter_fall
+            fall_speed = 15 * N + counter_fall
+            count_fall = False
+            counter_fall = 0
+            main_character.cur_sheet = SLIDING_SHEET
         elif not jump:
-            fall_speed = 90 * N + counter_fall
+            fall_speed = 45 * N + counter_fall
         if jump:
             # при прыжке, на самой верхней точке скорость меньше
-            fall_speed = -(30 * N - start_jump_altitude + main_character.rect.y) * 5
-            if not fall_speed:
+            fall_speed = -(25 * N - start_jump_altitude + main_character.rect.y) * 7
+            if fall_speed > -20:
                 counter_fall = 0
                 count_fall = True
                 jump = False
-                fall_speed = 60 * N
+                fall_speed = 45 * N
         # если совершается прыжок от стены
         if jump_from_wall:
             # если уже далеко от стены
-            if abs(main_character.rect.x - start_jump_from_wall_position) > 10 * N:
+            if abs(main_character.rect.x - start_jump_from_wall_position) > 2 * N:
                 jump_from_wall = False
                 right, left = speeds_before_jump
                 speeds_before_jump = [0, 0]
@@ -191,7 +200,7 @@ if __name__ == '__main__':
         money.draw(screen)
         money.update()
 
-        character.draw(screen)
+
 
         if game_paused:
             screen.blit(smooth_surface, (0, 0))
@@ -204,7 +213,17 @@ if __name__ == '__main__':
             enemies.update()
 
         if count_fall:
-            counter_fall += 5
+            counter_fall += 6
+            if counter_fall == 6:
+                main_character.cur_sheet = FALLING_SHEET
+                main_character.cur_frame = 0
+        else:
+            main_character.cur_sheet = RUNNING_SHEET
+
+        if jump:
+            main_character.cur_sheet = JUMPING_SHEET
+
+        character.draw(screen)
 
         pygame.display.flip()
         clock.tick(fps)
