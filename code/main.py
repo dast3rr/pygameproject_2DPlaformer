@@ -216,13 +216,15 @@ if __name__ == '__main__':
         else:
             jump = main_character.update(move_hor, jump, move_speed, fall_speed)
             enemies.update()
-        if not move_hor:
-            main_character.cur_sheet = STANDING_SHEET
-        elif count_fall:
+        if count_fall:
             counter_fall += 6
             if counter_fall == 6:
                 main_character.cur_sheet = FALLING_SHEET
                 main_character.cur_frame = 0
+        elif not move_hor and main_character.get_hor():
+            main_character.cur_sheet = STANDING_SHEET
+            counter_fall = 0
+            count_fall = False
         else:
             main_character.cur_sheet = RUNNING_SHEET
 

@@ -38,7 +38,7 @@ class Character(pygame.sprite.Sprite):
             self.cut_sheet(sheet, columns, rows, x, y)
 
         self.cur_frame = 0
-        self.cur_sheet = 0
+        self.cur_sheet = 4
         self.image = self.frames[self.cur_sheet][self.cur_frame]
         self.rect = self.image.get_rect()
         self.rect = self.rect.move(x + w // 2, y + h // 2)
