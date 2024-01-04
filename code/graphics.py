@@ -24,20 +24,45 @@ def load_image(name, colorkey=None):
 
 # класс для горизонтальных пересечений и картинки
 class Character(pygame.sprite.Sprite):
-    def __init__(self, x, y, a, b, color, *groups):
+    def __init__(self, x, y, graphics, *groups):
         # всякие кординаты
-        self.color = color
         super().__init__(character, *groups)
         w, h = screen.get_size()
-        self.a, self.b = a * N, b * N
         x *= N
         y *= N
 
-        self.image = pygame.Surface([self.a, self.b])
-        self.image.fill(color)
-        self.cords = (w // 2 + x, h // 2 + y, self.a, self.b)
-        self.rect = pygame.Rect(w // 2 + x - 1, h // 2 + y - 1, self.a + 2, self.b + 2)
-        pygame.draw.rect(self.image, self.color, self.rect)
+        self.frames = []
+        # графика
+        for i in range(len(graphics)):
+            sheet, columns, rows = graphics[i]
+            self.cut_sheet(sheet, columns, rows, x, y)
+
+        self.cur_frame = 0
+        self.cur_sheet = 0
+        self.image = self.frames[self.cur_sheet][self.cur_frame]
+        self.rect = self.image.get_rect()
+        self.rect = self.rect.move(x + w // 2, y + h // 2)
+        self.mask = pygame.mask.from_surface(self.image)
+
+    # создание анимации
+    def cut_sheet(self, sheet, columns, rows, x, y):
+        res = []
+        if not self.frames:
+            count = 2
+        else:
+            count = 1
+
+        self.rect = pygame.Rect(x, y, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for x in range(columns):
+                frame_location = (self.rect.w * x, self.rect.h * j)
+                image = sheet.subsurface(pygame.Rect(
+                    frame_location, (self.rect.w, self.rect.h)))
+                for _ in range(count):
+                    res.append(image)
+
+        self.frames.append(res)
 
     def get_hor(self):
         return pygame.sprite.spritecollideany(self, horizontal_platforms)
@@ -46,9 +71,9 @@ class Character(pygame.sprite.Sprite):
         return pygame.sprite.spritecollideany(self, vertical_platforms)
 
 
-class MainCharacter(Character):
-    def __init__(self, x, y, a, b, color, *groups):
-        super().__init__(x, y, a, b, color, *groups)
+class Knight(Character):
+    def __init__(self, x, y, graphics, *groups):
+        super().__init__(x, y, graphics, *groups)
         self.health = 5
         self.healings = 6
         self.money = 0
@@ -60,6 +85,8 @@ class MainCharacter(Character):
         self.money_image = pygame.transform.scale(money_image, (60, 60))
         self.non_damage_count = 0
         self.damage = False
+        self.count_flip = 0
+        self.old_move_hor = 0
 
         self.attack_radius = 40
         self.attack_damage = 1
@@ -111,6 +138,23 @@ class MainCharacter(Character):
         self.update_healthbar()
         self.update_heals()
         self.update_money()
+
+        if self.count_flip == 3:
+            self.count_flip = 0
+            if move_hor == 0 and self.cur_sheet == 0:
+                self.cur_frame = 0
+            else:
+                self.cur_frame = (self.cur_frame + 1) % len(self.frames[self.cur_sheet])
+            self.image = self.frames[self.cur_sheet][self.cur_frame]
+            if move_hor == -1 or self.old_move_hor == -1:
+                self.image = pygame.transform.flip(self.image, True, False)
+
+            self.mask = pygame.mask.from_surface(self.image)
+
+        self.count_flip += 1
+        if move_hor:
+            self.old_move_hor = move_hor
+
         return jump
 
     def update_healthbar(self):
@@ -157,8 +201,8 @@ class MainCharacter(Character):
                 pygame.draw.rect(sprite.image, pygame.Color('Blue'), sprite.rect)
 
 class Enemy(Character):
-    def __init__(self, x, y, a, b, color, *groups):
-        super().__init__(x, y, a, b, color, *groups)
+    def __init__(self, x, y, a, b, graphics, *groups):
+        super().__init__(x, y, a, b, graphics, *groups)
         self.condition = 0
         self.count = 0
         self.hp = 3
@@ -184,7 +228,6 @@ class Enemy(Character):
         if abs(self.rect.y - main_character.rect.y) <= enemy_attack_radius and abs(
                 self.rect.x - main_character.rect.x) <= enemy_attack_radius:
             self.condition = 1
-
 
         if self.condition == 1:
             self.count += 1 / fps
@@ -262,13 +305,17 @@ def initialization():
         Platform(x + 1 / N, y, a - 2 / N, b, platforms, horizontal_platforms)
         Platform(x, y + 1 / N, a, b - 2 / N, platforms, vertical_platforms)
 
-    enemy_cords = [(-30, 10, 10, 10), (200, 30, 10, 10)]
-    for cords in enemy_cords:
-        Enemy(*cords, 'red', enemies)
+    images = [(load_image('knight_running.png'), 9), (load_image('knight_falling.png'), 7),
+              (load_image('knight_in_jump.png', 'white'), 1), (load_image('knight_sliding.png'), 4)]
+    graphics = []
+    for image, row in images:
+        k = 130 / image.get_height()
+        scaled_image = pygame.transform.scale(image, (
+            image.get_width() * k, image.get_height() * k))
+        graphics.append((scaled_image, row, 1))
 
     # главный герой
-
-    main_character = MainCharacter(0, 0, 10, 20, 'white')
+    main_character = Knight(0, 0, graphics)
 
     return main_character
 
@@ -291,4 +338,5 @@ enemies = pygame.sprite.Group()
 menu = pygame.sprite.Group()
 money = pygame.sprite.Group()
 N = 6
+N = 10
 main_character = initialization()
