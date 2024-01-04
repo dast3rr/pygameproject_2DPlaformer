@@ -61,9 +61,16 @@ class MainCharacter(Character):
         self.non_damage_count = 0
         self.damage = False
 
+        self.attack_radius = 40
+        self.attack_damage = 1
+        self.can_damage = False
+        self.view_direcion = 0
+
     # рисование
     def update(self, *args):
         move_hor, jump, move_speed, fall_speed = args
+        if move_hor:
+            self.view_direcion = move_hor // abs(move_hor)
 
         if move_hor < 0:
             # если движение влево, то изначально значение отрицательно
@@ -137,12 +144,25 @@ class MainCharacter(Character):
         text = font.render(str(self.money), True, pygame.Color('White'))
         screen.blit(text, (130, 140))
 
+    def attacking(self):
+        if self.view_direcion == 1:
+            attacking_rect = pygame.Rect(self.rect.topright[0], self.rect.y, self.attack_radius, self.rect.width)
+        elif self.view_direcion == -1:
+            attacking_rect = pygame.Rect(self.rect.x - self.attack_radius, self.rect.y,
+                                         self.attack_radius, self.rect.height)
+
+        for sprite in enemies:
+            if attacking_rect.colliderect(sprite.rect):
+                sprite.get_damage(self.attack_damage)
+                pygame.draw.rect(sprite.image, pygame.Color('Blue'), sprite.rect)
 
 class Enemy(Character):
     def __init__(self, x, y, a, b, color, *groups):
         super().__init__(x, y, a, b, color, *groups)
         self.condition = 0
         self.count = 0
+        self.hp = 3
+        self.dropping_money = 10
 
     def update(self):
         # если враг и гг находятся на одной платформе, то враг движется к гг. В противном случае - нет.
@@ -186,6 +206,15 @@ class Enemy(Character):
             pygame.draw.rect(self.image, self.color, self.rect)
             self.condition = 0
 
+        if self.hp == 0:
+            self.drop_money()
+            self.kill()
+
+    def get_damage(self, damage):
+        self.hp -= damage
+
+    def drop_money(self):
+        Money(self.rect.x, self.rect.y, self.dropping_money)
 
 class Money(pygame.sprite.Sprite):
     def __init__(self, x, y, amount):

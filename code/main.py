@@ -149,6 +149,10 @@ if __name__ == '__main__':
                 if event.key == pygame.K_a:
                     left = 0
 
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    main_character.attacking()
+
         # цвет можно поменять. Это будет цвет фона
         screen.fill(pygame.color.Color(200, 200, 200))
 
