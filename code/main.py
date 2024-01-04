@@ -12,6 +12,7 @@ SLIDING_SHEET = 3
 JUMPING_SHEET = 2
 FALLING_SHEET = 1
 RUNNING_SHEET = 0
+STANDING_SHEET = 4
 
 
 # класс камеры
@@ -211,8 +212,9 @@ if __name__ == '__main__':
         else:
             jump = main_character.update(move_hor, jump, move_speed, fall_speed)
             enemies.update()
-
-        if count_fall:
+        if not move_hor:
+            main_character.cur_sheet = STANDING_SHEET
+        elif count_fall:
             counter_fall += 6
             if counter_fall == 6:
                 main_character.cur_sheet = FALLING_SHEET
