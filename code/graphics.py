@@ -56,9 +56,9 @@ class Character(pygame.sprite.Sprite):
                                 sheet.get_height() // rows)
         for j in range(rows):
             for x in range(columns):
-                frame_location = (self.rect.w * x, self.rect.h * j)
+                frame_location = (self.rect.w * x + 10, self.rect.h * j)
                 image = sheet.subsurface(pygame.Rect(
-                    frame_location, (self.rect.w, self.rect.h)))
+                    frame_location, (self.rect.w - 20, self.rect.h)))
                 for _ in range(count):
                     res.append(image)
 
@@ -305,8 +305,9 @@ def initialization():
         Platform(x + 1 / N, y, a - 2 / N, b, platforms, horizontal_platforms)
         Platform(x, y + 1 / N, a, b - 2 / N, platforms, vertical_platforms)
 
-    images = [(load_image('knight_running.png'), 9), (load_image('knight_falling.png'), 7),
-              (load_image('knight_in_jump.png', 'white'), 1), (load_image('knight_sliding.png'), 4)]
+    images = [(load_image('knight_running.png'), 6), (load_image('knight_falling.png'), 7),
+              (load_image('knight_in_jump.png', 'white'), 1), (load_image('knight_sliding.png'), 4),
+              (load_image('knight_standing.png'), 1)]
     graphics = []
     for image, row in images:
         k = 130 / image.get_height()
