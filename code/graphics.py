@@ -51,13 +51,14 @@ class Character(pygame.sprite.Sprite):
             count = 2
         else:
             count = 1
+
         self.rect = pygame.Rect(x, y, sheet.get_width() // columns,
                                 sheet.get_height() // rows)
         for j in range(rows):
             for x in range(columns):
                 frame_location = (self.rect.w * x, self.rect.h * j)
                 image = sheet.subsurface(pygame.Rect(
-                    frame_location, (self.rect.w - 12, self.rect.h)))
+                    frame_location, (self.rect.w, self.rect.h)))
                 for _ in range(count):
                     res.append(image)
 
@@ -230,6 +231,7 @@ class Platform(pygame.sprite.Sprite):
         # начальное положение. Чтобы поменять self.rect.x = 100 или self.rect.y = 200
         self.rect = pygame.Rect(w // 2 + x, h // 2 + y, self.a, self.b)
         pygame.draw.rect(self.image, 'black', self.rect)
+        self.mask = pygame.mask.from_surface(self.image)
 
 
 def initialization():
@@ -244,22 +246,17 @@ def initialization():
         Platform(x + 1 / N, y, a - 2 / N, b, platforms, horizontal_platforms)
         Platform(x, y + 1 / N, a, b - 2 / N, platforms, vertical_platforms)
 
-    running_knight_image = load_image('knight_running.png')
-    falling_knight_image = load_image('knight_falling.png')
-    jumping_knight_image = load_image('knight_in_jump.png', 'white')
-    k = 130 / running_knight_image.get_height()
-    running_knight_image = pygame.transform.scale(running_knight_image, (
-        running_knight_image.get_width() * k, running_knight_image.get_height() * k))
-    k = 130 / falling_knight_image.get_height()
-    falling_knight_image = pygame.transform.scale(falling_knight_image, (
-        falling_knight_image.get_width() * k, falling_knight_image.get_height() * k))
-    k = 130 / jumping_knight_image.get_height()
-    jumping_knight_image = pygame.transform.scale(jumping_knight_image, (
-        jumping_knight_image.get_width() * k, jumping_knight_image.get_height() * k))
-
+    images = [(load_image('knight_running.png'), 9), (load_image('knight_falling.png'), 7),
+              (load_image('knight_in_jump.png', 'white'), 1), (load_image('knight_sliding.png'), 4)]
+    graphics = []
+    for image, row in images:
+        k = 130 / image.get_height()
+        scaled_image = pygame.transform.scale(image, (
+            image.get_width() * k, image.get_height() * k))
+        graphics.append((scaled_image, row, 1))
 
     # главный герой
-    main_character = Knight(0, 0, ((running_knight_image, 8, 1), (falling_knight_image, 7, 1), (jumping_knight_image, 1, 1)))
+    main_character = Knight(0, 0, graphics)
 
     return main_character
 

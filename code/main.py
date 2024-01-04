@@ -8,6 +8,12 @@ import pygame
 import os
 
 
+SLIDING_SHEET = 3
+JUMPING_SHEET = 2
+FALLING_SHEET = 1
+RUNNING_SHEET = 0
+
+
 # класс камеры
 class Camera:
     # зададим начальный сдвиг камеры
@@ -21,7 +27,7 @@ class Camera:
         d_x = main_character.rect.x - self.x
         d_y = main_character.rect.y - self.y
 
-        r = 30 * N
+        r = 15 * N
         k = 0
         if d_x > r:
             k = -1
@@ -164,6 +170,7 @@ if __name__ == '__main__':
             fall_speed = 15 * N + counter_fall
             count_fall = False
             counter_fall = 0
+            main_character.cur_sheet = SLIDING_SHEET
         elif not jump:
             fall_speed = 45 * N + counter_fall
         if jump:
@@ -189,7 +196,7 @@ if __name__ == '__main__':
         platforms.draw(screen)
         platforms.update()
 
-        character.draw(screen)
+
 
         if game_paused:
             screen.blit(smooth_surface, (0, 0))
@@ -204,13 +211,15 @@ if __name__ == '__main__':
         if count_fall:
             counter_fall += 6
             if counter_fall == 6:
-                main_character.cur_sheet = 1
+                main_character.cur_sheet = FALLING_SHEET
                 main_character.cur_frame = 0
         else:
-            main_character.cur_sheet = 0
+            main_character.cur_sheet = RUNNING_SHEET
 
         if jump:
-            main_character.cur_sheet = 2
+            main_character.cur_sheet = JUMPING_SHEET
+
+        character.draw(screen)
 
         pygame.display.flip()
         clock.tick(fps)
