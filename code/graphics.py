@@ -40,9 +40,8 @@ class Character(pygame.sprite.Sprite):
         self.cur_frame = 0
         self.cur_sheet = 4
         self.image = self.frames[self.cur_sheet][self.cur_frame]
-        self.rect = self.image.get_rect()
-        self.rect = self.rect.move(x + w // 2, y + h // 2)
-        self.mask = pygame.mask.from_surface(self.image)
+        self.rect = pygame.rect.Rect(x, y, 78, 130)
+        self.rect = self.rect.move(x + w // 2 + 20, y + h // 2)
 
     # создание анимации
     def cut_sheet(self, sheet, columns, rows, x, y):
@@ -54,11 +53,15 @@ class Character(pygame.sprite.Sprite):
 
         self.rect = pygame.Rect(x, y, sheet.get_width() // columns,
                                 sheet.get_height() // rows)
+        if len(self.frames) == 3:
+            z = 1.6
+        else:
+            z = 1
         for j in range(rows):
-            for x in range(columns):
-                frame_location = (self.rect.w * x + 10, self.rect.h * j)
+            for i in range(columns):
+                frame_location = (self.rect.w * i + 20, self.rect.h * j)
                 image = sheet.subsurface(pygame.Rect(
-                    frame_location, (self.rect.w - 20, self.rect.h)))
+                    frame_location, (self.rect.w - 40 * z, self.rect.h)))
                 for _ in range(count):
                     res.append(image)
 
@@ -92,6 +95,7 @@ class Knight(Character):
         self.attack_damage = 1
         self.can_damage = False
         self.view_direcion = 0
+
 
     # рисование
     def update(self, *args):
@@ -154,6 +158,8 @@ class Knight(Character):
         self.count_flip += 1
         if move_hor:
             self.old_move_hor = move_hor
+
+
 
         return jump
 
@@ -292,6 +298,18 @@ class Platform(pygame.sprite.Sprite):
 
 
 def initialization():
+    images = [(load_image('knight_running.png'), 6), (load_image('knight_falling.png'), 7),
+              (load_image('knight_in_jump.png', 'white'), 1), (load_image('knight_sliding.png'), 4),
+              (load_image('knight_standing.png'), 1)]
+    graphics = []
+    for image, row in images:
+        k = 130 / image.get_height()
+        scaled_image = pygame.transform.scale(image, (
+            image.get_width() * k, image.get_height() * k))
+        graphics.append((scaled_image, row, 1))
+
+    # главный герой
+    main_character = Knight(0, 0, graphics)
     cords = [(-100, -185, 69, 391), (-100, -185, 191, 68), (-100, 20, 102, 186), (-100, 20, 227, 34),
              (-100, 144, 647, 62),
              (-100, -185, 300, 31), (245, -185, 302, 68), (81, -185, 10, 180), (81, -68, 170, 17), (482, -185, 65, 391),
@@ -305,18 +323,8 @@ def initialization():
         Platform(x + 1 / N, y, a - 2 / N, b, platforms, horizontal_platforms)
         Platform(x, y + 1 / N, a, b - 2 / N, platforms, vertical_platforms)
 
-    images = [(load_image('knight_running.png'), 6), (load_image('knight_falling.png'), 7),
-              (load_image('knight_in_jump.png', 'white'), 1), (load_image('knight_sliding.png'), 4),
-              (load_image('knight_standing.png'), 1)]
-    graphics = []
-    for image, row in images:
-        k = 130 / image.get_height()
-        scaled_image = pygame.transform.scale(image, (
-            image.get_width() * k, image.get_height() * k))
-        graphics.append((scaled_image, row, 1))
 
-    # главный герой
-    main_character = Knight(0, 0, graphics)
+
 
     return main_character
 
@@ -338,6 +346,5 @@ vertical_platforms = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 menu = pygame.sprite.Group()
 money = pygame.sprite.Group()
-N = 6
 N = 10
 main_character = initialization()

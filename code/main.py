@@ -174,10 +174,12 @@ if __name__ == '__main__':
 
         # определение скорости падения
         if main_character.get_ver() and not jump:
+
             fall_speed = 15 * N + counter_fall
             count_fall = False
             counter_fall = 0
             main_character.cur_sheet = SLIDING_SHEET
+
         elif not jump:
             fall_speed = 45 * N + counter_fall
         if jump:
@@ -204,6 +206,7 @@ if __name__ == '__main__':
         platforms.update()
         money.draw(screen)
         money.update()
+        character.draw(screen)
 
 
 
@@ -231,7 +234,7 @@ if __name__ == '__main__':
         if jump:
             main_character.cur_sheet = JUMPING_SHEET
 
-        character.draw(screen)
+
 
         pygame.display.flip()
         clock.tick(fps)
