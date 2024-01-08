@@ -1,8 +1,10 @@
+import sys
+
 from graphics import platforms, screen, fps, size, \
     character, enemies, main_character, menu, money, load_image
 from data import move_speed, start_jump_from_wall_position, start_jump_altitude, jump, jump_from_wall, \
     jump_speed, fall_speed
-from menu import InGameMenu
+from menu import InGameMenu, Button
 
 import pygame
 import os
@@ -59,16 +61,25 @@ class Camera:
 
 def main_menu(screen):
     background = pygame.transform.scale(load_image('main_menu_background.jpg'), (screen.get_width(), screen.get_height()))
-    screen.blit(background, (0, 0))
-    font = pygame.font.Font(None, 50)
-    text = font.render('Нажмите кнопку мыши, чтобы начать', True, pygame.Color('Black'))
-    screen.blit(text, (200, 200))
+
+    new_game_button = Button(300, 100, screen.get_width() // 2 - 150, 300, (0, 0, 0, 100), (255, 255, 255, 20))
+    continue_button = Button(300, 100, screen.get_width() // 2 - 150, 450,
+                             (0, 0, 0, 100), (255, 255, 255, 20), (50, 50, 50))
+    exit_game_button = Button(300, 100, screen.get_width() // 2 - 150, 600, (0, 0, 0, 100), (255, 255, 255, 20))
     while True:
         for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                return
+            if event.type == pygame.MOUSEMOTION:
+                pass
+        screen.blit(background, (0, 0))
+        new_game_button.draw('Новая игра', 40)
+        continue_button.draw('Продолжить', 40)
+        exit_game_button.draw('Выйти из игры', 40)
+        if new_game_button.get_pressed():
+            return
+        if exit_game_button.get_pressed():
+            pygame.quit()
+            sys.exit()
         pygame.display.flip()
-
 
 
 if __name__ == '__main__':
@@ -227,6 +238,9 @@ if __name__ == '__main__':
             InGameMenu.draw_menu_buttons(paused_menu)
             if paused_menu.resume_button.get_pressed():
                 game_paused = False
+            if paused_menu.back_to_main_menu_button.get_pressed():
+                game_paused = False
+                main_menu(screen)
         else:
             jump = main_character.update(move_hor, jump, move_speed, fall_speed)
             enemies.update()
