@@ -206,11 +206,15 @@ class Knight(Character):
                 sprite.get_damage(self.attack_damage)
                 pygame.draw.rect(sprite.image, pygame.Color('Blue'), sprite.rect)
 
+    def get_damage(self, damage):
+        self.health -= damage
+
 class Enemy(Character):
     def __init__(self, x, y, a, b, graphics, *groups):
         super().__init__(x, y, a, b, graphics, *groups)
         self.condition = 0
         self.count = 0
+        self.damage = 1
         self.hp = 3
         self.dropping_money = 10
 
@@ -249,7 +253,7 @@ class Enemy(Character):
 
         if self.condition == 2:
             if not main_character.damage:
-                main_character.health -= 1
+                main_character.get_damage(self.damage)
                 main_character.damage = True
                 main_character.non_damage_count = 0
             pygame.draw.rect(self.image, self.color, self.rect)

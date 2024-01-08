@@ -1,5 +1,5 @@
 from graphics import platforms, screen, fps, size, \
-    character, enemies, main_character, menu, money
+    character, enemies, main_character, menu, money, load_image
 from data import move_speed, start_jump_from_wall_position, start_jump_altitude, jump, jump_from_wall, \
     jump_speed, fall_speed
 from menu import InGameMenu
@@ -38,11 +38,9 @@ class Camera:
             main_character.rect.x -= d_x + r * k
             self.x = main_character.rect.x + r * k
             start_jump_from_wall_position -= (d_x + r * k)
-            for group in [platforms, money]:
+            for group in [platforms, money, enemies]:
                 for sprite in group:
                     sprite.rect.x -= (d_x + r * k)
-            for sprite in enemies:
-                sprite.rect.x -= (d_x + r * k)
 
         k = 0
         if d_y > r:
@@ -54,11 +52,23 @@ class Camera:
             main_character.rect.y -= d_y + r * k
             self.y = main_character.rect.y + r * k
             start_jump_altitude -= (d_y + r * k)
-            for group in [platforms, money]:
+            for group in [platforms, money, enemies]:
                 for sprite in group:
-                    sprite.rect.y -= (d_y + r * k)
-            for sprite in enemies:
-                sprite.rect.y -= (d_y + r * k)
+                    sprite.rect.y -= (d_y + r * k)\
+
+
+def main_menu(screen):
+    background = pygame.transform.scale(load_image('main_menu_background.jpg'), (screen.get_width(), screen.get_height()))
+    screen.blit(background, (0, 0))
+    font = pygame.font.Font(None, 50)
+    text = font.render('Нажмите кнопку мыши, чтобы начать', True, pygame.Color('Black'))
+    screen.blit(text, (200, 200))
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                return
+        pygame.display.flip()
+
 
 
 if __name__ == '__main__':
@@ -94,6 +104,7 @@ if __name__ == '__main__':
     camera = Camera()
     running = True
     game_paused = False
+    main_menu(screen)
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
