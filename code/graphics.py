@@ -218,51 +218,6 @@ class Enemy(Character):
         self.hp = 3
         self.dropping_money = 10
 
-    def update(self):
-        # если враг и гг находятся на одной платформе, то враг движется к гг. В противном случае - нет.
-
-        if abs(self.rect.y - main_character.rect.y) < enemy_agressive_radius and self.condition == 0:
-            if main_character.rect.x < self.rect.x:
-                if enemy_agressive_radius > abs(main_character.rect.x - self.rect.x) > enemy_attack_radius:
-                    self.rect.x -= self.rect.w
-                    if self.get_hor():
-                        self.rect.x -= enemy_speed / fps
-                    self.rect.x += self.rect.w
-            else:
-                if enemy_agressive_radius > abs(main_character.rect.x - self.rect.x) > enemy_attack_radius:
-                    self.rect.x += self.rect.w
-                    if self.get_hor():
-                        self.rect.x += enemy_speed / fps
-                    self.rect.x -= self.rect.w
-
-        if abs(self.rect.y - main_character.rect.y) <= enemy_attack_radius and abs(
-                self.rect.x - main_character.rect.x) <= enemy_attack_radius:
-            self.condition = 1
-
-        if self.condition == 1:
-            self.count += 1 / fps
-            pygame.draw.rect(screen, 'white', self.rect)
-
-            if self.count >= 1:
-                if abs(self.rect.y - main_character.rect.y) <= enemy_attack_radius and abs(
-                        self.rect.x - main_character.rect.x) <= enemy_attack_radius:
-                    self.condition = 2
-                else:
-                    self.condition = 0
-                self.count = 0
-
-        if self.condition == 2:
-            if not main_character.damage:
-                main_character.get_damage(self.damage)
-                main_character.damage = True
-                main_character.non_damage_count = 0
-            pygame.draw.rect(self.image, self.color, self.rect)
-            self.condition = 0
-
-        if self.hp == 0:
-            self.drop_money()
-            self.kill()
-
     def get_damage(self, damage):
         self.hp -= damage
 
@@ -326,9 +281,6 @@ def initialization():
         x, y, a, b = cord
         Platform(x + 1 / N, y, a - 2 / N, b, platforms, horizontal_platforms)
         Platform(x, y + 1 / N, a, b - 2 / N, platforms, vertical_platforms)
-
-
-
 
     return main_character
 
