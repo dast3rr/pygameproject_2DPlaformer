@@ -2,7 +2,7 @@ import pygame
 import os
 import sys
 from screeninfo import get_monitors
-from data import enemy_speed, enemy_agressive_radius, enemy_attack_radius
+from data import global_x, global_y
 
 
 def load_image(name, colorkey=None):
@@ -159,8 +159,6 @@ class Knight(Character):
         if move_hor:
             self.old_move_hor = move_hor
 
-
-
         return jump
 
     def update_healthbar(self):
@@ -257,6 +255,14 @@ class Platform(pygame.sprite.Sprite):
 
 
 def initialization():
+    global main_character, platforms, money, vertical_platforms, horizontal_platforms, enemies
+    background = pygame.Surface(size)
+    for group in [platforms, money, vertical_platforms, horizontal_platforms, enemies]:
+        for sprite in group:
+            sprite.kill()
+            group.clear(screen, background)
+            group.draw(screen)
+
     images = [(load_image('knight_running.png'), 6), (load_image('knight_falling.png'), 7),
               (load_image('knight_in_jump.png', 'white'), 1), (load_image('knight_sliding.png'), 4),
               (load_image('knight_standing.png'), 1)]
@@ -268,7 +274,12 @@ def initialization():
         graphics.append((scaled_image, row, 1))
 
     # главный герой
-    main_character = Knight(0, 0, graphics)
+    if main_character is None:
+        main_character = Knight(0, 0, graphics)
+    else:
+        main_character.health = 5
+        main_character.healings = 6
+        main_character.money = 0
     cords = [(-100, -185, 69, 391), (-100, -185, 191, 68), (-100, 20, 102, 186), (-100, 20, 227, 34),
              (-100, 144, 647, 62),
              (-100, -185, 300, 31), (245, -185, 302, 68), (81, -185, 10, 180), (81, -68, 170, 17), (482, -185, 65, 391),
@@ -282,7 +293,6 @@ def initialization():
         Platform(x + 1 / N, y, a - 2 / N, b, platforms, horizontal_platforms)
         Platform(x, y + 1 / N, a, b - 2 / N, platforms, vertical_platforms)
 
-    return main_character
 
 
 # получаю параметры монитора, по ним делаю окно игры
@@ -303,4 +313,5 @@ enemies = pygame.sprite.Group()
 menu = pygame.sprite.Group()
 money = pygame.sprite.Group()
 N = 10
-main_character = initialization()
+main_character = None
+initialization()

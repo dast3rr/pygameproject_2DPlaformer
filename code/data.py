@@ -12,3 +12,6 @@ jump_speed = 45 * N
 enemy_speed = 15 * N
 enemy_agressive_radius = 80 * N
 enemy_attack_radius = 20 * N
+
+global_x = 0
+global_y = 0
