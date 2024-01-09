@@ -5,6 +5,7 @@ from graphics import platforms, screen, fps, size, \
 from data import move_speed, start_jump_from_wall_position, start_jump_altitude, jump, jump_from_wall, \
     jump_speed, fall_speed
 from menu import InGameMenu, Button
+import load_music
 
 import pygame
 import os
@@ -60,12 +61,15 @@ class Camera:
 
 
 def main_menu(screen):
+    load_music.main_menu_music()
+    pygame.mixer.music.set_volume(0.2)
+    pygame.mixer.music.play(-1, fade_ms=50)
     background = pygame.transform.scale(load_image('main_menu_background.jpg'), (screen.get_width(), screen.get_height()))
 
-    new_game_button = Button(300, 100, screen.get_width() // 2 - 150, 300, (0, 0, 0, 100), (255, 255, 255, 20))
+    new_game_button = Button(300, 100, screen.get_width() // 2 - 150, 300, (50, 50, 50), (255, 255, 255, 100))
     continue_button = Button(300, 100, screen.get_width() // 2 - 150, 450,
-                             (0, 0, 0, 100), (255, 255, 255, 20), (50, 50, 50))
-    exit_game_button = Button(300, 100, screen.get_width() // 2 - 150, 600, (0, 0, 0, 100), (255, 255, 255, 20))
+                             (50, 50, 50), (255, 255, 255, 20), (0, 0, 0, 100))
+    exit_game_button = Button(300, 100, screen.get_width() // 2 - 150, 600, (50, 50, 50), (255, 255, 255, 100))
     while True:
         for event in pygame.event.get():
             if event.type == pygame.MOUSEMOTION:
@@ -75,6 +79,9 @@ def main_menu(screen):
         continue_button.draw('Продолжить', 40)
         exit_game_button.draw('Выйти из игры', 40)
         if new_game_button.get_pressed():
+            load_music.first_loc_music()
+            pygame.mixer.music.set_volume(0.1)
+            pygame.mixer.music.play(-1, fade_ms=50)
             return
         if exit_game_button.get_pressed():
             pygame.quit()

@@ -11,12 +11,12 @@ class InGameMenu(pygame.sprite.Sprite):
 
         self.resume_button = Button(self.rect.width // 2, self.rect.height // 8,
                                     self.rect.x + self.rect.width // 4, self.rect.y + self.rect.height // 4,
-                                    (0, 0, 0, 0), (255, 255, 255, 20))
+                                    (50, 50, 50), (255, 255, 255, 100))
         self.back_to_main_menu_button = Button(self.rect.width // 2, self.rect.height // 8,
                                                self.rect.x + self.rect.width // 4,
                                                self.rect.y + self.rect.height - self.rect.height // 5 -
                                                self.rect.height // 8,
-                                               (0, 0, 0, 0), (255, 255, 255, 20))
+                                               (50, 50, 50), (255, 255, 255, 100))
 
     def draw_menu_buttons(self):
         self.resume_button.draw('Вернуться в игру', 25)
