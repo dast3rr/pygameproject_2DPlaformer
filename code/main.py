@@ -6,9 +6,11 @@ from data import move_speed, start_jump_from_wall_position, start_jump_altitude,
     fall_speed, global_x, global_y
 from menu import InGameMenu, Button
 import load_music
+import music_volume_controller
 
 import pygame
 import os
+
 
 SLIDING_SHEET = 3
 JUMPING_SHEET = 2
@@ -75,8 +77,15 @@ def main_menu(screen):
     load_music.main_menu_music()
     pygame.mixer.music.set_volume(0.2)
     pygame.mixer.music.play(-1, fade_ms=50)
+
+    base = music_volume_controller.Base()
+    slider = music_volume_controller.Slider()
+    filler = music_volume_controller.Filler(slider)
+
     background = pygame.transform.scale(load_image('main_menu_background.jpg'),
                                         (screen.get_width(), screen.get_height()))
+
+
 
     new_game_button = Button(300, 100, screen.get_width() // 2 - 150, 300, (50, 50, 50), (255, 255, 255, 100))
     continue_button = Button(300, 100, screen.get_width() // 2 - 150, 450,
@@ -86,13 +95,17 @@ def main_menu(screen):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEMOTION:
                 pass
+            slider.update(event)
+            filler.update(slider)
+
         screen.blit(background, (0, 0))
         new_game_button.draw('Новая игра', 40)
         continue_button.draw('Продолжить', 40)
         exit_game_button.draw('Выйти из игры', 40)
+
         if new_game_button.get_pressed():
             global start_jump_altitude, start_jump_from_wall_position
-            global jump, jump_from_wall, speeds_before_jump, count_fall,counter_fall, game_paused, right, left
+            global jump, jump_from_wall, speeds_before_jump, count_fall, counter_fall, game_paused, right, left
 
             data = upload_data()
             start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
@@ -105,6 +118,14 @@ def main_menu(screen):
         if exit_game_button.get_pressed():
             pygame.quit()
             sys.exit()
+
+        font = pygame.font.Font(None, 40)
+        text = font.render('Громкость', True, pygame.Color('White'))
+        screen.blit(text, (275, 50))
+
+        music_volume_controller.volume_controller.draw(screen)
+        filler.draw()
+
         pygame.display.flip()
 
 
