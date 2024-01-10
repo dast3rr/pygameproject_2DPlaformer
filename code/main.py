@@ -1,9 +1,9 @@
 import sys
 
 from graphics import platforms, screen, fps, size, \
-    character, enemies, main_character, menu, money, load_image
-from data import move_speed, start_jump_from_wall_position, start_jump_altitude, jump, jump_from_wall, \
-    jump_speed, fall_speed
+    character, enemies, main_character, menu, money, load_image, initialization
+from data import move_speed, start_jump_from_wall_position, start_jump_altitude, \
+    fall_speed, global_x, global_y
 from menu import InGameMenu, Button
 import load_music
 import music_volume_controller
@@ -28,12 +28,17 @@ class Camera:
 
     # позиционировать камеру на объекте target
     def update(self):
-        global start_jump_altitude, start_jump_from_wall_position
+        global start_jump_altitude, start_jump_from_wall_position, global_x, global_y
+
         d_x = main_character.rect.x - self.x
         d_y = main_character.rect.y - self.y
 
         r = 15 * N
         k = 0
+        if d_x > 1:
+            global_x -= d_x - 1
+        elif d_x < -1:
+            global_x -= d_x + 1
         if d_x > r:
             k = -1
         elif d_x < -r:
@@ -41,10 +46,16 @@ class Camera:
         if k:
             main_character.rect.x -= d_x + r * k
             self.x = main_character.rect.x + r * k
+
             start_jump_from_wall_position -= (d_x + r * k)
             for group in [platforms, money, enemies]:
                 for sprite in group:
                     sprite.rect.x -= (d_x + r * k)
+
+        if d_y > 1:
+            global_y -= d_y - 1
+        elif d_y < -1:
+            global_y -= d_y + 1
 
         k = 0
         if d_y > r:
@@ -54,11 +65,12 @@ class Camera:
 
         if k:
             main_character.rect.y -= d_y + r * k
+            global_y -= d_y + r * k
             self.y = main_character.rect.y + r * k
             start_jump_altitude -= (d_y + r * k)
             for group in [platforms, money, enemies]:
                 for sprite in group:
-                    sprite.rect.y -= (d_y + r * k)\
+                    sprite.rect.y -= (d_y + r * k)
 
 
 def main_menu(screen):
@@ -92,6 +104,13 @@ def main_menu(screen):
         exit_game_button.draw('Выйти из игры', 40)
 
         if new_game_button.get_pressed():
+            global start_jump_altitude, start_jump_from_wall_position
+            global jump, jump_from_wall, speeds_before_jump, count_fall, counter_fall, game_paused, right, left
+
+            data = upload_data()
+            start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
+            speeds_before_jump, count_fall, counter_fall, game_paused, right, left = data[4:]
+
             load_music.first_loc_music()
             pygame.mixer.music.set_volume(0.1)
             pygame.mixer.music.play(-1, fade_ms=50)
@@ -110,9 +129,36 @@ def main_menu(screen):
         pygame.display.flip()
 
 
+def upload_data():
+    global main_character, global_y, global_x
+    start_jump_altitude = -100000
+    start_jump_from_wall_position = 0
+    jump = False
+    jump_from_wall = False
+    speeds_before_jump = [0, 0]
+
+    count_fall = False
+    counter_fall = 0
+    game_paused = False
+    # перемещение в стороны
+    right = left = 0
+    main_character.rect.move(-global_x, -global_y)
+    main_character.rect.y -= 90
+
+    initialization()
+
+    return (start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall, speeds_before_jump, count_fall,
+            counter_fall, game_paused, right, left)
+
+
 if __name__ == '__main__':
     # Перемещаю экран на центр
     os.environ['SDL_VIDEO_CENTERED'] = '1'
+    camera = Camera()
+
+    data = upload_data()
+    start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
+    speeds_before_jump, count_fall, counter_fall, game_paused, right, left = data[4:]
 
     N = 10
 
@@ -122,28 +168,17 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
 
     # пустое значение
-    start_jump_altitude = -100000
-    start_jump_from_wall_position = 0
-    jump = False
-    jump_from_wall = False
-    speeds_before_jump = [0, 0]
-
-    # перемещение в стороны
-    right = left = 0
 
     paused_menu = InGameMenu()
 
     smooth_surface = pygame.Surface(size)
     smooth_surface.set_alpha(60)
 
-    count_fall = False
-    counter_fall = 0
 
-
-    camera = Camera()
     running = True
-    game_paused = False
+
     main_menu(screen)
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -248,7 +283,6 @@ if __name__ == '__main__':
                 right, left = speeds_before_jump
                 speeds_before_jump = [0, 0]
 
-
         camera.update()
 
         # отрисовываю все группы спрайтов
@@ -257,8 +291,6 @@ if __name__ == '__main__':
         money.draw(screen)
         money.update()
         character.draw(screen)
-
-
 
         if game_paused:
             screen.blit(smooth_surface, (0, 0))
@@ -286,8 +318,6 @@ if __name__ == '__main__':
 
         if jump:
             main_character.cur_sheet = JUMPING_SHEET
-
-
 
         pygame.display.flip()
         clock.tick(fps)

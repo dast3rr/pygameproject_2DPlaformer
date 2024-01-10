@@ -2,7 +2,7 @@ import pygame
 import os
 import sys
 from screeninfo import get_monitors
-from data import enemy_speed, enemy_agressive_radius, enemy_attack_radius
+from data import global_x, global_y
 
 
 def load_image(name, colorkey=None):
@@ -159,8 +159,6 @@ class Knight(Character):
         if move_hor:
             self.old_move_hor = move_hor
 
-
-
         return jump
 
     def update_healthbar(self):
@@ -218,51 +216,6 @@ class Enemy(Character):
         self.hp = 3
         self.dropping_money = 10
 
-    def update(self):
-        # если враг и гг находятся на одной платформе, то враг движется к гг. В противном случае - нет.
-
-        if abs(self.rect.y - main_character.rect.y) < enemy_agressive_radius and self.condition == 0:
-            if main_character.rect.x < self.rect.x:
-                if enemy_agressive_radius > abs(main_character.rect.x - self.rect.x) > enemy_attack_radius:
-                    self.rect.x -= self.rect.w
-                    if self.get_hor():
-                        self.rect.x -= enemy_speed / fps
-                    self.rect.x += self.rect.w
-            else:
-                if enemy_agressive_radius > abs(main_character.rect.x - self.rect.x) > enemy_attack_radius:
-                    self.rect.x += self.rect.w
-                    if self.get_hor():
-                        self.rect.x += enemy_speed / fps
-                    self.rect.x -= self.rect.w
-
-        if abs(self.rect.y - main_character.rect.y) <= enemy_attack_radius and abs(
-                self.rect.x - main_character.rect.x) <= enemy_attack_radius:
-            self.condition = 1
-
-        if self.condition == 1:
-            self.count += 1 / fps
-            pygame.draw.rect(screen, 'white', self.rect)
-
-            if self.count >= 1:
-                if abs(self.rect.y - main_character.rect.y) <= enemy_attack_radius and abs(
-                        self.rect.x - main_character.rect.x) <= enemy_attack_radius:
-                    self.condition = 2
-                else:
-                    self.condition = 0
-                self.count = 0
-
-        if self.condition == 2:
-            if not main_character.damage:
-                main_character.get_damage(self.damage)
-                main_character.damage = True
-                main_character.non_damage_count = 0
-            pygame.draw.rect(self.image, self.color, self.rect)
-            self.condition = 0
-
-        if self.hp == 0:
-            self.drop_money()
-            self.kill()
-
     def get_damage(self, damage):
         self.hp -= damage
 
@@ -302,6 +255,14 @@ class Platform(pygame.sprite.Sprite):
 
 
 def initialization():
+    global main_character, platforms, money, vertical_platforms, horizontal_platforms, enemies
+    background = pygame.Surface(size)
+    for group in [platforms, money, vertical_platforms, horizontal_platforms, enemies]:
+        for sprite in group:
+            sprite.kill()
+            group.clear(screen, background)
+            group.draw(screen)
+
     images = [(load_image('knight_running.png'), 6), (load_image('knight_falling.png'), 7),
               (load_image('knight_in_jump.png', 'white'), 1), (load_image('knight_sliding.png'), 4),
               (load_image('knight_standing.png'), 1)]
@@ -313,7 +274,12 @@ def initialization():
         graphics.append((scaled_image, row, 1))
 
     # главный герой
-    main_character = Knight(0, 0, graphics)
+    if main_character is None:
+        main_character = Knight(0, 0, graphics)
+    else:
+        main_character.health = 5
+        main_character.healings = 6
+        main_character.money = 0
     cords = [(-100, -185, 69, 391), (-100, -185, 191, 68), (-100, 20, 102, 186), (-100, 20, 227, 34),
              (-100, 144, 647, 62),
              (-100, -185, 300, 31), (245, -185, 302, 68), (81, -185, 10, 180), (81, -68, 170, 17), (482, -185, 65, 391),
@@ -327,10 +293,6 @@ def initialization():
         Platform(x + 1 / N, y, a - 2 / N, b, platforms, horizontal_platforms)
         Platform(x, y + 1 / N, a, b - 2 / N, platforms, vertical_platforms)
 
-
-
-
-    return main_character
 
 
 # получаю параметры монитора, по ним делаю окно игры
@@ -351,4 +313,5 @@ enemies = pygame.sprite.Group()
 menu = pygame.sprite.Group()
 money = pygame.sprite.Group()
 N = 10
-main_character = initialization()
+main_character = None
+initialization()
