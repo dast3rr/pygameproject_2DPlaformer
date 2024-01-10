@@ -39,6 +39,7 @@ class Camera:
             global_x -= d_x - 1
         elif d_x < -1:
             global_x -= d_x + 1
+
         if d_x > r:
             k = -1
         elif d_x < -r:
