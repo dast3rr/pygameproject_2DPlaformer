@@ -12,11 +12,11 @@ import pygame
 import os
 
 
-SLIDING_SHEET = 3
-JUMPING_SHEET = 2
-FALLING_SHEET = 1
-RUNNING_SHEET = 0
-STANDING_SHEET = 4
+SLIDING_SHEET = 4
+JUMPING_SHEET = 3
+FALLING_SHEET = 2
+RUNNING_SHEET = 1
+STANDING_SHEET = 0
 
 
 # класс камеры
@@ -293,6 +293,7 @@ if __name__ == '__main__':
         money.update()
         character.draw(screen)
 
+
         if game_paused:
             screen.blit(smooth_surface, (0, 0))
             menu.draw(screen)
@@ -319,6 +320,9 @@ if __name__ == '__main__':
 
         if jump:
             main_character.cur_sheet = JUMPING_SHEET
+
+        enemies.update()
+        enemies.draw(screen)
 
         pygame.display.flip()
         clock.tick(fps)

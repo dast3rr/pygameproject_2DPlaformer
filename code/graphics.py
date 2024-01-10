@@ -38,28 +38,36 @@ class Character(pygame.sprite.Sprite):
             self.cut_sheet(sheet, columns, rows, x, y)
 
         self.cur_frame = 0
-        self.cur_sheet = 4
+        self.cur_sheet = 0
         self.image = self.frames[self.cur_sheet][self.cur_frame]
         self.rect = pygame.rect.Rect(x, y, 78, 130)
         self.rect = self.rect.move(x + w // 2 + 20, y + h // 2)
+        self.count_flip = 0
 
     # создание анимации
     def cut_sheet(self, sheet, columns, rows, x, y):
         res = []
-        if not self.frames:
+        if len(self.frames) == 1 and type(self) == Knight:
             count = 2
+        elif len(self.frames) == 1 and type(self) == Crawlid:
+            count = 4
         else:
             count = 1
 
         self.rect = pygame.Rect(x, y, sheet.get_width() // columns,
                                 sheet.get_height() // rows)
-        if len(self.frames) == 3:
-            z = 1.6
+        if type(self) == Knight:
+            if len(self.frames) == 4:
+                z = 1.6
+            else:
+                z = 1
+            x = 1
         else:
-            z = 1
+            z = 0
+            x = 0
         for j in range(rows):
             for i in range(columns):
-                frame_location = (self.rect.w * i + 20, self.rect.h * j)
+                frame_location = (self.rect.w * i + 20 * x, self.rect.h * j)
                 image = sheet.subsurface(pygame.Rect(
                     frame_location, (self.rect.w - 40 * z, self.rect.h)))
                 for _ in range(count):
@@ -88,13 +96,15 @@ class Knight(Character):
         self.money_image = pygame.transform.scale(money_image, (60, 60))
         self.non_damage_count = 0
         self.damage = False
-        self.count_flip = 0
         self.old_move_hor = 0
 
         self.attack_radius = 40
         self.attack_damage = 1
         self.can_damage = False
         self.view_direcion = 0
+
+        self.resist = False
+        self.resist_count = 0
 
 
     # рисование
@@ -142,6 +152,7 @@ class Knight(Character):
         self.update_healthbar()
         self.update_heals()
         self.update_money()
+        self.update_damage_resistant()
 
         if self.count_flip == 3:
             self.count_flip = 0
@@ -205,22 +216,84 @@ class Knight(Character):
                 pygame.draw.rect(sprite.image, pygame.Color('Blue'), sprite.rect)
 
     def get_damage(self, damage):
-        self.health -= damage
+        if not self.resist:
+            self.health -= damage
+            self.resist = True
+
+    def update_damage_resistant(self):
+        if self.resist:
+            self.resist_count += 1
+        if self.resist_count == 90:
+            self.resist = False
+            self.resist_count = 0
+
+
 
 class Enemy(Character):
-    def __init__(self, x, y, a, b, graphics, *groups):
-        super().__init__(x, y, a, b, graphics, *groups)
-        self.condition = 0
-        self.count = 0
-        self.damage = 1
+    def __init__(self, x, y, graphics, *groups):
+        super().__init__(x, y, graphics, *groups)
         self.hp = 3
         self.dropping_money = 10
+        self.reverse_count = 0
 
     def get_damage(self, damage):
         self.hp -= damage
 
     def drop_money(self):
         Money(self.rect.x, self.rect.y, self.dropping_money)
+
+    def intersect_with_knight(self):
+        return pygame.sprite.collide_mask(self, main_character)
+
+
+class Crawlid(Enemy):
+    def __init__(self, x, y, graphics, *groups):
+        super().__init__(x, y, graphics, *groups)
+
+        self.hp = 2
+        self.dropping_money = 3
+        self.direction = -1
+        self.count_reverse = 0
+
+    def update(self):
+
+        old_x = self.rect.x
+        self.rect.x += self.direction * self.rect.width + self.direction * 10
+        if not self.get_ver():
+            self.direction *= -1
+            self.cur_sheet = 1
+            self.count_reverse = 1
+            self.cur_frame = 0
+        self.rect.x = old_x
+
+        if self.cur_sheet == 1 and self.count_reverse == 3:
+            self.count_reverse = 0
+            self.count_flip = 0
+            self.cur_sheet = self.cur_frame = 0
+
+        if self.count_flip == 10:
+            self.count_flip = 0
+            self.cur_frame = (self.cur_frame + 1) % len(self.frames[self.cur_sheet])
+            self.image = self.frames[self.cur_sheet][self.cur_frame]
+            if self.direction == 1:
+                self.image = pygame.transform.flip(self.image, True, False)
+
+            self.mask = pygame.mask.from_surface(self.image)
+
+            if self.count_reverse:
+                self.count_reverse += 1
+
+        if self.cur_sheet == 0:
+            self.rect.x += self.direction
+
+        self.count_flip += 1
+
+        self.check_needs_of_damage()
+
+    def check_needs_of_damage(self):
+        if self.intersect_with_knight():
+            main_character.get_damage(1)
+
 
 class Money(pygame.sprite.Sprite):
     def __init__(self, x, y, amount):
@@ -263,23 +336,37 @@ def initialization():
             group.clear(screen, background)
             group.draw(screen)
 
-    images = [(load_image('knight_running.png'), 6), (load_image('knight_falling.png'), 7),
-              (load_image('knight_in_jump.png', 'white'), 1), (load_image('knight_sliding.png'), 4),
-              (load_image('knight_standing.png'), 1)]
-    graphics = []
+    images = [(load_image('knight\knight_standing.png'), 1), (load_image('knight\knight_running.png'), 6),
+              (load_image('knight\knight_falling.png'), 7),
+              (load_image('knight\knight_in_jump.png', 'white'), 1),
+              (load_image('knight\knight_sliding.png'), 4)
+              ]
+    graphics_knight = []
     for image, row in images:
         k = 130 / image.get_height()
         scaled_image = pygame.transform.scale(image, (
             image.get_width() * k, image.get_height() * k))
-        graphics.append((scaled_image, row, 1))
-
+        graphics_knight.append((scaled_image, row, 1))
     # главный герой
     if main_character is None:
-        main_character = Knight(0, 0, graphics)
+        main_character = Knight(0, 0, graphics_knight)
     else:
         main_character.health = 5
         main_character.healings = 6
         main_character.money = 0
+
+    crawlids_graphics = []
+    crawlids_images = [(load_image('crawlid\crawlid_walking.png'), 4), (load_image('crawlid\crawlid_reversing.png'), 2)]
+    for image, row in crawlids_images:
+        k = 80 / image.get_height()
+        scaled_image = pygame.transform.scale(image, (
+            image.get_width() * k, image.get_height() * k))
+        crawlids_graphics.append((scaled_image, row, 1))
+
+    enemies_cords = [(100, 16)]
+    for x, y in enemies_cords:
+        Crawlid(x, y, crawlids_graphics, enemies)
+
     cords = [(-100, -185, 69, 391), (-100, -185, 191, 68), (-100, 20, 102, 186), (-100, 20, 227, 34),
              (-100, 144, 647, 62),
              (-100, -185, 300, 31), (245, -185, 302, 68), (81, -185, 10, 180), (81, -68, 170, 17), (482, -185, 65, 391),
@@ -292,7 +379,6 @@ def initialization():
         x, y, a, b = cord
         Platform(x + 1 / N, y, a - 2 / N, b, platforms, horizontal_platforms)
         Platform(x, y + 1 / N, a, b - 2 / N, platforms, vertical_platforms)
-
 
 
 # получаю параметры монитора, по ним делаю окно игры
