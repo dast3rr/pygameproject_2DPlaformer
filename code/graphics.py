@@ -2,7 +2,6 @@ import pygame
 import os
 import sys
 from screeninfo import get_monitors
-from data import global_x, global_y
 
 
 def load_image(name, colorkey=None):
@@ -254,17 +253,27 @@ class Crawlid(Enemy):
         self.dropping_money = 3
         self.direction = -1
         self.count_reverse = 0
+        self.rect = pygame.rect.Rect(self.rect.x, self.rect.y - 78, 100, 80)
+        self.cur_sheet = self.cur_frame = 0
 
     def update(self):
+        need_reverse = False
+        print(pygame.sprite.spritecollide(self, vertical_platforms, False))
+        if len(pygame.sprite.spritecollide(self, vertical_platforms, False)) > 1:
+            need_reverse = True
+        else:
+            old_x = self.rect.x
+            self.rect.x += self.direction * self.rect.width + self.direction * 10
+            if not self.get_ver():
+                need_reverse = True
+            self.rect.x = old_x
 
-        old_x = self.rect.x
-        self.rect.x += self.direction * self.rect.width + self.direction * 10
-        if not self.get_ver():
+        if need_reverse:
             self.direction *= -1
             self.cur_sheet = 1
             self.count_reverse = 1
             self.cur_frame = 0
-        self.rect.x = old_x
+        print(self.cur_sheet)
 
         if self.cur_sheet == 1 and self.count_reverse == 3:
             self.count_reverse = 0
@@ -363,7 +372,7 @@ def initialization():
             image.get_width() * k, image.get_height() * k))
         crawlids_graphics.append((scaled_image, row, 1))
 
-    enemies_cords = [(100, 16)]
+    enemies_cords = [(100, 20)]
     for x, y in enemies_cords:
         Crawlid(x, y, crawlids_graphics, enemies)
 
