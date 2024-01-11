@@ -97,7 +97,7 @@ class Knight(Character):
         self.damage = False
         self.old_move_hor = 0
 
-        self.attack_radius = 40
+        self.attack_radius = 50
         self.attack_damage = 1
         self.can_damage = False
         self.view_direcion = 0
@@ -212,7 +212,6 @@ class Knight(Character):
         for sprite in enemies:
             if attacking_rect.colliderect(sprite.rect):
                 sprite.get_damage(self.attack_damage)
-                pygame.draw.rect(sprite.image, pygame.Color('Blue'), sprite.rect)
 
     def get_damage(self, damage):
         if not self.resist:
@@ -299,9 +298,16 @@ class Crawlid(Enemy):
 
         self.check_needs_of_damage()
 
+        if self.hp <= 0:
+            self.kill()
+            self.drop_money()
+
     def check_needs_of_damage(self):
         if self.intersect_with_knight():
             main_character.get_damage(1)
+
+    def get_damage(self, damage):
+        self.hp -= damage
 
 
 class Money(pygame.sprite.Sprite):
@@ -336,10 +342,31 @@ class Platform(pygame.sprite.Sprite):
         pygame.draw.rect(self.image, 'black', self.rect)
 
 
+class Saving_point(pygame.sprite.Sprite):
+    def __init__(self, x, y, point_id):
+        super().__init__(saving_points)
+        image = load_image('saving_point.png', -1)
+        self.image = pygame.transform.scale(image, (50, 50))
+        self.rect = pygame.Rect(x * N + screen.get_width() // 2, y * N + screen.get_height() // 2,
+                                self.image.get_width(), self.image.get_height())
+        self.can_save = False
+        self.point_id = point_id
+
+    def update(self):
+        if self.rect.colliderect(main_character):
+            font = pygame.font.Font(None, 30)
+            text = font.render('Нажмите E, чтобы установить точку возрождения', 0, pygame.Color('white'))
+            screen.blit(text, (self.rect.x - 100, self.rect.y - 30))
+            self.can_save = True
+        else:
+            self.can_save = False
+
+
+
 def initialization():
-    global main_character, platforms, money, vertical_platforms, horizontal_platforms, enemies
+    global main_character, platforms, money, vertical_platforms, horizontal_platforms, enemies, saving_points
     background = pygame.Surface(size)
-    for group in [platforms, money, vertical_platforms, horizontal_platforms, enemies]:
+    for group in [platforms, money, vertical_platforms, horizontal_platforms, enemies, saving_points]:
         for sprite in group:
             sprite.kill()
             group.clear(screen, background)
@@ -383,6 +410,7 @@ def initialization():
              (110, -115, 50, 20), (180, -130, 30, 10)]
 
     Money(1500, 1500, 25)
+    Saving_point(20, 130, '1')
 
     for cord in cords:
         x, y, a, b = cord
@@ -407,6 +435,7 @@ vertical_platforms = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 menu = pygame.sprite.Group()
 money = pygame.sprite.Group()
+saving_points = pygame.sprite.Group()
 N = 10
 main_character = None
 initialization()

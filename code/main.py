@@ -1,7 +1,7 @@
 import sys
 
 from graphics import platforms, screen, fps, size, \
-    character, enemies, main_character, menu, money, load_image, initialization
+    character, enemies, main_character, menu, money, load_image, initialization, saving_points
 from data import move_speed, start_jump_from_wall_position, start_jump_altitude, \
     fall_speed, global_x, global_y
 from menu import InGameMenu, Button
@@ -17,6 +17,10 @@ JUMPING_SHEET = 3
 FALLING_SHEET = 2
 RUNNING_SHEET = 1
 STANDING_SHEET = 0
+
+SAVING_POINTS_CORDS = {'1': (15, 70)}
+
+x_from_save, y_from_save = 0, 0
 
 
 # класс камеры
@@ -49,7 +53,7 @@ class Camera:
             self.x = main_character.rect.x + r * k
 
             start_jump_from_wall_position -= (d_x + r * k)
-            for group in [platforms, money, enemies]:
+            for group in [platforms, money, enemies, saving_points]:
                 for sprite in group:
                     sprite.rect.x -= (d_x + r * k)
 
@@ -69,7 +73,7 @@ class Camera:
             global_y -= d_y + r * k
             self.y = main_character.rect.y + r * k
             start_jump_altitude -= (d_y + r * k)
-            for group in [platforms, money, enemies]:
+            for group in [platforms, money, enemies, saving_points]:
                 for sprite in group:
                     sprite.rect.y -= (d_y + r * k)
 
@@ -103,6 +107,8 @@ def main_menu(screen):
         new_game_button.draw('Новая игра', 40)
         continue_button.draw('Продолжить', 40)
         exit_game_button.draw('Выйти из игры', 40)
+        if x_from_save and y_from_save:
+            continue_button.disabled_color = None
 
         if new_game_button.get_pressed():
             global start_jump_altitude, start_jump_from_wall_position
@@ -113,7 +119,6 @@ def main_menu(screen):
             speeds_before_jump, count_fall, counter_fall, game_paused, right, left = data[4:]
 
             load_music.first_loc_music()
-            pygame.mixer.music.set_volume(0.1)
             pygame.mixer.music.play(-1, fade_ms=50)
             return
         if exit_game_button.get_pressed():
@@ -206,6 +211,12 @@ if __name__ == '__main__':
                         game_paused = False
                     else:
                         game_paused = True
+
+                if keys[pygame.K_e]:
+                    for sprite in saving_points:
+                        if sprite.can_save:
+                            x_from_save, y_from_save = SAVING_POINTS_CORDS[sprite.point_id]
+
 
                 # при нажатии на пробел - прыжок
                 if event.key == pygame.K_SPACE and (main_character.get_hor() or main_character.get_ver()):
@@ -323,6 +334,9 @@ if __name__ == '__main__':
 
         enemies.update()
         enemies.draw(screen)
+
+        saving_points.update()
+        saving_points.draw(screen)
 
         pygame.display.flip()
         clock.tick(fps)
