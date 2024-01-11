@@ -257,7 +257,6 @@ class Crawlid(Enemy):
 
     def update(self):
         need_reverse = False
-        print(pygame.sprite.spritecollide(self, vertical_platforms, False))
         if len(pygame.sprite.spritecollide(self, vertical_platforms, False)) > 1:
             need_reverse = True
         else:
@@ -272,7 +271,6 @@ class Crawlid(Enemy):
             self.cur_sheet = 1
             self.count_reverse = 1
             self.cur_frame = 0
-        print(self.cur_sheet)
 
         if self.cur_sheet == 1 and self.count_reverse == 3:
             self.count_reverse = 0
