@@ -321,6 +321,7 @@ if __name__ == '__main__':
         else:
             main_character.update_damage_resistant()
 
+
         if count_fall:
             counter_fall += 6
             if counter_fall == 6:
@@ -349,6 +350,7 @@ if __name__ == '__main__':
         saving_points.draw(screen)
 
         if main_character.stop_screen:
+            counter_fall = 0
             screen.blit(stop_screen, (0, 0))
 
         pygame.display.flip()

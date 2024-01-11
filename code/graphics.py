@@ -46,6 +46,7 @@ class DamageWaves(pygame.sprite.Sprite):
 
 
 
+
 # класс для горизонтальных пересечений и картинки
 class Character(pygame.sprite.Sprite):
     def __init__(self, x, y, graphics, *groups):
@@ -130,6 +131,8 @@ class Knight(Character):
         self.resist = False
         self.resist_count = 0
         self.stop_screen = False
+
+        self.drop_direction = 1
 
 
     # рисование
@@ -249,7 +252,7 @@ class Knight(Character):
             if attacking_rect.colliderect(sprite.rect):
                 sprite.get_damage(self.attack_damage)
 
-    def get_damage(self, damage):
+    def get_damage(self, damage, enemy):
         if not self.resist:
             self.health -= damage
             self.resist = True
@@ -259,18 +262,24 @@ class Knight(Character):
             DamageWaves(1, 0)
             DamageWaves(1, 1)
             damage_waves.draw(screen)
-
-
+            if enemy.rect.x < self.rect.x:
+                self.drop_direction = -1
+            else:
+                self.drop_direction = 1
 
 
     def update_damage_resistant(self):
         if self.resist:
             self.resist_count += 1
-        if self.resist_count == 120:
-            self.resist = False
-            self.resist_count = 0
-        if self.resist_count == 40:
-            self.stop_screen = False
+
+            if self.resist_count == 120:
+                self.resist = False
+                self.resist_count = 0
+            if self.resist_count == 40:
+                self.stop_screen = False
+            if 60 > self.resist_count > 40:
+                self.rect.y -= 800 / fps
+                self.rect.x -= (300 / fps) * self.drop_direction
 
 
 
@@ -349,10 +358,8 @@ class Crawlid(Enemy):
 
     def check_needs_of_damage(self):
         if self.intersect_with_knight():
-            main_character.get_damage(1)
+            main_character.get_damage(1, self)
 
-    def get_damage(self, damage):
-        self.hp -= damage
 
 
 class Money(pygame.sprite.Sprite):
