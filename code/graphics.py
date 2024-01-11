@@ -213,7 +213,6 @@ class Knight(Character):
         for sprite in enemies:
             if attacking_rect.colliderect(sprite.rect):
                 sprite.get_damage(self.attack_damage)
-                pygame.draw.rect(sprite.image, pygame.Color('Blue'), sprite.rect)
 
     def get_damage(self, damage):
         if not self.resist:
@@ -290,9 +289,16 @@ class Crawlid(Enemy):
 
         self.check_needs_of_damage()
 
+        if self.hp <= 0:
+            self.kill()
+            self.drop_money()
+
     def check_needs_of_damage(self):
         if self.intersect_with_knight():
             main_character.get_damage(1)
+
+    def get_damage(self, damage):
+        self.hp -= damage
 
 
 class Money(pygame.sprite.Sprite):
