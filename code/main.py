@@ -1,7 +1,7 @@
 import sys
 
 from graphics import platforms, screen, fps, size, \
-    character, enemies, main_character, menu, money, load_image, initialization, saving_points
+    character, enemies, main_character, menu, money, load_image, initialization, saving_points, damage_waves
 from data import move_speed, start_jump_from_wall_position, start_jump_altitude, \
     fall_speed, global_x, global_y
 from menu import InGameMenu, Button
@@ -116,7 +116,7 @@ def main_menu(screen):
 
             data = upload_data()
             start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
-            speeds_before_jump, count_fall, counter_fall, game_paused, right, left = data[4:]
+            speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects = data[4:]
 
             load_music.first_loc_music()
             pygame.mixer.music.play(-1, fade_ms=50)
@@ -150,11 +150,12 @@ def upload_data():
     right = left = 0
     main_character.rect.move(-global_x, -global_y)
     main_character.rect.y -= 90
+    condition_damage_effects = False
 
     initialization()
 
     return (start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall, speeds_before_jump, count_fall,
-            counter_fall, game_paused, right, left)
+            counter_fall, game_paused, right, left, condition_damage_effects)
 
 
 if __name__ == '__main__':
@@ -164,7 +165,7 @@ if __name__ == '__main__':
 
     data = upload_data()
     start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
-    speeds_before_jump, count_fall, counter_fall, game_paused, right, left = data[4:]
+    speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects = data[4:]
 
     N = 10
 
@@ -314,9 +315,12 @@ if __name__ == '__main__':
             if paused_menu.back_to_main_menu_button.get_pressed():
                 game_paused = False
                 main_menu(screen)
-        else:
+        elif not condition_damage_effects:
             jump = main_character.update(move_hor, jump, move_speed, fall_speed)
             enemies.update()
+        else:
+            main_character.update_damage_resistant()
+
         if count_fall:
             counter_fall += 6
             if counter_fall == 6:
@@ -332,11 +336,20 @@ if __name__ == '__main__':
         if jump:
             main_character.cur_sheet = JUMPING_SHEET
 
+        if main_character.stop_screen and not condition_damage_effects:
+            stop_screen = screen.copy()
+            condition_damage_effects = True
+        if not main_character.stop_screen:
+            condition_damage_effects = False
+
         enemies.update()
         enemies.draw(screen)
 
         saving_points.update()
         saving_points.draw(screen)
+
+        if main_character.stop_screen:
+            screen.blit(stop_screen, (0, 0))
 
         pygame.display.flip()
         clock.tick(fps)

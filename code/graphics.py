@@ -21,6 +21,31 @@ def load_image(name, colorkey=None):
     return image
 
 
+class DamageWaves(pygame.sprite.Sprite):
+    def __init__(self, direction_x, direction_y):
+        super().__init__(damage_waves)
+
+        self.direction_x = direction_x
+        self.direction_y = direction_y
+
+        self.image = pygame.transform.flip(load_image('effects\damage_waves_1.png'), direction_x, direction_y)
+        self.rect = self.image.get_rect()
+
+        x = main_character.rect.x + main_character.rect.w // 2 - self.rect.w * ((direction_x + 1) % 2)
+        y = main_character.rect.y + main_character.rect.h // 2 - self.rect.h * direction_y
+
+        self.rect.x = x
+        self.rect.y = y
+
+    def update(self):
+        if main_character.resist_count:
+            if main_character.resist_count > 40:
+                self.rect.x += 2400 / fps if self.direction_x else -2400 / fps
+                self.rect.y -= 2400 / fps if self.direction_y else -2400 / fps
+                self.image.set_alpha(130 - main_character.resist_count, False)
+
+
+
 # класс для горизонтальных пересечений и картинки
 class Character(pygame.sprite.Sprite):
     def __init__(self, x, y, graphics, *groups):
@@ -104,6 +129,7 @@ class Knight(Character):
 
         self.resist = False
         self.resist_count = 0
+        self.stop_screen = False
 
 
     # рисование
@@ -152,6 +178,7 @@ class Knight(Character):
         self.update_heals()
         self.update_money()
         self.update_damage_resistant()
+        self.update_effects()
 
         if self.count_flip == 3:
             self.count_flip = 0
@@ -170,6 +197,15 @@ class Knight(Character):
             self.old_move_hor = move_hor
 
         return jump
+
+    def update_effects(self):
+        if self.resist:
+            damage_waves.update()
+            damage_waves.draw(screen)
+        else:
+            for sprite in damage_waves:
+                sprite.kill()
+            damage_waves.draw(screen)
 
     def update_healthbar(self):
         for i in range(self.health):
@@ -217,13 +253,24 @@ class Knight(Character):
         if not self.resist:
             self.health -= damage
             self.resist = True
+            self.stop_screen = True
+            DamageWaves(0, 0)
+            DamageWaves(0, 1)
+            DamageWaves(1, 0)
+            DamageWaves(1, 1)
+            damage_waves.draw(screen)
+
+
+
 
     def update_damage_resistant(self):
         if self.resist:
             self.resist_count += 1
-        if self.resist_count == 90:
+        if self.resist_count == 120:
             self.resist = False
             self.resist_count = 0
+        if self.resist_count == 40:
+            self.stop_screen = False
 
 
 
@@ -434,6 +481,7 @@ enemies = pygame.sprite.Group()
 menu = pygame.sprite.Group()
 money = pygame.sprite.Group()
 saving_points = pygame.sprite.Group()
+damage_waves = pygame.sprite.Group()
 N = 10
 main_character = None
 initialization()
