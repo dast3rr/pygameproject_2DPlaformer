@@ -113,7 +113,6 @@ def main_menu(screen):
             speeds_before_jump, count_fall, counter_fall, game_paused, right, left = data[4:]
 
             load_music.first_loc_music()
-            pygame.mixer.music.set_volume(0.1)
             pygame.mixer.music.play(-1, fade_ms=50)
             return
         if exit_game_button.get_pressed():
