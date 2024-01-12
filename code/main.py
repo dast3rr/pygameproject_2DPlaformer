@@ -1,7 +1,8 @@
 import sys
 
 from graphics import platforms, screen, fps, size, \
-    character, enemies, main_character, menu, money, load_image, initialization, saving_points, damage_waves
+    character, enemies, main_character, menu, money, load_image, initialization, saving_points, \
+    damage_waves, update_map_after_save
 from data import move_speed, start_jump_from_wall_position, start_jump_altitude, \
     fall_speed, global_x, global_y
 from menu import InGameMenu, Button
@@ -29,6 +30,7 @@ class Camera:
     def __init__(self):
         self.x = size[0] // 2
         self.y = size[1] // 2
+        self.summary_d_x, self.summary_d_y = 0, 0
 
     # позиционировать камеру на объекте target
     def update(self):
@@ -51,6 +53,7 @@ class Camera:
         if k:
             main_character.rect.x -= d_x + r * k
             self.x = main_character.rect.x + r * k
+            self.summary_d_x += (d_x + r * k)
 
             start_jump_from_wall_position -= (d_x + r * k)
             for group in [platforms, money, enemies, saving_points]:
@@ -72,6 +75,7 @@ class Camera:
             main_character.rect.y -= d_y + r * k
             global_y -= d_y + r * k
             self.y = main_character.rect.y + r * k
+            self.summary_d_y += (d_y + r * k)
             start_jump_altitude -= (d_y + r * k)
             for group in [platforms, money, enemies, saving_points]:
                 for sprite in group:
@@ -152,6 +156,8 @@ def upload_data():
     main_character.rect.y -= 90
     condition_damage_effects = False
 
+    camera.summary_d_x, camera.summary_d_y = 0, 0
+
     initialization()
 
     return (start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall, speeds_before_jump, count_fall,
@@ -217,6 +223,7 @@ if __name__ == '__main__':
                     for sprite in saving_points:
                         if sprite.can_save:
                             x_from_save, y_from_save = SAVING_POINTS_CORDS[sprite.point_id]
+                            update_map_after_save(camera)
 
 
                 # при нажатии на пробел - прыжок

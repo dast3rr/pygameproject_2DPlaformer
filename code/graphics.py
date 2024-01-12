@@ -475,6 +475,32 @@ def initialization():
         Platform(x, y + 1 / N, a, b - 2 / N, platforms, vertical_platforms)
 
 
+def update_map_after_save(camera):
+    global main_character, enemies
+
+    for sprite in enemies:
+        sprite.kill()
+
+    crawlids_graphics = []
+    crawlids_images = [(load_image('crawlid\crawlid_walking.png'), 4), (load_image('crawlid\crawlid_reversing.png'), 2)]
+    for image, row in crawlids_images:
+        k = 80 / image.get_height()
+        scaled_image = pygame.transform.scale(image, (
+            image.get_width() * k, image.get_height() * k))
+        crawlids_graphics.append((scaled_image, row, 1))
+
+    enemies_cords = [(100, 20)]
+    for x, y in enemies_cords:
+        Crawlid(x, y, crawlids_graphics, enemies)
+    for sprite in enemies:
+        sprite.rect.x -= camera.summary_d_x
+        sprite.rect.y -= camera.summary_d_y
+
+    main_character.health = 5
+    main_character.healings = 6
+
+
+
 # получаю параметры монитора, по ним делаю окно игры
 monitor = get_monitors()[0]
 size = monitor.width, monitor.height
