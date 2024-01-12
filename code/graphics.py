@@ -29,6 +29,7 @@ class DamageWaves(pygame.sprite.Sprite):
         self.direction_y = direction_y
 
         self.image = pygame.transform.flip(load_image('effects\damage_waves_1.png'), direction_x, direction_y)
+        self.image = pygame.transform.scale(self.image, (300, 300))
         self.rect = self.image.get_rect()
 
         x = main_character.rect.x + main_character.rect.w // 2 - self.rect.w * ((direction_x + 1) % 2)
@@ -39,10 +40,10 @@ class DamageWaves(pygame.sprite.Sprite):
 
     def update(self):
         if main_character.resist_count:
-            if main_character.resist_count > 40:
+            if main_character.resist_count > 25:
                 self.rect.x += 2400 / fps if self.direction_x else -2400 / fps
                 self.rect.y -= 2400 / fps if self.direction_y else -2400 / fps
-                self.image.set_alpha(130 - main_character.resist_count, False)
+                self.image.set_alpha(80 - main_character.resist_count, False)
 
 
 
@@ -272,12 +273,12 @@ class Knight(Character):
         if self.resist:
             self.resist_count += 1
 
-            if self.resist_count == 120:
+            if self.resist_count == 100:
                 self.resist = False
                 self.resist_count = 0
-            if self.resist_count == 40:
+            if self.resist_count == 25:
                 self.stop_screen = False
-            if 60 > self.resist_count > 40:
+            if 50 > self.resist_count > 25:
                 self.rect.y -= 800 / fps
                 self.rect.x -= (300 / fps) * self.drop_direction
 
