@@ -462,7 +462,11 @@ def initialization():
              (162, 40, 166, 66), (245, -185, 302, 31), (352, 38, 192, 74), (290, -72, 160, 17), (402, -17, 48, 30),
              (110, -115, 50, 20), (180, -130, 30, 10)]
 
-    Money(1500, 1500, 25)
+    monies_cords = [(1500, 1500, 25)]
+    for coin in monies_cords:
+        x, y, value = coin
+        Money(x, y, value)
+
     Saving_point(20, 130, '1')
 
     for cord in cords:
