@@ -270,9 +270,9 @@ class Knight(Character):
         self.attack = True
 
     def update_attack_condition(self):
-        if self.attack and self.attack_count == 4:
+        if self.attack and self.attack_count == 5:
             self.attacking()
-        if self.attack and self.attack_count == 8:
+        if self.attack and self.attack_count == 10:
             self.cur_sheet = 0
             self.cur_frame = 0
             self.attack_count = 0
@@ -454,7 +454,7 @@ def initialization():
     images = [(load_image('knight\knight_standing.png'), 1), (load_image('knight\knight_running.png'), 6),
               (load_image('knight\knight_falling.png'), 7),
               (load_image('knight\knight_in_jump.png', 'white'), 1),
-              (load_image('knight\knight_sliding.png'), 4), (load_image('knight\knight_attacking.png'), 4)]
+              (load_image('knight\knight_sliding.png'), 4), (load_image('knight\knight_attacking.png'), 5)]
     graphics_knight = []
     for image, row in images:
         k = 130 / image.get_height()
