@@ -2,7 +2,7 @@ import sys
 
 from graphics import platforms, screen, fps, size, \
     character, enemies, main_character, menu, money, load_image, initialization, saving_points, \
-    damage_waves, update_map_after_save
+    damage_waves, update_map_after_save, monies
 from data import move_speed, start_jump_from_wall_position, start_jump_altitude, \
     fall_speed, global_x, global_y
 from menu import InGameMenu, Button
@@ -19,9 +19,10 @@ FALLING_SHEET = 2
 RUNNING_SHEET = 1
 STANDING_SHEET = 0
 
-SAVING_POINTS_CORDS = {'1': (15, 70)}
+SAVING_POINTS_CORDS = {'1': (1500, 2000)}
 
-x_from_save, y_from_save = 0, 0
+respawn_x, respawn_y = 0, 0
+main_character_money = 0
 
 
 # класс камеры
@@ -83,6 +84,7 @@ class Camera:
 
 
 def main_menu(screen):
+    global respawn_x, respawn_y, main_character_money
     load_music.main_menu_music()
     pygame.mixer.music.set_volume(0.2)
     pygame.mixer.music.play(-1, fade_ms=50)
@@ -111,13 +113,26 @@ def main_menu(screen):
         new_game_button.draw('Новая игра', 40)
         continue_button.draw('Продолжить', 40)
         exit_game_button.draw('Выйти из игры', 40)
-        if x_from_save and y_from_save:
+        if respawn_x and respawn_y:
             continue_button.disabled_color = None
 
         if new_game_button.get_pressed():
-            global start_jump_altitude, start_jump_from_wall_position
+            global start_jump_altitude, start_jump_from_wall_position, monies
             global jump, jump_from_wall, speeds_before_jump, count_fall, counter_fall, game_paused, right, left
 
+            respawn_x, respawn_y = 0, 0
+            main_character_money = 0
+            for coin in monies:
+                monies[monies.index(coin)][4] = False
+            data = upload_data()
+
+            start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
+            speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects = data[4:]
+
+            load_music.first_loc_music()
+            pygame.mixer.music.play(-1, fade_ms=50)
+            return
+        if continue_button.get_pressed():
             data = upload_data()
             start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
             speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects = data[4:]
@@ -140,7 +155,7 @@ def main_menu(screen):
 
 
 def upload_data():
-    global main_character, global_y, global_x
+    global main_character, global_y, global_x, monies
     start_jump_altitude = -100000
     start_jump_from_wall_position = 0
     jump = False
@@ -153,12 +168,15 @@ def upload_data():
     # перемещение в стороны
     right = left = 0
     main_character.rect.move(-global_x, -global_y)
+    if respawn_x and respawn_y:
+        main_character.rect.x = respawn_x
+        main_character.rect.y = respawn_y
     main_character.rect.y -= 90
     condition_damage_effects = False
 
     camera.summary_d_x, camera.summary_d_y = 0, 0
 
-    initialization()
+    initialization(monies, main_character_money)
 
     return (start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall, speeds_before_jump, count_fall,
             counter_fall, game_paused, right, left, condition_damage_effects)
@@ -222,7 +240,7 @@ if __name__ == '__main__':
                 if keys[pygame.K_e]:
                     for sprite in saving_points:
                         if sprite.can_save:
-                            x_from_save, y_from_save = SAVING_POINTS_CORDS[sprite.point_id]
+                            respawn_x, respawn_y = SAVING_POINTS_CORDS[sprite.point_id]
                             update_map_after_save(camera)
 
 
@@ -321,6 +339,7 @@ if __name__ == '__main__':
                 game_paused = False
             if paused_menu.back_to_main_menu_button.get_pressed():
                 game_paused = False
+                main_character_money = main_character.money
                 main_menu(screen)
         elif not condition_damage_effects:
             jump = main_character.update(move_hor, jump, move_speed, fall_speed)

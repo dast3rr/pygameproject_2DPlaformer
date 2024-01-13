@@ -364,17 +364,20 @@ class Crawlid(Enemy):
 
 
 class Money(pygame.sprite.Sprite):
-    def __init__(self, x, y, amount):
+    def __init__(self, x, y, amount, id=None):
         super().__init__(money)
         self.amount = amount
         image = load_image('money.png')
         self.image = pygame.transform.scale(image, (40, 40))
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = x, y
+        self.id = id
 
     def update(self):
         if pygame.sprite.spritecollideany(self, character):
             main_character.add_money(self.amount)
+            if self.id:
+                monies[self.id - 1][4] = True
             self.kill()
 
 
@@ -416,7 +419,7 @@ class Saving_point(pygame.sprite.Sprite):
 
 
 
-def initialization():
+def initialization(monies_list, main_character_money):
     global main_character, platforms, money, vertical_platforms, horizontal_platforms, enemies, saving_points
     background = pygame.Surface(size)
     for group in [platforms, money, vertical_platforms, horizontal_platforms, enemies, saving_points]:
@@ -442,7 +445,7 @@ def initialization():
     else:
         main_character.health = 5
         main_character.healings = 6
-        main_character.money = 0
+        main_character.money = main_character_money
 
     crawlids_graphics = []
     crawlids_images = [(load_image('crawlid\crawlid_walking.png'), 4), (load_image('crawlid\crawlid_reversing.png'), 2)]
@@ -462,10 +465,11 @@ def initialization():
              (162, 40, 166, 66), (245, -185, 302, 31), (352, 38, 192, 74), (290, -72, 160, 17), (402, -17, 48, 30),
              (110, -115, 50, 20), (180, -130, 30, 10)]
 
-    monies_cords = [(1500, 1500, 25)]
-    for coin in monies_cords:
-        x, y, value = coin
-        Money(x, y, value)
+    monies = monies_list
+    for coin in monies:
+        x, y, value, id, collected = coin
+        if not collected:
+            Money(x, y, value, id)
 
     Saving_point(20, 130, '1')
 
@@ -500,7 +504,6 @@ def update_map_after_save(camera):
     main_character.healings = 6
 
 
-
 # получаю параметры монитора, по ним делаю окно игры
 monitor = get_monitors()[0]
 size = monitor.width, monitor.height
@@ -522,4 +525,5 @@ saving_points = pygame.sprite.Group()
 damage_waves = pygame.sprite.Group()
 N = 10
 main_character = None
-initialization()
+monies = [[1500, 1500, 25, 1, False]]
+initialization(monies, 0)
