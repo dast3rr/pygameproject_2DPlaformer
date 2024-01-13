@@ -171,7 +171,7 @@ def upload_data():
     if respawn_x and respawn_y:
         main_character.rect.x = respawn_x
         main_character.rect.y = respawn_y
-    main_character.rect.y -= 90
+    main_character.rect.y -= 200
     condition_damage_effects = False
 
     camera.summary_d_x, camera.summary_d_y = 0, 0
