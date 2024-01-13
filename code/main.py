@@ -2,7 +2,7 @@ import sys
 
 from graphics import platforms, screen, fps, size, \
     character, enemies, main_character, menu, money, load_image, initialization, saving_points, \
-    damage_waves, update_map_after_save, money_list
+    damage_waves, update_map_after_save, monies
 from data import move_speed, start_jump_from_wall_position, start_jump_altitude, \
     fall_speed, global_x, global_y
 from menu import InGameMenu, Button
@@ -19,41 +19,10 @@ FALLING_SHEET = 2
 RUNNING_SHEET = 1
 STANDING_SHEET = 0
 
-SAVING_POINTS_CORDS = {'1': (1500, 2000), '2': (5880, 870)}
+SAVING_POINTS_CORDS = {'1': (1500, 2000)}
 
 respawn_x, respawn_y = 0, 0
 main_character_money = 0
-volume = 0
-
-def load_data_from_save():
-    global respawn_x, respawn_y, main_character_money, money_list, volume
-    with open('../save/save.txt', 'r', encoding='utf-8') as f:
-        lines = f.readlines()
-        if not lines:
-            write_data_to_save()
-        else:
-            respawn_x = int(lines[0].split(':')[1].strip())
-            respawn_y = int(lines[1].split(':')[1].strip())
-            main_character_money = int(lines[2].split(':')[1].strip())
-            for line in lines[3:-1]:
-                collected = line.split(':')[1].split(', ')[4]
-                if collected == 'False':
-                    money_list[lines.index(line) - 3][4] = False
-                else:
-                    money_list[lines.index(line) - 3][4] = True
-
-            volume = float(lines[-1].split(':')[1].strip())
-
-
-def write_data_to_save():
-    with open('../save/save.txt', 'w', encoding='utf-8') as f:
-        f.write(f'respawn_x: {str(respawn_x)}\n')
-        f.write(f'respawn_y: {str(respawn_y)}\n')
-        f.write(f'main_character_money: {str(main_character_money)}\n')
-        for coin in money_list:
-            f.write(f'money: {", ".join([str(el) for el in coin])}\n')
-
-        f.write(f'volume: {str(volume)}\n')
 
 
 # класс камеры
@@ -115,20 +84,17 @@ class Camera:
 
 
 def main_menu(screen):
-    global respawn_x, respawn_y, main_character_money, volume
+    global respawn_x, respawn_y, main_character_money
     load_music.main_menu_music()
-    pygame.mixer.music.set_volume(volume)
+    pygame.mixer.music.set_volume(0.2)
     pygame.mixer.music.play(-1, fade_ms=50)
 
     base = music_volume_controller.Base()
     slider = music_volume_controller.Slider()
     filler = music_volume_controller.Filler(slider)
 
-    background = pygame.transform.scale(load_image('main_menu_background_2.png'),
+    background = pygame.transform.scale(load_image('main_menu_background.jpg'),
                                         (screen.get_width(), screen.get_height()))
-    current_bg = 1
-    change_bg_button = Button(400, 50, screen.get_width() // 2 - 200, screen.get_height() - 75,
-                              (0, 0, 0, 0), (255, 255, 255, 100))
 
 
 
@@ -140,45 +106,6 @@ def main_menu(screen):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEMOTION:
                 pass
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if change_bg_button.get_pressed():
-                    if current_bg == 1:
-                        current_bg = 2
-                        background = pygame.transform.scale(load_image('main_menu_background_1.jpg'),
-                                                            (screen.get_width(), screen.get_height()))
-                    elif current_bg == 2:
-                        current_bg = 1
-                        background = pygame.transform.scale(load_image('main_menu_background_2.png'),
-                                                            (screen.get_width(), screen.get_height()))
-                if new_game_button.get_pressed():
-                    global start_jump_altitude, start_jump_from_wall_position, money_list
-                    global jump, jump_from_wall, speeds_before_jump, count_fall, counter_fall, game_paused, right, left
-
-                    respawn_x, respawn_y = 0, 0
-                    main_character_money = 0
-                    for coin in money_list:
-                        money_list[money_list.index(coin)][4] = False
-                    data = upload_data()
-
-                    start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
-                    speeds_before_jump, count_fall, counter_fall, game_paused, \
-                    right, left, condition_damage_effects = data[4:]
-
-                    load_music.first_loc_music()
-                    pygame.mixer.music.play(-1, fade_ms=50)
-                    return
-                if continue_button.get_pressed():
-                    data = upload_data()
-                    start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
-                    speeds_before_jump, count_fall, counter_fall, game_paused, \
-                    right, left, condition_damage_effects = data[4:]
-
-                    load_music.first_loc_music()
-                    pygame.mixer.music.play(-1, fade_ms=50)
-                    return
-                if exit_game_button.get_pressed():
-                    pygame.quit()
-                    sys.exit()
             slider.update(event)
             filler.update(slider)
 
@@ -186,25 +113,49 @@ def main_menu(screen):
         new_game_button.draw('Новая игра', 40)
         continue_button.draw('Продолжить', 40)
         exit_game_button.draw('Выйти из игры', 40)
-
-        change_bg_button.draw('Сменить задний фон', 30)
-
         if respawn_x and respawn_y:
             continue_button.disabled_color = None
+
+        if new_game_button.get_pressed():
+            global start_jump_altitude, start_jump_from_wall_position, monies
+            global jump, jump_from_wall, speeds_before_jump, count_fall, counter_fall, game_paused, right, left
+
+            respawn_x, respawn_y = 0, 0
+            main_character_money = 0
+            for coin in monies:
+                monies[monies.index(coin)][4] = False
+            data = upload_data()
+
+            start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
+            speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects = data[4:]
+
+            load_music.first_loc_music()
+            pygame.mixer.music.play(-1, fade_ms=50)
+            return
+        if continue_button.get_pressed():
+            data = upload_data()
+            start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
+            speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects = data[4:]
+
+            load_music.first_loc_music()
+            pygame.mixer.music.play(-1, fade_ms=50)
+            return
+        if exit_game_button.get_pressed():
+            pygame.quit()
+            sys.exit()
 
         font = pygame.font.Font(None, 40)
         text = font.render('Громкость', True, pygame.Color('White'))
         screen.blit(text, (275, 50))
 
         music_volume_controller.volume_controller.draw(screen)
-        volume = pygame.mixer.music.get_volume()
         filler.draw()
 
         pygame.display.flip()
 
 
 def upload_data():
-    global main_character, global_y, global_x, money_list
+    global main_character, global_y, global_x, monies
     start_jump_altitude = -100000
     start_jump_from_wall_position = 0
     jump = False
@@ -225,7 +176,7 @@ def upload_data():
 
     camera.summary_d_x, camera.summary_d_y = 0, 0
 
-    initialization(money_list, main_character_money)
+    initialization(monies, main_character_money)
 
     return (start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall, speeds_before_jump, count_fall,
             counter_fall, game_paused, right, left, condition_damage_effects)
@@ -237,8 +188,6 @@ if __name__ == '__main__':
     camera = Camera()
 
     data = upload_data()
-    load_data_from_save()
-
     start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
     speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects = data[4:]
 
@@ -293,7 +242,6 @@ if __name__ == '__main__':
                         if sprite.can_save:
                             respawn_x, respawn_y = SAVING_POINTS_CORDS[sprite.point_id]
                             update_map_after_save(camera)
-                            write_data_to_save()
 
 
                 # при нажатии на пробел - прыжок
@@ -392,7 +340,6 @@ if __name__ == '__main__':
             if paused_menu.back_to_main_menu_button.get_pressed():
                 game_paused = False
                 main_character_money = main_character.money
-                write_data_to_save()
                 main_menu(screen)
         elif not condition_damage_effects:
             jump = main_character.update(move_hor, jump, move_speed, fall_speed)
