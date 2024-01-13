@@ -1,0 +1,5 @@
+respawn_x: 5880
+respawn_y: 870
+main_character_money: 3
+money: 1500, 1500, 25, 1, True
+volume: 0.0

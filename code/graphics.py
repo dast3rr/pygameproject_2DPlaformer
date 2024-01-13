@@ -402,7 +402,7 @@ class Money(pygame.sprite.Sprite):
         if pygame.sprite.spritecollideany(self, character):
             main_character.add_money(self.amount)
             if self.id:
-                monies[self.id - 1][4] = True
+                money_list[self.id - 1][4] = True
             self.kill()
 
 
@@ -433,6 +433,7 @@ class Saving_point(pygame.sprite.Sprite):
                                 self.image.get_width(), self.image.get_height())
         self.can_save = False
         self.point_id = point_id
+        print(self.rect.x, self.rect.y)
 
     def update(self):
         if self.rect.colliderect(main_character):
@@ -445,7 +446,7 @@ class Saving_point(pygame.sprite.Sprite):
 
 
 
-def initialization(monies_list, main_character_money):
+def initialization(money_list, main_character_money):
     global main_character, platforms, money, vertical_platforms, horizontal_platforms, enemies, saving_points
     background = pygame.Surface(size)
     for group in [platforms, money, vertical_platforms, horizontal_platforms, enemies, saving_points]:
@@ -490,13 +491,14 @@ def initialization(monies_list, main_character_money):
              (162, 40, 166, 66), (245, -185, 302, 31), (352, 38, 192, 74), (290, -72, 160, 17), (402, -17, 48, 30),
              (110, -115, 50, 20), (180, -130, 30, 10)]
 
-    monies = monies_list
-    for coin in monies:
+    list_of_money = money_list
+    for coin in list_of_money:
         x, y, value, id, collected = coin
         if not collected:
             Money(x, y, value, id)
 
     Saving_point(20, 130, '1')
+    Saving_point(460, 25, '2')
 
     for cord in cords:
         x, y, a, b = cord
@@ -550,5 +552,5 @@ saving_points = pygame.sprite.Group()
 damage_waves = pygame.sprite.Group()
 N = 10
 main_character = None
-monies = [[1500, 1500, 25, 1, False]]
-initialization(monies, 0)
+money_list = [[1500, 1500, 25, 1, False]]
+initialization(money_list, 0)
