@@ -369,6 +369,8 @@ if __name__ == '__main__':
         if main_character.stop_screen and not condition_damage_effects:
             stop_screen = screen.copy()
             condition_damage_effects = True
+        else:
+            stop_screen = screen.copy()
         if not main_character.stop_screen:
             condition_damage_effects = False
 

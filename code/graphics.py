@@ -262,6 +262,8 @@ class Knight(Character):
             if attacking_rect.colliderect(sprite.rect):
                 sprite.get_damage(self.attack_damage)
 
+        print('a')
+
     def start_attacking(self):
         self.cur_frame = 0
         self.cur_sheet = 5
@@ -270,7 +272,7 @@ class Knight(Character):
         self.attack = True
 
     def update_attack_condition(self):
-        if self.attack and self.attack_count == 5:
+        if self.attack and self.attack_count == 5 and self.count_flip == 1:
             self.attacking()
         if self.attack and self.attack_count == 10:
             self.cur_sheet = 0
