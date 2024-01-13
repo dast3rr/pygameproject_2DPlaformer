@@ -77,6 +77,8 @@ class Character(pygame.sprite.Sprite):
             count = 2
         elif len(self.frames) == 1 and type(self) == Crawlid:
             count = 4
+        elif len(self.frames) == 5 and type(self) == Knight:
+            count = 2
         else:
             count = 1
 
@@ -124,7 +126,7 @@ class Knight(Character):
         self.damage = False
         self.old_move_hor = 0
 
-        self.attack_radius = 50
+        self.attack_radius = 100
         self.attack_damage = 1
         self.can_damage = False
         self.view_direcion = 0
@@ -134,6 +136,9 @@ class Knight(Character):
         self.stop_screen = False
 
         self.drop_direction = 1
+
+        self.attack_count = 0
+        self.attack = False
 
 
     # рисование
@@ -183,8 +188,12 @@ class Knight(Character):
         self.update_money()
         self.update_damage_resistant()
         self.update_effects()
+        self.update_attack_condition()
+
 
         if self.count_flip == 3:
+            if self.attack:
+                self.attack_count += 1
             self.count_flip = 0
             if move_hor == 0 and self.cur_sheet == 0:
                 self.cur_frame = 0
@@ -245,13 +254,29 @@ class Knight(Character):
     def attacking(self):
         if self.view_direcion == 1:
             attacking_rect = pygame.Rect(self.rect.topright[0], self.rect.y, self.attack_radius, self.rect.width)
-        elif self.view_direcion == -1:
+        else:
             attacking_rect = pygame.Rect(self.rect.x - self.attack_radius, self.rect.y,
                                          self.attack_radius, self.rect.height)
 
         for sprite in enemies:
             if attacking_rect.colliderect(sprite.rect):
                 sprite.get_damage(self.attack_damage)
+
+    def start_attacking(self):
+        self.cur_frame = 0
+        self.cur_sheet = 5
+
+        self.attack_count = 0
+        self.attack = True
+
+    def update_attack_condition(self):
+        if self.attack and self.attack_count == 5:
+            self.attacking()
+        if self.attack and self.attack_count == 10:
+            self.cur_sheet = 0
+            self.cur_frame = 0
+            self.attack_count = 0
+            self.attack = False
 
     def get_damage(self, damage, enemy):
         if not self.resist:
@@ -381,6 +406,7 @@ class Money(pygame.sprite.Sprite):
             self.kill()
 
 
+
 # класс стен
 class Platform(pygame.sprite.Sprite):
     def __init__(self, x, y, a, b, *groups):
@@ -431,8 +457,7 @@ def initialization(monies_list, main_character_money):
     images = [(load_image('knight\knight_standing.png'), 1), (load_image('knight\knight_running.png'), 6),
               (load_image('knight\knight_falling.png'), 7),
               (load_image('knight\knight_in_jump.png', 'white'), 1),
-              (load_image('knight\knight_sliding.png'), 4)
-              ]
+              (load_image('knight\knight_sliding.png'), 4), (load_image('knight\knight_attacking.png'), 5)]
     graphics_knight = []
     for image, row in images:
         k = 130 / image.get_height()
