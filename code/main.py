@@ -280,7 +280,7 @@ if __name__ == '__main__':
                     left = 0
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
+                if event.button == 1 and not main_character.attack:
                     main_character.start_attacking()
 
         # цвет можно поменять. Это будет цвет фона
