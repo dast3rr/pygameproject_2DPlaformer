@@ -11,7 +11,7 @@ import music_volume_controller
 import pygame
 import os
 
-
+ATTACKING_SHEET = 5
 SLIDING_SHEET = 4
 JUMPING_SHEET = 3
 FALLING_SHEET = 2
@@ -256,7 +256,7 @@ if __name__ == '__main__':
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    main_character.attacking()
+                    main_character.start_attacking()
 
         # цвет можно поменять. Это будет цвет фона
         screen.fill(pygame.color.Color(200, 200, 200))
@@ -336,6 +336,9 @@ if __name__ == '__main__':
 
         if jump:
             main_character.cur_sheet = JUMPING_SHEET
+
+        if main_character.attack:
+            main_character.cur_sheet = ATTACKING_SHEET
 
         if main_character.stop_screen and not condition_damage_effects:
             stop_screen = screen.copy()
