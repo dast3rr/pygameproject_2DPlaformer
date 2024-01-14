@@ -2,4 +2,4 @@ respawn_x: 0
 respawn_y: 0
 main_character_money: 0
 money: 1500, 1500, 25, 1, False
-volume: 0.2
+volume: 0.1953125

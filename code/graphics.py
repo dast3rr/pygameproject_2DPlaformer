@@ -300,7 +300,12 @@ class Knight(Character):
                 self.stop_screen = False
             if 50 > self.resist_count > 25:
                 self.rect.y -= 800 / fps
+                if self.get_ver():
+                    self.rect.y += 800 / fps
                 self.rect.x -= (300 / fps) * self.drop_direction
+                if self.get_hor():
+                    self.rect.x += (300 / fps) * self.drop_direction
+
 
 
 class Enemy(Character):
@@ -332,6 +337,7 @@ class Vengefly(Enemy):
         self.cur_sheet = self.cur_frame = 0
 
         self.chase = False
+        self.agr_radius = 800
 
     def update(self):
         print(self.hp)
@@ -363,11 +369,27 @@ class Vengefly(Enemy):
             if self.count_reverse:
                 self.count_reverse += 1
 
-        if ((self.rect.x - main_character.rect.x) ** 2 + (self.rect.y - main_character.rect.y) ** 2) ** 0.5 > self.agr_radius:
+        if ((self.rect.x - main_character.rect.x) ** 2 + (self.rect.y - main_character.rect.y) ** 2) ** 0.5 <= self.agr_radius:
             self.chase = True
 
         if self.chase:
-            pass
+            if self.rect.x < main_character.rect.x:
+                self.rect.x += 2
+                if self.get_hor():
+                    self.rect.x -= 4
+            else:
+                self.rect.x -= 2
+                if self.get_hor():
+                    self.rect.x += 4
+
+            if self.rect.y < main_character.rect.y:
+                self.rect.y += 1
+                if self.get_ver():
+                    self.rect.y -= 2
+            else:
+                self.rect.y -= 1
+                if self.get_ver():
+                    self.rect.y += 2
 
         self.count_flip += 1
 
