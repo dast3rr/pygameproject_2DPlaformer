@@ -230,21 +230,18 @@ def upload_data():
             counter_fall, game_paused, right, left, condition_damage_effects)
 
 
-def check_dead():
+def check_dead(camera):
     global start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall, money_list, global_y, global_x
     global speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects
+    global respawn_x, respawn_y, main_character_money
     if not main_character.health:
         x, y = main_character.rect.x, main_character.rect.y
-        main_character.money = 0
-        main_character.healings = 2
-        main_character.health = 5
-
-        main_character.update_heals()
-        main_character.update_money()
-        main_character.update_healthbar()
+        lost_money_x, lost_money_y = x + camera.summary_d_x, y + camera.summary_d_y
 
         for sprite in damage_waves:
             sprite.kill()
+
+        lost_money = main_character_money
 
         damage_waves.draw(screen)
         data = upload_data()
@@ -252,8 +249,18 @@ def check_dead():
         start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
         speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects = data[4:]
 
-        Money(x - 30 + global_x, y - 30 + global_y, main_character.money, money_list[-1][3] + 1)
-        money_list += [[x - 30 + global_x, y - 30 + global_y, main_character.money, money_list[-1][3] + 1, False]]
+        main_character.money = 0
+        main_character_money = 0
+        main_character.healings = 2
+        main_character.health = 5
+
+        main_character.update_heals()
+        main_character.update_money()
+        main_character.update_healthbar()
+
+
+        lost_money_coin = Money(lost_money_x, lost_money_y, lost_money)
+        write_data_to_save()
 
 
 if __name__ == '__main__':
@@ -453,7 +460,7 @@ if __name__ == '__main__':
         saving_points.update()
         saving_points.draw(screen)
 
-        check_dead()
+        check_dead(camera)
 
         if main_character.stop_screen:
             counter_fall = 0
@@ -461,4 +468,5 @@ if __name__ == '__main__':
 
         pygame.display.flip()
         clock.tick(fps)
+    write_data_to_save()
     pygame.quit()
