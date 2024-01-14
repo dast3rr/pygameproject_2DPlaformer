@@ -25,6 +25,7 @@ respawn_x, respawn_y = 0, 0
 main_character_money = 0
 volume = 0
 
+
 def load_data_from_save():
     global respawn_x, respawn_y, main_character_money, money_list, volume
     with open('../save/save.txt', 'r', encoding='utf-8') as f:
@@ -160,7 +161,7 @@ def main_menu(screen):
 
                     start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
                     speeds_before_jump, count_fall, counter_fall, game_paused, \
-                    right, left, condition_damage_effects = data[4:]
+                        right, left, condition_damage_effects = data[4:]
 
                     load_music.first_loc_music()
                     pygame.mixer.music.play(-1, fade_ms=50)
@@ -169,7 +170,7 @@ def main_menu(screen):
                     data = upload_data()
                     start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
                     speeds_before_jump, count_fall, counter_fall, game_paused, \
-                    right, left, condition_damage_effects = data[4:]
+                        right, left, condition_damage_effects = data[4:]
 
                     load_music.first_loc_music()
                     pygame.mixer.music.play(-1, fade_ms=50)
@@ -230,7 +231,7 @@ def upload_data():
 
 
 def check_dead():
-    global start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall, monies, global_y, global_x
+    global start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall, money_list, global_y, global_x
     global speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects
     if not main_character.health:
         x, y = main_character.rect.x, main_character.rect.y
@@ -251,11 +252,8 @@ def check_dead():
         start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
         speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects = data[4:]
 
-        Money(x - 30 + global_x, y - 30 + global_y, main_character.money,
-              monies[-1][3] + 1)
-        monies += [
-            [x - 30 + global_x, y - 30 + global_y, main_character.money,
-             monies[-1][3] + 1, False]]
+        Money(x - 30 + global_x, y - 30 + global_y, main_character.money, money_list[-1][3] + 1)
+        money_list += [[x - 30 + global_x, y - 30 + global_y, main_character.money, money_list[-1][3] + 1, False]]
 
 
 if __name__ == '__main__':
@@ -321,7 +319,6 @@ if __name__ == '__main__':
                             respawn_x, respawn_y = SAVING_POINTS_CORDS[sprite.point_id]
                             update_map_after_save(camera)
                             write_data_to_save()
-
 
                 # при нажатии на пробел - прыжок
                 if event.key == pygame.K_SPACE and (main_character.get_hor() or main_character.get_ver()):
