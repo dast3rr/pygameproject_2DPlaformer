@@ -613,9 +613,25 @@ def update_map_after_save(camera):
             image.get_width() * k, image.get_height() * k))
         crawlids_graphics.append((scaled_image, row, 1))
 
-    enemies_cords = [(100, 20)]
-    for x, y in enemies_cords:
+    crawlid_cords = [(100, 20)]
+    for x, y in crawlid_cords:
         Crawlid(x, y, crawlids_graphics, enemies)
+
+    vengefly_graphics = []
+    vengefly_images = [(load_image('vengefly\\vengefly_flying.png'), 5),
+                       (load_image('vengefly\\vengefly_turning.png'), 2),
+                       (load_image('vengefly\\vengefly_diying.png'), 3)]
+
+    for image, row in vengefly_images:
+        k = 120 / image.get_height()
+        scaled_image = pygame.transform.scale(image, (
+            image.get_width() * k, image.get_height() * k))
+        vengefly_graphics.append((scaled_image, row, 1))
+
+    vengefly_cords = [(170, -20)]
+    for x, y in vengefly_cords:
+        Vengefly(x, y, vengefly_graphics, enemies)
+
     for sprite in enemies:
         sprite.rect.x -= camera.summary_d_x
         sprite.rect.y -= camera.summary_d_y
