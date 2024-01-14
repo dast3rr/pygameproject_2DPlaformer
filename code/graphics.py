@@ -367,7 +367,7 @@ class Vengefly(Enemy):
             self.chase = True
 
         if self.chase:
-            if
+            pass
 
         self.count_flip += 1
 
