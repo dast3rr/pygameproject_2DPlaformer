@@ -2,7 +2,7 @@ import sys
 
 from graphics import platforms, screen, fps, size, \
     character, enemies, main_character, menu, money, load_image, initialization, saving_points, \
-    damage_waves, update_map_after_save, money_list
+    damage_waves, update_map_after_save, Money, money_list
 from data import move_speed, start_jump_from_wall_position, start_jump_altitude, \
     fall_speed, global_x, global_y
 from menu import InGameMenu, Button
@@ -130,8 +130,6 @@ def main_menu(screen):
     change_bg_button = Button(400, 50, screen.get_width() // 2 - 200, screen.get_height() - 75,
                               (0, 0, 0, 0), (255, 255, 255, 100))
 
-
-
     new_game_button = Button(300, 100, screen.get_width() // 2 - 150, 300, (50, 50, 50), (255, 255, 255, 100))
     continue_button = Button(300, 100, screen.get_width() // 2 - 150, 450,
                              (50, 50, 50), (255, 255, 255, 20), (0, 0, 0, 100))
@@ -231,10 +229,40 @@ def upload_data():
             counter_fall, game_paused, right, left, condition_damage_effects)
 
 
+def check_dead():
+    global start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall, monies, global_y, global_x
+    global speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects
+    if not main_character.health:
+        x, y = main_character.rect.x, main_character.rect.y
+        main_character.money = 0
+        main_character.healings = 2
+        main_character.health = 5
+
+        main_character.update_heals()
+        main_character.update_money()
+        main_character.update_healthbar()
+
+        for sprite in damage_waves:
+            sprite.kill()
+
+        damage_waves.draw(screen)
+        data = upload_data()
+
+        start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
+        speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects = data[4:]
+
+        Money(x - 30 + global_x, y - 30 + global_y, main_character.money,
+              monies[-1][3] + 1)
+        monies += [
+            [x - 30 + global_x, y - 30 + global_y, main_character.money,
+             monies[-1][3] + 1, False]]
+
+
 if __name__ == '__main__':
     # Перемещаю экран на центр
     os.environ['SDL_VIDEO_CENTERED'] = '1'
     camera = Camera()
+    stop_screen = screen.copy()
 
     data = upload_data()
     load_data_from_save()
@@ -255,7 +283,6 @@ if __name__ == '__main__':
 
     smooth_surface = pygame.Surface(size)
     smooth_surface.set_alpha(60)
-
 
     running = True
 
@@ -382,7 +409,6 @@ if __name__ == '__main__':
         money.update()
         character.draw(screen)
 
-
         if game_paused:
             screen.blit(smooth_surface, (0, 0))
             menu.draw(screen)
@@ -399,7 +425,6 @@ if __name__ == '__main__':
             enemies.update()
         else:
             main_character.update_damage_resistant()
-
 
         if count_fall:
             counter_fall += 6
@@ -422,8 +447,6 @@ if __name__ == '__main__':
         if main_character.stop_screen and not condition_damage_effects:
             stop_screen = screen.copy()
             condition_damage_effects = True
-        else:
-            stop_screen = screen.copy()
         if not main_character.stop_screen:
             condition_damage_effects = False
 
@@ -432,6 +455,8 @@ if __name__ == '__main__':
 
         saving_points.update()
         saving_points.draw(screen)
+
+        check_dead()
 
         if main_character.stop_screen:
             counter_fall = 0
