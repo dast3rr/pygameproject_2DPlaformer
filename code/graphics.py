@@ -46,8 +46,6 @@ class DamageWaves(pygame.sprite.Sprite):
                 self.image.set_alpha(80 - main_character.resist_count, False)
 
 
-
-
 # класс для горизонтальных пересечений и картинки
 class Character(pygame.sprite.Sprite):
     def __init__(self, x, y, graphics, *groups):
@@ -140,7 +138,6 @@ class Knight(Character):
         self.attack_count = 0
         self.attack = False
 
-
     # рисование
     def update(self, *args):
         move_hor, jump, move_speed, fall_speed = args
@@ -189,7 +186,6 @@ class Knight(Character):
         self.update_damage_resistant()
         self.update_effects()
         self.update_attack_condition()
-
 
         if self.count_flip == 3:
             if self.attack:
@@ -293,7 +289,6 @@ class Knight(Character):
             else:
                 self.drop_direction = 1
 
-
     def update_damage_resistant(self):
         if self.resist:
             self.resist_count += 1
@@ -306,7 +301,6 @@ class Knight(Character):
             if 50 > self.resist_count > 25:
                 self.rect.y -= 800 / fps
                 self.rect.x -= (300 / fps) * self.drop_direction
-
 
 
 class Enemy(Character):
@@ -326,6 +320,69 @@ class Enemy(Character):
         return pygame.sprite.collide_mask(self, main_character)
 
 
+class Vengefly(Enemy):
+    def __init__(self, x, y, graphics, *groups):
+        super().__init__(x, y, graphics, *groups)
+
+        self.hp = 3
+        self.dropping_money = 4
+        self.direction = -1
+        self.count_reverse = 0
+        self.rect = pygame.rect.Rect(self.rect.x, self.rect.y, 150, 120)
+        self.cur_sheet = self.cur_frame = 0
+
+        self.chase = False
+
+    def update(self):
+        print(self.hp)
+        need_reverse = False
+        if self.direction == 1 and self.rect.x > main_character.rect.x or \
+                self.direction == -1 and self.rect.x < main_character.rect.x:
+            need_reverse = True
+
+        if need_reverse:
+            self.direction *= -1
+            self.cur_sheet = 1
+            self.count_reverse = 1
+            self.cur_frame = 0
+
+        if self.cur_sheet == 1 and self.count_reverse == 3:
+            self.count_reverse = 0
+            self.count_flip = 0
+            self.cur_sheet = self.cur_frame = 0
+
+        if self.count_flip == 10:
+            self.count_flip = 0
+            self.cur_frame = (self.cur_frame + 1) % len(self.frames[self.cur_sheet])
+            self.image = self.frames[self.cur_sheet][self.cur_frame]
+            if self.direction == 1:
+                self.image = pygame.transform.flip(self.image, True, False)
+
+            self.mask = pygame.mask.from_surface(self.image)
+
+            if self.count_reverse:
+                self.count_reverse += 1
+
+        if ((self.rect.x - main_character.rect.x) ** 2 + (self.rect.y - main_character.rect.y) ** 2) ** 0.5 > self.agr_radius:
+            self.chase = True
+
+        if self.chase:
+            if
+
+        self.count_flip += 1
+
+        self.check_needs_of_damage()
+
+        if self.hp <= 0:
+            self.kill()
+            self.drop_money()
+
+
+    def check_needs_of_damage(self):
+        if self.intersect_with_knight():
+            main_character.get_damage(1, self)
+
+
 class Crawlid(Enemy):
     def __init__(self, x, y, graphics, *groups):
         super().__init__(x, y, graphics, *groups)
@@ -336,6 +393,8 @@ class Crawlid(Enemy):
         self.count_reverse = 0
         self.rect = pygame.rect.Rect(self.rect.x, self.rect.y - 78, 100, 80)
         self.cur_sheet = self.cur_frame = 0
+
+
 
     def update(self):
         need_reverse = False
@@ -387,7 +446,6 @@ class Crawlid(Enemy):
             main_character.get_damage(1, self)
 
 
-
 class Money(pygame.sprite.Sprite):
     def __init__(self, x, y, amount, id=None):
         super().__init__(money)
@@ -404,7 +462,6 @@ class Money(pygame.sprite.Sprite):
             if self.id:
                 money_list[self.id - 1][4] = True
             self.kill()
-
 
 
 # класс стен
@@ -445,7 +502,6 @@ class Saving_point(pygame.sprite.Sprite):
             self.can_save = False
 
 
-
 def initialization(money_list, main_character_money):
     global main_character, platforms, money, vertical_platforms, horizontal_platforms, enemies, saving_points
     background = pygame.Surface(size)
@@ -474,16 +530,32 @@ def initialization(money_list, main_character_money):
         main_character.money = main_character_money
 
     crawlids_graphics = []
-    crawlids_images = [(load_image('crawlid\crawlid_walking.png'), 4), (load_image('crawlid\crawlid_reversing.png'), 2)]
+    crawlids_images = [(load_image('crawlid\crawlid_walking.png'), 4), (load_image('crawlid\crawlid_reversing.png'), 2),
+                       (load_image('crawlid\crawlid_diying.png'), 3)]
     for image, row in crawlids_images:
         k = 80 / image.get_height()
         scaled_image = pygame.transform.scale(image, (
             image.get_width() * k, image.get_height() * k))
         crawlids_graphics.append((scaled_image, row, 1))
 
-    enemies_cords = [(100, 20)]
-    for x, y in enemies_cords:
+    crawlid_cords = [(100, 20)]
+    for x, y in crawlid_cords:
         Crawlid(x, y, crawlids_graphics, enemies)
+
+    vengefly_graphics = []
+    vengefly_images = [(load_image('vengefly\\vengefly_flying.png'), 5),
+                       (load_image('vengefly\\vengefly_turning.png'), 2),
+                       (load_image('vengefly\\vengefly_diying.png'), 3)]
+
+    for image, row in vengefly_images:
+        k = 120 / image.get_height()
+        scaled_image = pygame.transform.scale(image, (
+            image.get_width() * k, image.get_height() * k))
+        vengefly_graphics.append((scaled_image, row, 1))
+
+    vengefly_cords = [(170, -20)]
+    for x, y in vengefly_cords:
+        Vengefly(x, y, vengefly_graphics, enemies)
 
     cords = [(-100, -185, 69, 391), (-100, -185, 191, 68), (-100, 20, 102, 186), (-100, 20, 227, 34),
              (-100, 144, 647, 62),
