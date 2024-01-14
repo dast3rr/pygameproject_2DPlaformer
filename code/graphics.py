@@ -490,7 +490,6 @@ class Saving_point(pygame.sprite.Sprite):
                                 self.image.get_width(), self.image.get_height())
         self.can_save = False
         self.point_id = point_id
-        print(self.rect.x, self.rect.y)
 
     def update(self):
         if self.rect.colliderect(main_character):
