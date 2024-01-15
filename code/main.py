@@ -140,28 +140,42 @@ def main_menu(screen):
     continue_button = Button(300, 100, screen.get_width() // 2 - 150, 450,
                              (50, 50, 50), (255, 255, 255, 20), (0, 0, 0, 100))
     exit_game_button = Button(300, 100, screen.get_width() // 2 - 150, 600, (50, 50, 50), (255, 255, 255, 100))
+
     start_new_game = False
     confirm_new_game = False
+
+    how_to_play = False
+    how_to_play_button = Button(200, 50, screen.get_width() - 250, 25,
+                                (0, 0, 0, 100), (255, 255, 255, 100))
+    how_to_play_font_color = pygame.Color('white')
+    back_button = Button(300, 50, screen.get_width() // 2 - 150, screen.get_height() - 75,
+                         (0, 0, 0, 100), (255, 255, 255, 100))
     while True:
         for event in pygame.event.get():
             if event.type == pygame.MOUSEMOTION:
                 pass
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if change_bg_button.get_pressed() and not confirm_new_game:
+                if change_bg_button.get_pressed() and not confirm_new_game and not how_to_play:
                     if current_bg == 1:
                         current_bg = 2
                         background = pygame.transform.scale(load_image('main_menu_background_1.jpg'),
                                                             (screen.get_width(), screen.get_height()))
+                        how_to_play_font_color = (60, 60, 70)
                     elif current_bg == 2:
                         current_bg = 1
                         background = pygame.transform.scale(load_image('main_menu_background_2.png'),
                                                             (screen.get_width(), screen.get_height()))
-                if new_game_button.get_pressed():
+                        how_to_play_font_color = pygame.Color('White')
+                if how_to_play_button.get_pressed() and not confirm_new_game and not how_to_play:
+                    how_to_play = True
+                if back_button.get_pressed() and how_to_play:
+                    how_to_play = False
+                if new_game_button.get_pressed() and not confirm_new_game and not how_to_play:
                     if respawn_x and respawn_y:
                         confirm_new_game = True
                     else:
                         start_new_game = True
-                if continue_button.get_pressed() and not confirm_new_game:
+                if continue_button.get_pressed() and not confirm_new_game and not how_to_play:
                     data = upload_data()
                     start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
                     speeds_before_jump, count_fall, counter_fall, game_paused, \
@@ -170,30 +184,29 @@ def main_menu(screen):
                     load_music.first_loc_music()
                     pygame.mixer.music.play(-1, fade_ms=50)
                     return
-                if exit_game_button.get_pressed() and not confirm_new_game:
+                if exit_game_button.get_pressed() and not confirm_new_game and not how_to_play:
                     pygame.quit()
                     sys.exit()
             slider.update(event)
             filler.update(slider)
 
         screen.blit(background, (0, 0))
-        if not confirm_new_game:
-            new_game_button.draw('Новая игра', 40)
-            continue_button.draw('Продолжить', 40)
-            exit_game_button.draw('Выйти из игры', 40)
 
-        change_bg_button.draw('Сменить задний фон', 30)
 
         if respawn_x and respawn_y:
             continue_button.disabled_color = None
 
-        font = pygame.font.Font(None, 40)
-        text = font.render('Громкость', True, pygame.Color('White'))
-        screen.blit(text, (275, 50))
-
-        music_volume_controller.volume_controller.draw(screen)
-        volume = pygame.mixer.music.get_volume()
-        filler.draw()
+        if how_to_play:
+            back_button.draw('Назад', 30)
+            font = pygame.font.Font(None, 35)
+            texts = ['A, D - Передвижение', 'ПРОБЕЛ - Прыжок', 'Левая кнопка мыши - Атака', 'H - Лечение',
+                     'E - Взаимодействие', 'Деньги остаются на месте смерти.',
+                     'Враги возрождаются после смерти и после взаимодействия с точкой сохранения.',
+                     'Хорошей игры!']
+            for el in texts:
+                text = font.render(el, 1, how_to_play_font_color)
+                screen.blit(text, (screen.get_width() // 2 - text.get_width() // 2,
+                                   screen.get_height() // 4 + text.get_height() * 2 * texts.index(el)))
 
         if confirm_new_game:
             new_game_confirmation.draw(screen)
@@ -219,6 +232,21 @@ def main_menu(screen):
             load_music.first_loc_music()
             pygame.mixer.music.play(-1, fade_ms=50)
             return
+
+        if not confirm_new_game and not how_to_play:
+            new_game_button.draw('Новая игра', 40)
+            continue_button.draw('Продолжить', 40)
+            exit_game_button.draw('Выйти из игры', 40)
+            how_to_play_button.draw('Как играть', 30)
+            change_bg_button.draw('Сменить задний фон', 30)
+
+            font = pygame.font.Font(None, 40)
+            text = font.render('Громкость', True, pygame.Color('White'))
+            screen.blit(text, (275, 50))
+
+            music_volume_controller.volume_controller.draw(screen)
+            volume = pygame.mixer.music.get_volume()
+            filler.draw()
 
         pygame.display.flip()
 
