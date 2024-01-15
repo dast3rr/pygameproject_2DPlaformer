@@ -7,7 +7,8 @@ from data import move_speed, start_jump_from_wall_position, start_jump_altitude,
     fall_speed, global_x, global_y
 from menu import InGameMenu, Button, New_game_confirmation
 import load_music
-import music_volume_controller
+from music_volume_controller import volume_controller_filler, volume_controller_slider, volume_controller_base, \
+    Base, Filler, Slider
 
 import pygame
 import os
@@ -126,9 +127,9 @@ def main_menu(screen):
 
     confirmation = New_game_confirmation()
 
-    base = music_volume_controller.Base()
-    slider = music_volume_controller.Slider()
-    filler = music_volume_controller.Filler(slider)
+    base = Base()
+    slider = Slider()
+    filler = Filler()
 
     background = pygame.transform.scale(load_image('main_menu_background_2.png'),
                                         (screen.get_width(), screen.get_height()))
@@ -185,10 +186,11 @@ def main_menu(screen):
                     pygame.mixer.music.play(-1, fade_ms=50)
                     return
                 if exit_game_button.get_pressed() and not confirm_new_game and not how_to_play:
+                    write_data_to_save()
                     pygame.quit()
                     sys.exit()
             slider.update(event)
-            filler.update(slider)
+            filler.update()
 
         screen.blit(background, (0, 0))
 
@@ -244,9 +246,10 @@ def main_menu(screen):
             text = font.render('Громкость', True, pygame.Color('White'))
             screen.blit(text, (275, 50))
 
-            music_volume_controller.volume_controller.draw(screen)
+            volume_controller_base.draw(screen)
+            pygame.draw.rect(screen, (255, 255, 255), filler.rect, border_radius=10)
+            volume_controller_slider.draw(screen)
             volume = pygame.mixer.music.get_volume()
-            filler.draw()
 
         pygame.display.flip()
 

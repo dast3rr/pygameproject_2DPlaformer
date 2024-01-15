@@ -4,7 +4,7 @@ from graphics import screen
 
 class Base(pygame.sprite.Sprite):
     def __init__(self):
-        super().__init__(volume_controller)
+        super().__init__(volume_controller_base)
         self.image = pygame.Surface((500, 30), pygame.SRCALPHA, 32)
         self.rect = pygame.Rect(100, 100, self.image.get_width(), self.image.get_height())
         pygame.draw.rect(self.image, (150, 150, 150), self.image.get_rect(), border_radius=10)
@@ -12,7 +12,7 @@ class Base(pygame.sprite.Sprite):
 
 class Slider(pygame.sprite.Sprite):
     def __init__(self):
-        super().__init__(volume_controller)
+        super().__init__(volume_controller_slider)
         self.image = pygame.Surface((30, 30), pygame.SRCALPHA, 32)
         self.rect = pygame.Rect(100 + 5 * pygame.mixer.music.get_volume() * 100, 100,
                                 self.image.get_width(), self.image.get_height())
@@ -38,17 +38,21 @@ class Slider(pygame.sprite.Sprite):
 
 
 class Filler(pygame.sprite.Sprite):
-    def __init__(self, slider):
-        super().__init__(volume_controller)
+    def __init__(self):
+        super().__init__(volume_controller_filler)
+        w = 0
+        for sprite in volume_controller_slider:
+            w = sprite.rect.x - 100 + 20
         self.image = pygame.Surface((500, 30), pygame.SRCALPHA, 32)
-        self.rect = pygame.Rect(100, 100, slider.rect.x - 100, self.image.get_height())
-        pygame.draw.rect(self.image, (255, 255, 255), self.rect, border_radius=10)
+        self.rect = pygame.Rect(100, 100, w, self.image.get_height())
 
-    def update(self, slider):
-        self.rect.width = slider.rect.x - 100
-        pygame.draw.rect(self.image, (255, 255, 255), self.rect, border_radius=10)
+    def update(self):
+        w = 0
+        for sprite in volume_controller_slider:
+            w = sprite.rect.x - 100 + 20
+        self.rect.width = w
 
-    def draw(self):
-        pygame.draw.rect(self.image, (255, 255, 255), self.rect, border_radius=10)
 
-volume_controller = pygame.sprite.Group()
+volume_controller_base = pygame.sprite.Group()
+volume_controller_slider = pygame.sprite.Group()
+volume_controller_filler = pygame.sprite.Group()
