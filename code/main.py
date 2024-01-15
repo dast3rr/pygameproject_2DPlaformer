@@ -2,10 +2,10 @@ import sys
 
 from graphics import platforms, screen, fps, size, \
     character, enemies, main_character, menu, money, load_image, initialization, saving_points, \
-    damage_waves, update_map_after_save, Money, money_list
+    damage_waves, update_map_after_save, Money, money_list, new_game_confirmation
 from data import move_speed, start_jump_from_wall_position, start_jump_altitude, \
     fall_speed, global_x, global_y
-from menu import InGameMenu, Button
+from menu import InGameMenu, Button, New_game_confirmation
 import load_music
 import music_volume_controller
 
@@ -117,9 +117,14 @@ class Camera:
 
 def main_menu(screen):
     global respawn_x, respawn_y, main_character_money, volume
+    global start_jump_altitude, start_jump_from_wall_position, money_list
+    global jump, jump_from_wall, speeds_before_jump, count_fall, counter_fall, game_paused, right, left
+
     load_music.main_menu_music()
     pygame.mixer.music.set_volume(volume)
     pygame.mixer.music.play(-1, fade_ms=50)
+
+    confirmation = New_game_confirmation()
 
     base = music_volume_controller.Base()
     slider = music_volume_controller.Slider()
@@ -135,12 +140,14 @@ def main_menu(screen):
     continue_button = Button(300, 100, screen.get_width() // 2 - 150, 450,
                              (50, 50, 50), (255, 255, 255, 20), (0, 0, 0, 100))
     exit_game_button = Button(300, 100, screen.get_width() // 2 - 150, 600, (50, 50, 50), (255, 255, 255, 100))
+    start_new_game = False
+    confirm_new_game = False
     while True:
         for event in pygame.event.get():
             if event.type == pygame.MOUSEMOTION:
                 pass
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if change_bg_button.get_pressed():
+                if change_bg_button.get_pressed() and not confirm_new_game:
                     if current_bg == 1:
                         current_bg = 2
                         background = pygame.transform.scale(load_image('main_menu_background_1.jpg'),
@@ -150,23 +157,11 @@ def main_menu(screen):
                         background = pygame.transform.scale(load_image('main_menu_background_2.png'),
                                                             (screen.get_width(), screen.get_height()))
                 if new_game_button.get_pressed():
-                    global start_jump_altitude, start_jump_from_wall_position, money_list
-                    global jump, jump_from_wall, speeds_before_jump, count_fall, counter_fall, game_paused, right, left
-
-                    respawn_x, respawn_y = 0, 0
-                    main_character_money = 0
-                    for coin in money_list:
-                        money_list[money_list.index(coin)][4] = False
-                    data = upload_data()
-
-                    start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
-                    speeds_before_jump, count_fall, counter_fall, game_paused, \
-                        right, left, condition_damage_effects = data[4:]
-
-                    load_music.first_loc_music()
-                    pygame.mixer.music.play(-1, fade_ms=50)
-                    return
-                if continue_button.get_pressed():
+                    if respawn_x and respawn_y:
+                        confirm_new_game = True
+                    else:
+                        start_new_game = True
+                if continue_button.get_pressed() and not confirm_new_game:
                     data = upload_data()
                     start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
                     speeds_before_jump, count_fall, counter_fall, game_paused, \
@@ -175,16 +170,17 @@ def main_menu(screen):
                     load_music.first_loc_music()
                     pygame.mixer.music.play(-1, fade_ms=50)
                     return
-                if exit_game_button.get_pressed():
+                if exit_game_button.get_pressed() and not confirm_new_game:
                     pygame.quit()
                     sys.exit()
             slider.update(event)
             filler.update(slider)
 
         screen.blit(background, (0, 0))
-        new_game_button.draw('Новая игра', 40)
-        continue_button.draw('Продолжить', 40)
-        exit_game_button.draw('Выйти из игры', 40)
+        if not confirm_new_game:
+            new_game_button.draw('Новая игра', 40)
+            continue_button.draw('Продолжить', 40)
+            exit_game_button.draw('Выйти из игры', 40)
 
         change_bg_button.draw('Сменить задний фон', 30)
 
@@ -198,6 +194,31 @@ def main_menu(screen):
         music_volume_controller.volume_controller.draw(screen)
         volume = pygame.mixer.music.get_volume()
         filler.draw()
+
+        if confirm_new_game:
+            new_game_confirmation.draw(screen)
+            confirmation.draw_buttons()
+            new_game_confirmation.update()
+        if confirmation.confirm_button.get_pressed():
+            start_new_game = True
+            confirm_new_game = False
+        if confirmation.reject_button.get_pressed():
+            confirm_new_game = False
+
+        if start_new_game:
+            respawn_x, respawn_y = 0, 0
+            main_character_money = 0
+            for coin in money_list:
+                money_list[money_list.index(coin)][4] = False
+            data = upload_data()
+
+            start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
+            speeds_before_jump, count_fall, counter_fall, game_paused, \
+            right, left, condition_damage_effects = data[4:]
+
+            load_music.first_loc_music()
+            pygame.mixer.music.play(-1, fade_ms=50)
+            return
 
         pygame.display.flip()
 
@@ -241,7 +262,7 @@ def check_dead(camera):
         for sprite in damage_waves:
             sprite.kill()
 
-        lost_money = main_character_money
+        lost_money = main_character.money
 
         damage_waves.draw(screen)
         data = upload_data()
@@ -250,7 +271,7 @@ def check_dead(camera):
         speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects = data[4:]
 
         main_character.money = 0
-        main_character_money = 0
+        main_character_money = main_character.money
         main_character.healings = 2
         main_character.health = 5
 

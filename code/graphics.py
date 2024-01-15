@@ -340,7 +340,6 @@ class Vengefly(Enemy):
         self.agr_radius = 800
 
     def update(self):
-        print(self.hp)
         need_reverse = False
         if self.direction == 1 and self.rect.x > main_character.rect.x or \
                 self.direction == -1 and self.rect.x < main_character.rect.x:
@@ -656,6 +655,7 @@ horizontal_platforms = pygame.sprite.Group()
 vertical_platforms = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 menu = pygame.sprite.Group()
+new_game_confirmation = pygame.sprite.Group()
 money = pygame.sprite.Group()
 saving_points = pygame.sprite.Group()
 damage_waves = pygame.sprite.Group()
