@@ -2,6 +2,7 @@ import pygame
 import os
 import sys
 from screeninfo import get_monitors
+from data import cords
 
 
 def load_image(name, colorkey=None):
@@ -558,7 +559,7 @@ def initialization(money_list, main_character_money):
             image.get_width() * k, image.get_height() * k))
         crawlids_graphics.append((scaled_image, row, 1))
 
-    crawlid_cords = [(100, 20)]
+    crawlid_cords = []
     for x, y in crawlid_cords:
         Crawlid(x, y, crawlids_graphics, enemies)
 
@@ -573,15 +574,11 @@ def initialization(money_list, main_character_money):
             image.get_width() * k, image.get_height() * k))
         vengefly_graphics.append((scaled_image, row, 1))
 
-    vengefly_cords = [(170, -20)]
+    vengefly_cords = []
     for x, y in vengefly_cords:
         Vengefly(x, y, vengefly_graphics, enemies)
 
-    cords = [(-100, -185, 69, 391), (-100, -185, 191, 68), (-100, 20, 102, 186), (-100, 20, 227, 34),
-             (-100, 144, 647, 62),
-             (-100, -185, 300, 31), (245, -185, 302, 68), (81, -185, 10, 180), (81, -68, 170, 17), (482, -185, 65, 391),
-             (162, 40, 166, 66), (245, -185, 302, 31), (352, 38, 192, 74), (290, -72, 160, 17), (402, -17, 48, 30),
-             (110, -115, 50, 20), (180, -130, 30, 10)]
+
 
     list_of_money = money_list
     for coin in list_of_money:
@@ -589,8 +586,8 @@ def initialization(money_list, main_character_money):
         if not collected:
             Money(x, y, value, id)
 
-    Saving_point(20, 130, '1')
-    Saving_point(460, 25, '2')
+    # Saving_point(20, 130, '1')
+    # Saving_point(460, 25, '2')
 
     for cord in cords:
         x, y, a, b = cord
