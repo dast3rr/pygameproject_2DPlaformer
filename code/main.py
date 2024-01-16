@@ -20,7 +20,7 @@ FALLING_SHEET = 2
 RUNNING_SHEET = 1
 STANDING_SHEET = 0
 
-SAVING_POINTS_CORDS = {'1': (1500, 2000), '2': (5880, 870)}
+SAVING_POINTS_CORDS = {'1': (-570, 7550), '2': (8780, 9220), '3': (9480, 7420)}
 
 respawn_x, respawn_y = 0, 0
 main_character_money = 0
@@ -233,6 +233,8 @@ def main_menu(screen):
 
             load_music.first_loc_music()
             pygame.mixer.music.play(-1, fade_ms=50)
+
+            slider.kill()
             return
 
         if not confirm_new_game and not how_to_play:
@@ -271,7 +273,6 @@ def upload_data():
     if respawn_x and respawn_y:
         main_character.rect.x = respawn_x
         main_character.rect.y = respawn_y
-    main_character.rect.y -= 200
     condition_damage_effects = False
 
     camera.summary_d_x, camera.summary_d_y = 0, 0
@@ -327,7 +328,7 @@ if __name__ == '__main__':
     start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
     speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects = data[4:]
 
-    N = 1
+    N = 10
 
     pygame.init()
     pygame.display.set_mode(size)

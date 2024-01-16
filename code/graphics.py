@@ -474,9 +474,12 @@ class Money(pygame.sprite.Sprite):
         self.amount = amount
         image = load_image('money.png')
         self.image = pygame.transform.scale(image, (40, 40))
-        self.rect = self.image.get_rect()
-        self.rect.x, self.rect.y = x, y
         self.id = id
+        if self.id:
+            self.rect = pygame.Rect(x * N + screen.get_width() // 2, y * N + screen.get_height() // 2,
+                                    self.image.get_width(), self.image.get_height())
+        else:
+            self.rect = pygame.Rect(x, y, self.image.get_width(), self.image.get_height())
 
     def update(self):
         if pygame.sprite.spritecollideany(self, character):
@@ -546,6 +549,8 @@ def initialization(money_list, main_character_money):
     if main_character is None:
         main_character = Knight(0, 0, graphics_knight)
     else:
+        main_character.rect.y -= 300
+        main_character.rect.x += 50
         main_character.health = 5
         main_character.healings = 6
         main_character.money = main_character_money
@@ -559,7 +564,7 @@ def initialization(money_list, main_character_money):
             image.get_width() * k, image.get_height() * k))
         crawlids_graphics.append((scaled_image, row, 1))
 
-    crawlid_cords = []
+    crawlid_cords = [(0, 64)]
     for x, y in crawlid_cords:
         Crawlid(x, y, crawlids_graphics, enemies)
 
@@ -574,10 +579,14 @@ def initialization(money_list, main_character_money):
             image.get_width() * k, image.get_height() * k))
         vengefly_graphics.append((scaled_image, row, 1))
 
-    vengefly_cords = []
+    vengefly_cords = [(0, 50)]
     for x, y in vengefly_cords:
         Vengefly(x, y, vengefly_graphics, enemies)
 
+    points = [(-185, 685, '1'), (750, 850, '2'), (820, 670, '3')]
+    for el in points:
+        x, y, id = el
+        Saving_point(x, y, id)
 
 
     list_of_money = money_list
@@ -585,9 +594,6 @@ def initialization(money_list, main_character_money):
         x, y, value, id, collected = coin
         if not collected:
             Money(x, y, value, id)
-
-    # Saving_point(20, 130, '1')
-    # Saving_point(460, 25, '2')
 
     for cord in cords:
         x, y, a, b = cord
@@ -656,7 +662,7 @@ new_game_confirmation = pygame.sprite.Group()
 money = pygame.sprite.Group()
 saving_points = pygame.sprite.Group()
 damage_waves = pygame.sprite.Group()
-N = 1
+N = 10
 main_character = None
-money_list = [[1500, 1500, 25, 1, False]]
+money_list = [[-180, 120, 50, 1, False], [75, 350, 50, 2, False],  [720, 720, 50, 3, False]]
 initialization(money_list, 0)
