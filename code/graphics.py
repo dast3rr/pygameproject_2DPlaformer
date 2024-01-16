@@ -656,7 +656,7 @@ new_game_confirmation = pygame.sprite.Group()
 money = pygame.sprite.Group()
 saving_points = pygame.sprite.Group()
 damage_waves = pygame.sprite.Group()
-N = 10
+N = 1
 main_character = None
 money_list = [[1500, 1500, 25, 1, False]]
 initialization(money_list, 0)

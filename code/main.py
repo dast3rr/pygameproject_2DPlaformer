@@ -324,7 +324,7 @@ if __name__ == '__main__':
     start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
     speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects = data[4:]
 
-    N = 10
+    N = 1
 
     pygame.init()
     pygame.display.set_mode(size)
