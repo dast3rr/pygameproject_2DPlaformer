@@ -1,5 +1,7 @@
-respawn_x: 0
-respawn_y: 0
+respawn_x: 8780
+respawn_y: 9220
 main_character_money: 0
-money: 1500, 1500, 25, 1, False
-volume: 0.1953125
+money: -180, 120, 50, 1, False
+money: 75, 350, 50, 2, False
+money: 720, 720, 50, 3, False
+volume: 0.1328125

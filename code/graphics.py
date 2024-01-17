@@ -330,9 +330,6 @@ class Enemy(Character):
         return pygame.sprite.collide_mask(self, main_character)
 
 
-
-
-
 class Vengefly(Enemy):
     def __init__(self, x, y, graphics, *groups):
         super().__init__(x, y, graphics, *groups)
@@ -344,6 +341,9 @@ class Vengefly(Enemy):
         self.rect = pygame.rect.Rect(self.rect.x, self.rect.y, 120, 120)
         self.cur_sheet = self.cur_frame = 0
         self.start_x = self.rect.x
+
+        self.speed = 2
+
 
         self.chase = False
         self.agr_radius = 650
@@ -382,22 +382,22 @@ class Vengefly(Enemy):
 
         if self.chase:
             if self.rect.x < main_character.rect.x:
-                self.rect.x += 2
-                if self.get_hor():
-                    self.rect.x -= 4
+                self.rect.x += self.speed
+                if self.get_ver():
+                    self.rect.x -= self.speed * 2
             else:
-                self.rect.x -= 2
-                if self.get_hor():
-                    self.rect.x += 4
+                self.rect.x -= self.speed
+                if self.get_ver():
+                    self.rect.x += self.speed * 2
 
             if self.rect.y < main_character.rect.y:
-                self.rect.y += 1
-                if self.get_ver():
-                    self.rect.y -= 2
+                self.rect.y += self.speed / 2
+                if self.get_hor():
+                    self.rect.y -= self.speed
             else:
-                self.rect.y -= 1
-                if self.get_ver():
-                    self.rect.y += 2
+                self.rect.y -= self.speed / 2
+                if self.get_hor():
+                    self.rect.y += self.speed
 
         self.count_flip += 1
 
@@ -533,7 +533,7 @@ class Saving_point(pygame.sprite.Sprite):
 
 
 def initialization(money_list, main_character_money):
-    global main_character, platforms, money, vertical_platforms, horizontal_platforms, enemies, saving_points
+    global main_character, platforms, money, vertical_platforms, horizontal_platforms, enemies, saving_points, mouthwing
     background = pygame.Surface(size)
     for group in [platforms, money, vertical_platforms, horizontal_platforms, enemies, saving_points]:
         for sprite in group:
@@ -561,9 +561,25 @@ def initialization(money_list, main_character_money):
         main_character.healings = 6
         main_character.money = main_character_money
 
+    mouthwing_graphics = []
+    mouthwing_images = [(load_image('mouthwing\\mouthwing_flying.png'), 4),
+                   (load_image('mouthwing\\mouthwing_turning.png'), 2),
+                   (load_image('mouthwing\\mouthwing_diying.png'), 3)]
+
+    for image, row in mouthwing_images:
+        k = 400 / image.get_height()
+        scaled_image = pygame.transform.scale(image, (
+            image.get_width() * k, image.get_height() * k))
+        mouthwing_graphics.append((scaled_image, row, 1))
+
+    mouthwing = Vengefly(1050, 900, mouthwing_graphics, enemies)
+    mouthwing.rect.h = 400
+    mouthwing.rect.w = 500
+    mouthwing.agr_radius = 1000
+
     crawlids_graphics = []
-    crawlids_images = [(load_image('crawlid\crawlid_walking.png'), 4), (load_image('crawlid\crawlid_reversing.png'), 2),
-                       (load_image('crawlid\crawlid_diying.png'), 3)]
+    crawlids_images = [(load_image('crawlid\\crawlid_walking.png'), 4), (load_image('crawlid\\crawlid_reversing.png'), 2),
+                       (load_image('crawlid\\crawlid_diying.png'), 3)]
     for image, row in crawlids_images:
         k = 80 / image.get_height()
         scaled_image = pygame.transform.scale(image, (
@@ -670,7 +686,8 @@ damage_waves = pygame.sprite.Group()
 trigger_blocks = pygame.sprite.Group()
 N = 10
 main_character = None
-money_list = [[-180, 120, 50, 1, False], [75, 350, 50, 2, False], [50, 910, 50, 3, False],  [720, 720, 50, 4, False]]
+mouthwing = None
+money_list = [[-180, 120, 50, 1, False], [75, 350, 50, 2, False],  [720, 720, 50, 3, False]]
 crawlid_cords = [(-10, 61, 45, -1), (25, 181, 45, -1), (25, 346, 45, -1), (100, 396, 100, -1),
                  (150, 396, 100, -1), (200, 396, 100, 1), (360, 386, 50, -1), (310, 428.5, 40, 1), (355, 306, 25, 1),
                  (355, 536, 25, 1), (300, 536, 50, -1), (5, 466, 50, 1)]
