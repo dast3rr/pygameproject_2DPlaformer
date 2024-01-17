@@ -13,8 +13,10 @@ enemy_speed = 15 * N
 enemy_agressive_radius = 80 * N
 enemy_attack_radius = 20 * N
 
-global_x = 0
-global_y = 0
+global_cords = [0, 0]
+
+respawn_cords = [0, 0]
+
 
 cords = [(-20, 0, 100, 12),
          (-200, -100, 190, 200),
@@ -64,5 +66,6 @@ cords = [(-20, 0, 100, 12),
          (270, 685, 40, 10),
          (320, 690, 20, 10),
          (350, 695, 100, 30),
-         (465, 700, 20, 5)
+         (465, 700, 20, 5),
+
          ]

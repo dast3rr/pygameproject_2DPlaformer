@@ -330,11 +330,11 @@ class Vengefly(Enemy):
     def __init__(self, x, y, graphics, *groups):
         super().__init__(x, y, graphics, *groups)
 
-        self.hp = 3
+        self.hp = 2
         self.dropping_money = 4
         self.direction = -1
         self.count_reverse = 0
-        self.rect = pygame.rect.Rect(self.rect.x, self.rect.y, 150, 120)
+        self.rect = pygame.rect.Rect(self.rect.x, self.rect.y, 120, 120)
         self.cur_sheet = self.cur_frame = 0
 
         self.chase = False
@@ -406,29 +406,28 @@ class Vengefly(Enemy):
 
 
 class Crawlid(Enemy):
-    def __init__(self, x, y, graphics, *groups):
+    def __init__(self, x, y, distance, graphics, *groups):
         super().__init__(x, y, graphics, *groups)
 
         self.hp = 2
         self.dropping_money = 3
         self.direction = -1
         self.count_reverse = 0
-        self.rect = pygame.rect.Rect(self.rect.x, self.rect.y - 78, 100, 80)
+        self.rect = pygame.rect.Rect(self.rect.x, self.rect.y, 100, 85)
         self.cur_sheet = self.cur_frame = 0
-
-
+        self.first_update = True
+        self.start_x = self.rect.x
+        self.distance = distance
 
     def update(self):
         need_reverse = False
-        if len(pygame.sprite.spritecollide(self, vertical_platforms, False)) > 1:
+        print(abs(self.rect.x - self.start_x))
+        if abs(self.rect.x - self.start_x) >= self.distance:
+            if self.rect.x < self.start_x:
+                self.rect.x += 2
+            else:
+                self.rect.x -= 2
             need_reverse = True
-        else:
-            old_x = self.rect.x
-            self.rect.x += self.direction * self.rect.width + self.direction * 10
-            if not self.get_ver():
-                need_reverse = True
-            self.rect.x = old_x
-
         if need_reverse:
             self.direction *= -1
             self.cur_sheet = 1
@@ -564,9 +563,9 @@ def initialization(money_list, main_character_money):
             image.get_width() * k, image.get_height() * k))
         crawlids_graphics.append((scaled_image, row, 1))
 
-    crawlid_cords = [(0, 64)]
-    for x, y in crawlid_cords:
-        Crawlid(x, y, crawlids_graphics, enemies)
+    crawlid_cords = [(-100, 62, 380)]
+    for x, y, d in crawlid_cords:
+        Crawlid(x, y, d, crawlids_graphics, enemies)
 
     vengefly_graphics = []
     vengefly_images = [(load_image('vengefly\\vengefly_flying.png'), 5),

@@ -2,9 +2,9 @@ import sys
 
 from graphics import platforms, screen, fps, size, \
     character, enemies, main_character, menu, money, load_image, initialization, saving_points, \
-    damage_waves, update_map_after_save, Money, money_list, new_game_confirmation
+    damage_waves, update_map_after_save, Money, money_list, new_game_confirmation, Crawlid
 from data import move_speed, start_jump_from_wall_position, start_jump_altitude, \
-    fall_speed, global_x, global_y
+    fall_speed, global_cords
 from menu import InGameMenu, Button, New_game_confirmation
 import load_music
 from music_volume_controller import volume_controller_filler, volume_controller_slider, volume_controller_base, \
@@ -68,7 +68,7 @@ class Camera:
 
     # позиционировать камеру на объекте target
     def update(self):
-        global start_jump_altitude, start_jump_from_wall_position, global_x, global_y
+        global start_jump_altitude, start_jump_from_wall_position, global_cords
 
         d_x = main_character.rect.x - self.x
         d_y = main_character.rect.y - self.y
@@ -76,9 +76,9 @@ class Camera:
         r = 15 * N
         k = 0
         if d_x > 1:
-            global_x -= d_x - 1
+            global_cords[0] -= d_x - 1
         elif d_x < -1:
-            global_x -= d_x + 1
+            global_cords[0] -= d_x + 1
 
         if d_x > r:
             k = -1
@@ -92,12 +92,14 @@ class Camera:
             start_jump_from_wall_position -= (d_x + r * k)
             for group in [platforms, money, enemies, saving_points]:
                 for sprite in group:
+                    if type(sprite) == Crawlid:
+                        sprite.start_x -= (d_x + r * k)
                     sprite.rect.x -= (d_x + r * k)
 
         if d_y > 1:
-            global_y -= d_y - 1
+            global_cords[1] -= d_y - 1
         elif d_y < -1:
-            global_y -= d_y + 1
+            global_cords[1] -= d_y + 1
 
         k = 0
         if d_y > r:
@@ -107,7 +109,7 @@ class Camera:
 
         if k:
             main_character.rect.y -= d_y + r * k
-            global_y -= d_y + r * k
+            global_cords[1] -= d_y + r * k
             self.y = main_character.rect.y + r * k
             self.summary_d_y += (d_y + r * k)
             start_jump_altitude -= (d_y + r * k)
@@ -257,7 +259,7 @@ def main_menu(screen):
 
 
 def upload_data():
-    global main_character, global_y, global_x, money_list
+    global main_character, global_cords, money_list
     start_jump_altitude = -100000
     start_jump_from_wall_position = 0
     jump = False
@@ -269,7 +271,7 @@ def upload_data():
     game_paused = False
     # перемещение в стороны
     right = left = 0
-    main_character.rect.move(-global_x, -global_y)
+    main_character.rect.move(-global_cords[0], -global_cords[1])
     if respawn_x and respawn_y:
         main_character.rect.x = respawn_x
         main_character.rect.y = respawn_y
