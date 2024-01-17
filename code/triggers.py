@@ -8,6 +8,7 @@ class Boss_Wall_Lock(pygame.sprite.Sprite):
         super().__init__(trigger_blocks)
         self.rect = pygame.rect.Rect(1050 * N, 900 * N, 100 * N, 200 * N)
         self.lock_wall = False
+        self.boss = None
 
     def update(self):
         if pygame.sprite.spritecollideany(self, character) and not self.lock_wall:
@@ -34,8 +35,14 @@ class Boss_Wall_Lock(pygame.sprite.Sprite):
             mouthwing.hp = 20
             mouthwing.dropping_money = 100
             mouthwing.speed = 1
-
-
-
+            self.boss = mouthwing
+#         if self.boss.hp == 0:
+#             MindSphere()
+#
+#
+# class MindSphere(pygame.sprite.Sprite):
+#     def __init__(self):
+#         super().__init__(trigger_blocks)
+#         self.rect = pygame.rect.Rect(1050 * N, 900 * N, 100 * N, 200 * N)
 
 

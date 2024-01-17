@@ -21,11 +21,12 @@ FALLING_SHEET = 2
 RUNNING_SHEET = 1
 STANDING_SHEET = 0
 
-SAVING_POINTS_CORDS = {'1': (-570, 7550), '2': (8780, 9220), '3': (9480, 7420)}
-
+SAVING_POINTS_CORDS = {'1': (-570, 7550), '2': (8780, 9220), '3': (9480, 7420), '4': (21500, 23500), '5': (24800, 22200)}
 
 main_character_money = 0
 volume = 0
+
+lock_script = triggers.Boss_Wall_Lock()
 
 
 def load_data_from_save():
@@ -264,6 +265,7 @@ def upload_data():
     jump = False
     jump_from_wall = False
     speeds_before_jump = [0, 0]
+    lock_script.lock_wall = False
 
     count_fall = False
     counter_fall = 0
@@ -287,7 +289,7 @@ def upload_data():
 def check_dead(camera):
     global start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall, money_list, global_y, global_x
     global speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects
-    global respawn_cords, main_character_money
+    global respawn_cords, main_character_money, lock_script
     if not main_character.health:
         x, y = main_character.rect.x, main_character.rect.y
         lost_money_x, lost_money_y = x + camera.summary_d_x, y + camera.summary_d_y
@@ -329,9 +331,9 @@ if __name__ == '__main__':
     start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
     speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects = data[4:]
 
-    triggers.Boss_Wall_Lock()
 
-    N = 10
+
+    N = 1
 
     pygame.init()
     pygame.display.set_mode(size)

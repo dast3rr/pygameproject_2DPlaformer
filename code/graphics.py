@@ -561,22 +561,6 @@ def initialization(money_list, main_character_money):
         main_character.healings = 6
         main_character.money = main_character_money
 
-    mouthwing_graphics = []
-    mouthwing_images = [(load_image('mouthwing\\mouthwing_flying.png'), 4),
-                   (load_image('mouthwing\\mouthwing_turning.png'), 2),
-                   (load_image('mouthwing\\mouthwing_diying.png'), 3)]
-
-    for image, row in mouthwing_images:
-        k = 400 / image.get_height()
-        scaled_image = pygame.transform.scale(image, (
-            image.get_width() * k, image.get_height() * k))
-        mouthwing_graphics.append((scaled_image, row, 1))
-
-    mouthwing = Vengefly(1050, 900, mouthwing_graphics, enemies)
-    mouthwing.rect.h = 400
-    mouthwing.rect.w = 500
-    mouthwing.agr_radius = 1000
-
     crawlids_graphics = []
     crawlids_images = [(load_image('crawlid\\crawlid_walking.png'), 4), (load_image('crawlid\\crawlid_reversing.png'), 2),
                        (load_image('crawlid\\crawlid_diying.png'), 3)]
@@ -684,7 +668,7 @@ money = pygame.sprite.Group()
 saving_points = pygame.sprite.Group()
 damage_waves = pygame.sprite.Group()
 trigger_blocks = pygame.sprite.Group()
-N = 10
+N = 1
 main_character = None
 mouthwing = None
 money_list = [[-180, 120, 50, 1, False], [75, 350, 50, 2, False],  [720, 720, 50, 3, False]]
