@@ -343,7 +343,7 @@ class Vengefly(Enemy):
         self.start_x = self.rect.x
 
         self.chase = False
-        self.agr_radius = 800
+        self.agr_radius = 650
 
     def update(self):
         need_reverse = False
@@ -668,6 +668,6 @@ N = 10
 main_character = None
 money_list = [[-180, 120, 50, 1, False], [75, 350, 50, 2, False],  [720, 720, 50, 3, False]]
 crawlid_cords = [(-10, 61, 45, -1), (25, 181, 45, -1), (25, 346, 45, -1), (100, 396, 100, -1),
-                 (150, 396, 100, -1), (200, 396, 100, 1), (360, 386, 50, -1)]
-vengefly_cords = [(0, 50), (150, 320), (230, 330), (175, 370), (130, 360), (290, 365)]
+                 (150, 396, 100, -1), (200, 396, 100, 1), (360, 386, 50, -1), (310, 428.5, 40, 1), (355, 306, 25, 1)]
+vengefly_cords = [(0, 20), (150, 320), (230, 330), (175, 370), (130, 360), (290, 365), (355, 350), (335, 290)]
 initialization(money_list, 0)

@@ -179,6 +179,9 @@ def main_menu(screen):
 
                     load_music.first_loc_music()
                     pygame.mixer.music.play(-1, fade_ms=50)
+
+                    slider.kill()
+                    filler.kill()
                     return
                 if exit_game_button.get_pressed() and not confirm_new_game and not how_to_play:
                     write_data_to_save()
@@ -230,6 +233,7 @@ def main_menu(screen):
             pygame.mixer.music.play(-1, fade_ms=50)
 
             slider.kill()
+            filler.kill()
             return
 
         if not confirm_new_game and not how_to_play:
