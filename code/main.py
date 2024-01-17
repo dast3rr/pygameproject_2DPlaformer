@@ -32,20 +32,22 @@ def load_data_from_save():
     global respawn_cords, main_character_money, money_list, volume
     with open('../save/save.txt', 'r', encoding='utf-8') as f:
         lines = f.readlines()
-        if not lines:
-            write_data_to_save()
-        else:
+        try:
             respawn_cords[0] = int(lines[0].split(':')[1].strip())
             respawn_cords[1] = int(lines[1].split(':')[1].strip())
             main_character_money = int(lines[2].split(':')[1].strip())
             for line in lines[3:-1]:
                 collected = line.split(':')[1].split(', ')[4].strip()
                 if collected == 'False':
-                    money_list[lines.index(line) - 3][4] = False
+                     money_list[lines.index(line) - 3][4] = False
                 elif collected == 'True':
                     money_list[lines.index(line) - 3][4] = True
 
             volume = float(lines[-1].split(':')[1].strip())
+        except:
+            print('Файл сохранения повреждён, начните новую игру.')
+            write_data_to_save()
+
 
 
 def write_data_to_save():
