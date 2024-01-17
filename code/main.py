@@ -2,7 +2,8 @@ import sys
 
 from graphics import platforms, screen, fps, size, \
     character, knight, enemies, main_character, menu, money, load_image, initialization, saving_points, \
-    damage_waves, update_map_after_save, Money, money_list, new_game_confirmation, Crawlid, trigger_blocks
+    damage_waves, update_map_after_save, Money, money_list, new_game_confirmation, Crawlid, trigger_blocks, Sly, npcs, \
+    sly_dialogue, sly_shop
 from data import move_speed, start_jump_from_wall_position, start_jump_altitude, \
     fall_speed, global_cords, respawn_cords
 import triggers
@@ -10,6 +11,7 @@ from menu import InGameMenu, Button, New_game_confirmation
 import load_music
 from music_volume_controller import volume_controller_filler, volume_controller_slider, volume_controller_base, \
     Base, Filler, Slider
+from npc import Sly_dialogue, Sly_shop
 
 import pygame
 import os
@@ -30,29 +32,30 @@ lock_script = triggers.Boss_Wall_Lock()
 
 
 def load_data_from_save():
-    global respawn_cords, main_character_money, money_list, volume
+    global respawn_cords, main_character_money, money_list, volume, main_character
     with open('../save/save.txt', 'r', encoding='utf-8') as f:
         lines = f.readlines()
         try:
             respawn_cords[0] = int(lines[0].split(':')[1].strip())
             respawn_cords[1] = int(lines[1].split(':')[1].strip())
             main_character_money = int(lines[2].split(':')[1].strip())
-            for line in lines[3:-1]:
+            for line in lines[3:-4]:
                 collected = line.split(':')[1].split(', ')[4].strip()
                 if collected == 'False':
                      money_list[lines.index(line) - 3][4] = False
                 elif collected == 'True':
                     money_list[lines.index(line) - 3][4] = True
-
-            volume = float(lines[-1].split(':')[1].strip())
+            volume = float(lines[-4].split(':')[1].strip())
+            main_character.attack_damage = int(lines[-3].split(':')[1].strip())
+            main_character.maximum_health = int(lines[-2].split(':')[1].strip())
+            main_character.maximum_healings = int(lines[-1].split(':')[1].strip())
         except:
             print('Файл сохранения повреждён, начните новую игру.')
             write_data_to_save()
 
 
-
 def write_data_to_save():
-    global money_list
+    global money_list, main_character
     with open('../save/save.txt', 'w', encoding='utf-8') as f:
         f.write(f'respawn_x: {str(respawn_cords[0])}\n')
         f.write(f'respawn_y: {str(respawn_cords[1])}\n')
@@ -61,6 +64,9 @@ def write_data_to_save():
             f.write(f'money: {", ".join([str(el) for el in coin])}\n')
 
         f.write(f'volume: {str(volume)}\n')
+        f.write(f'main_character_attack_damage: {str(main_character.attack_damage)}\n')
+        f.write(f'main_character_maximum_health: {str(main_character.maximum_health)}\n')
+        f.write(f'main_character_maximum_healings: {str(main_character.maximum_healings)}\n')
 
 
 # класс камеры
@@ -91,12 +97,11 @@ class Camera:
             self.summary_d_x += (d_x + r * k)
 
             start_jump_from_wall_position -= (d_x + r * k)
-            for group in [platforms, money, enemies, saving_points, trigger_blocks]:
+            for group in [platforms, money, enemies, saving_points, trigger_blocks, npcs]:
                 for sprite in group:
                     if type(sprite) == Crawlid:
                         sprite.start_x -= (d_x + r * k)
                     sprite.rect.x -= (d_x + r * k)
-
         k = 0
         if d_y > r:
             k = -1
@@ -109,7 +114,7 @@ class Camera:
             self.y = main_character.rect.y + r * k
             self.summary_d_y += (d_y + r * k)
             start_jump_altitude -= (d_y + r * k)
-            for group in [platforms, money, enemies, saving_points, trigger_blocks]:
+            for group in [platforms, money, enemies, saving_points, trigger_blocks, npcs]:
                 for sprite in group:
                     sprite.rect.y -= (d_y + r * k)
 
@@ -178,7 +183,7 @@ def main_menu(screen):
                     data = upload_data()
                     start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
                     speeds_before_jump, count_fall, counter_fall, game_paused, \
-                        right, left, condition_damage_effects = data[4:]
+                        right, left, condition_damage_effects, dialogue_with_sly = data[4:]
 
                     load_music.first_loc_music()
                     pygame.mixer.music.play(-1, fade_ms=50)
@@ -224,13 +229,16 @@ def main_menu(screen):
         if start_new_game:
             respawn_cords[0] ,respawn_cords[1] = 0, 0
             main_character_money = 0
+            main_character.attack_damage = 1
+            main_character.maximum_health = 5
+            main_character.maximum_healings = 6
             for coin in money_list:
                 money_list[money_list.index(coin)][4] = False
             data = upload_data()
 
             start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
             speeds_before_jump, count_fall, counter_fall, game_paused, \
-            right, left, condition_damage_effects = data[4:]
+            right, left, condition_damage_effects, dialogue_with_sly = data[4:]
 
             load_music.first_loc_music()
             pygame.mixer.music.play(-1, fade_ms=50)
@@ -270,6 +278,7 @@ def upload_data():
     count_fall = False
     counter_fall = 0
     game_paused = False
+    dialogue_with_sly = False
     # перемещение в стороны
     right = left = 0
     main_character.rect.move(-global_cords[0], -global_cords[1])
@@ -283,12 +292,12 @@ def upload_data():
     initialization(money_list, main_character_money)
 
     return (start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall, speeds_before_jump, count_fall,
-            counter_fall, game_paused, right, left, condition_damage_effects)
+            counter_fall, game_paused, right, left, condition_damage_effects, dialogue_with_sly)
 
 
 def check_dead(camera):
     global start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall, money_list, global_y, global_x
-    global speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects
+    global speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects, dialogue_with_sly
     global respawn_cords, main_character_money, lock_script
     if not main_character.health:
         x, y = main_character.rect.x, main_character.rect.y
@@ -303,12 +312,13 @@ def check_dead(camera):
         data = upload_data()
 
         start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
-        speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects = data[4:]
+        speeds_before_jump, count_fall, counter_fall, game_paused, right, left,\
+        condition_damage_effects, dialogue_with_sly = data[4:]
 
         main_character.money = 0
         main_character_money = main_character.money
         main_character.healings = 2
-        main_character.health = 5
+        main_character.health = main_character.maximum_health
 
         main_character.update_heals()
         main_character.update_money()
@@ -329,11 +339,9 @@ if __name__ == '__main__':
     load_data_from_save()
 
     start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
-    speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects = data[4:]
+    speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects, dialogue_with_sly = data[4:]
 
-
-
-    N = 1
+    N = 10
 
     pygame.init()
     pygame.display.set_mode(size)
@@ -343,6 +351,8 @@ if __name__ == '__main__':
     # пустое значение
 
     paused_menu = InGameMenu()
+    dialogue_with_sly_window = Sly_dialogue()
+    shop = Sly_shop()
 
     smooth_surface = pygame.Surface(size)
     smooth_surface.set_alpha(60)
@@ -350,6 +360,9 @@ if __name__ == '__main__':
     running = True
 
     main_menu(screen)
+
+    background_image = load_image('background.png')
+    background_image = pygame.transform.scale(background_image, (screen.get_width(), screen.get_height()))
 
     while running:
         for event in pygame.event.get():
@@ -373,10 +386,15 @@ if __name__ == '__main__':
                     main_character.heal()
 
                 if keys[pygame.K_ESCAPE]:
-                    if game_paused:
-                        game_paused = False
-                    else:
+                    if not game_paused and not dialogue_with_sly:
                         game_paused = True
+                    elif dialogue_with_sly:
+                        dialogue_with_sly = False
+                        dialogue_with_sly_window.open_shop = False
+                    elif game_paused:
+                        game_paused = False
+                    write_data_to_save()
+
 
                 if keys[pygame.K_e]:
                     for sprite in saving_points:
@@ -384,6 +402,9 @@ if __name__ == '__main__':
                             respawn_cords[0], respawn_cords[1] = SAVING_POINTS_CORDS[sprite.point_id]
                             update_map_after_save(camera)
                             write_data_to_save()
+                    for sprite in npcs:
+                        if sprite.can_talk:
+                            dialogue_with_sly = True
 
                 # при нажатии на пробел - прыжок
                 if event.key == pygame.K_SPACE and (main_character.get_hor() or main_character.get_ver()):
@@ -425,7 +446,8 @@ if __name__ == '__main__':
                     main_character.start_attacking()
 
         # цвет можно поменять. Это будет цвет фона
-        screen.fill(pygame.color.Color(200, 200, 200))
+        # screen.fill(pygame.color.Color(200, 200, 200))
+        screen.blit(background_image, (0, 0))
 
         # перемещение в стороны
         move_hor = right + left
@@ -473,6 +495,9 @@ if __name__ == '__main__':
         enemies.update()
         enemies.draw(screen)
 
+        npcs.update()
+        npcs.draw(screen)
+
         saving_points.update()
         saving_points.draw(screen)
 
@@ -482,6 +507,17 @@ if __name__ == '__main__':
             screen.blit(smooth_surface, (0, 0))
             menu.draw(screen)
             InGameMenu.draw_menu_buttons(paused_menu)
+
+            font = pygame.font.Font(None, 40)
+            text = font.render(f'Урон от атаки: {main_character.attack_damage}', 1, pygame.Color('white'))
+            screen.blit(text, (40, screen.get_height() - 200))
+
+            text = font.render(f'Максимальное здоровье: {main_character.maximum_health}', 1, pygame.Color('white'))
+            screen.blit(text, (40, screen.get_height() - 150))
+
+            text = font.render(f'Максимум лечений: {main_character.maximum_healings}', 1, pygame.Color('white'))
+            screen.blit(text, (40, screen.get_height() - 100))
+
             if paused_menu.resume_button.get_pressed():
                 game_paused = False
             if paused_menu.back_to_main_menu_button.get_pressed():
@@ -489,6 +525,47 @@ if __name__ == '__main__':
                 main_character_money = main_character.money
                 write_data_to_save()
                 main_menu(screen)
+
+        if dialogue_with_sly:
+            screen.blit(smooth_surface, (0, 0))
+
+            if not dialogue_with_sly_window.open_shop:
+                sly_dialogue.draw(screen)
+                dialogue_with_sly_window.draw_buttons()
+
+                if dialogue_with_sly_window.close_dialogue_button.get_pressed():
+                    dialogue_with_sly = False
+                if dialogue_with_sly_window.next_phrase_button and dialogue_with_sly_window.next_phrase_button.get_pressed():
+                    dialogue_with_sly_window.current_phrase += 1
+                if dialogue_with_sly_window.shop_button and dialogue_with_sly_window.shop_button.get_pressed():
+                    dialogue_with_sly_window.open_shop = True
+            else:
+                sly_shop.draw(screen)
+                shop.draw_buttons()
+
+                font = pygame.font.Font(None, 35)
+                text = font.render(f'Ваши деньги: {main_character.money}', 1, pygame.Color('white'))
+                screen.blit(text, (screen.get_width() // 2 - text.get_width() // 2, 40))
+                if shop.close_button.get_pressed():
+                    dialogue_with_sly_window.open_shop = False
+
+                if shop.buy_attack_improvement.get_pressed():
+                    if main_character.money >= shop.damage_improvement_price:
+                        main_character.money -= shop.damage_improvement_price
+                        main_character.attack_damage += 1
+                if shop.buy_maximum_health_improvement.get_pressed():
+                    if main_character.money >= shop.maximum_health_improvement_price:
+                        main_character.money -= shop.maximum_health_improvement_price
+                        main_character.maximum_health += 1
+                if shop.buy_maximum_healings_improvement.get_pressed():
+                    if main_character.money >= shop.maximum_healings_improvement_price:
+                        main_character.money -= shop.maximum_healings_improvement_price
+                        main_character.maximum_healings += 1
+
+                sly_shop.update()
+
+            sly_dialogue.update()
+
         elif not condition_damage_effects:
             jump = main_character.update(move_hor, jump, move_speed, fall_speed)
             enemies.update()

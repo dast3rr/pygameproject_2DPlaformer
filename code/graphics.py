@@ -78,6 +78,8 @@ class Character(pygame.sprite.Sprite):
             count = 4
         elif len(self.frames) == 5 and type(self) == Knight:
             count = 2
+        elif type(self) == Sly:
+            count = 6
         else:
             count = 1
 
@@ -113,7 +115,9 @@ class Knight(Character):
     def __init__(self, x, y, graphics, *groups):
         super().__init__(x, y, graphics, *groups)
         self.health = 5
+        self.maximum_health = 5
         self.healings = 6
+        self.maximum_healings = 6
         self.money = 0
         heart_image = load_image('heart.png')
         heal_image = load_image('heal.png')
@@ -233,7 +237,7 @@ class Knight(Character):
             self.non_damage_count = 0
 
     def heal(self):
-        if self.healings > 0 and self.health < 5:
+        if self.healings > 0 and self.health < self.maximum_health:
             self.health += 1
             self.healings -= 1
 
@@ -474,6 +478,24 @@ class Crawlid(Enemy):
             main_character.get_damage(1, self)
 
 
+class Sly(Character):
+    def __init__(self, x, y, graphics):
+        super().__init__(x, y, graphics, npcs)
+        self.cur_sheet = self.cur_frame = 0
+        self.can_talk = False
+
+    def update(self):
+        self.cur_frame = (self.cur_frame + 1) % len(self.frames[self.cur_sheet])
+        self.image = self.frames[self.cur_sheet][self.cur_frame]
+        if pygame.sprite.spritecollideany(self, knight):
+            self.can_talk = True
+            font = pygame.font.Font(None, 30)
+            text = font.render('Поговорить(E)', 1, pygame.Color('white'))
+            screen.blit(text, (self.rect.x + self.rect.w // 2 - text.get_width() // 2, self.rect.y - text.get_height()))
+        else:
+            self.can_talk = False
+
+
 class Money(pygame.sprite.Sprite):
     def __init__(self, x, y, amount, id=None):
         super().__init__(money)
@@ -525,8 +547,8 @@ class Saving_point(pygame.sprite.Sprite):
     def update(self):
         if self.rect.colliderect(main_character):
             font = pygame.font.Font(None, 30)
-            text = font.render('Нажмите E, чтобы установить точку возрождения', 0, pygame.Color('white'))
-            screen.blit(text, (self.rect.x - 100, self.rect.y - 30))
+            text = font.render('Установить точку возрождения(E)', 0, pygame.Color('white'))
+            screen.blit(text, (self.rect.x + self.rect.w // 2 - text.get_width() // 2, self.rect.y - text.get_height()))
             self.can_save = True
         else:
             self.can_save = False
@@ -535,7 +557,7 @@ class Saving_point(pygame.sprite.Sprite):
 def initialization(money_list, main_character_money):
     global main_character, platforms, money, vertical_platforms, horizontal_platforms, enemies, saving_points, mouthwing
     background = pygame.Surface(size)
-    for group in [platforms, money, vertical_platforms, horizontal_platforms, enemies, saving_points]:
+    for group in [platforms, money, vertical_platforms, horizontal_platforms, enemies, saving_points, npcs]:
         for sprite in group:
             sprite.kill()
             group.clear(screen, background)
@@ -557,9 +579,18 @@ def initialization(money_list, main_character_money):
     else:
         main_character.rect.y -= 300
         main_character.rect.x += 50
-        main_character.health = 5
-        main_character.healings = 6
+        main_character.health = main_character.maximum_health
+        main_character.healings = main_character.maximum_healings
         main_character.money = main_character_money
+
+    sly_graphics = []
+    sly_images = [(load_image('npcs\sly.png'), 6)]
+    for image, row in sly_images:
+        k = 120 / image.get_height()
+        scaled_image = pygame.transform.scale(image, (
+            image.get_width() * k, image.get_height() * k))
+        sly_graphics.append((scaled_image, row, 1))
+    Sly(300, 506.5, sly_graphics)
 
     crawlids_graphics = []
     crawlids_images = [(load_image('crawlid\\crawlid_walking.png'), 4), (load_image('crawlid\\crawlid_reversing.png'), 2),
@@ -571,7 +602,7 @@ def initialization(money_list, main_character_money):
         crawlids_graphics.append((scaled_image, row, 1))
 
     for x, y, d, direction in crawlid_cords:
-        Crawlid(x, y, d, direction,crawlids_graphics, enemies)
+        Crawlid(x, y, d, direction, crawlids_graphics, enemies)
 
     vengefly_graphics = []
     vengefly_images = [(load_image('vengefly\\vengefly_flying.png'), 5),
@@ -642,8 +673,8 @@ def update_map_after_save(camera):
         sprite.rect.y -= camera.summary_d_y
         sprite.start_x = sprite.rect.x
 
-    main_character.health = 5
-    main_character.healings = 6
+    main_character.health = main_character.maximum_health
+    main_character.healings = main_character.maximum_healings
 
 
 # получаю параметры монитора, по ним делаю окно игры
@@ -662,13 +693,16 @@ knight = pygame.sprite.Group()
 horizontal_platforms = pygame.sprite.Group()
 vertical_platforms = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
+npcs = pygame.sprite.Group()
+sly_shop = pygame.sprite.Group()
+sly_dialogue = pygame.sprite.Group()
 menu = pygame.sprite.Group()
 new_game_confirmation = pygame.sprite.Group()
 money = pygame.sprite.Group()
 saving_points = pygame.sprite.Group()
 damage_waves = pygame.sprite.Group()
 trigger_blocks = pygame.sprite.Group()
-N = 1
+N = 10
 main_character = None
 mouthwing = None
 money_list = [[-180, 120, 50, 1, False], [75, 350, 50, 2, False],  [720, 720, 50, 3, False]]
