@@ -2,7 +2,7 @@ import pygame
 import os
 import sys
 from screeninfo import get_monitors
-from data import cords
+from data import cords, global_cords
 
 
 def load_image(name, colorkey=None):
@@ -142,6 +142,7 @@ class Knight(Character):
     # рисование
     def update(self, *args):
         move_hor, jump, move_speed, fall_speed = args
+        x, y = self.rect.x, self.rect.y
         if move_hor:
             self.view_direcion = move_hor // abs(move_hor)
 
@@ -205,6 +206,9 @@ class Knight(Character):
         self.count_flip += 1
         if move_hor:
             self.old_move_hor = move_hor
+
+        global_cords[0] -= (self.rect.x - x)
+        global_cords[1] -= (self.rect.y - y)
 
         return jump
 

@@ -14,7 +14,6 @@ enemy_agressive_radius = 80 * N
 enemy_attack_radius = 20 * N
 
 global_cords = [0, 0]
-
 respawn_cords = [0, 0]
 
 

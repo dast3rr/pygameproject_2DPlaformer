@@ -4,7 +4,8 @@ from graphics import platforms, screen, fps, size, \
     character, knight, enemies, main_character, menu, money, load_image, initialization, saving_points, \
     damage_waves, update_map_after_save, Money, money_list, new_game_confirmation, Crawlid
 from data import move_speed, start_jump_from_wall_position, start_jump_altitude, \
-    fall_speed, global_cords
+    fall_speed, global_cords, respawn_cords
+from boss_fight import update_walls_for_boss
 from menu import InGameMenu, Button, New_game_confirmation
 import load_music
 from music_volume_controller import volume_controller_filler, volume_controller_slider, volume_controller_base, \
@@ -22,20 +23,20 @@ STANDING_SHEET = 0
 
 SAVING_POINTS_CORDS = {'1': (-570, 7550), '2': (8780, 9220), '3': (9480, 7420)}
 
-respawn_x, respawn_y = 0, 0
+
 main_character_money = 0
 volume = 0
 
 
 def load_data_from_save():
-    global respawn_x, respawn_y, main_character_money, money_list, volume
+    global respawn_cords, main_character_money, money_list, volume
     with open('../save/save.txt', 'r', encoding='utf-8') as f:
         lines = f.readlines()
         if not lines:
             write_data_to_save()
         else:
-            respawn_x = int(lines[0].split(':')[1].strip())
-            respawn_y = int(lines[1].split(':')[1].strip())
+            respawn_cords[0] = int(lines[0].split(':')[1].strip())
+            respawn_cords[1] = int(lines[1].split(':')[1].strip())
             main_character_money = int(lines[2].split(':')[1].strip())
             for line in lines[3:-1]:
                 collected = line.split(':')[1].split(', ')[4].strip()
@@ -50,8 +51,8 @@ def load_data_from_save():
 def write_data_to_save():
     global money_list
     with open('../save/save.txt', 'w', encoding='utf-8') as f:
-        f.write(f'respawn_x: {str(respawn_x)}\n')
-        f.write(f'respawn_y: {str(respawn_y)}\n')
+        f.write(f'respawn_x: {str(respawn_cords[0])}\n')
+        f.write(f'respawn_y: {str(respawn_cords[1])}\n')
         f.write(f'main_character_money: {str(main_character_money)}\n')
         for coin in money_list:
             f.write(f'money: {", ".join([str(el) for el in coin])}\n')
@@ -76,10 +77,6 @@ class Camera:
 
         r = 15 * N
         k = 0
-        if d_x > 1:
-            global_cords[0] -= d_x - 1
-        elif d_x < -1:
-            global_cords[0] -= d_x + 1
 
         if d_x > r:
             k = -1
@@ -96,11 +93,6 @@ class Camera:
                     if type(sprite) == Crawlid:
                         sprite.start_x -= (d_x + r * k)
                     sprite.rect.x -= (d_x + r * k)
-
-        if d_y > 1:
-            global_cords[1] -= d_y - 1
-        elif d_y < -1:
-            global_cords[1] -= d_y + 1
 
         k = 0
         if d_y > r:
@@ -120,7 +112,7 @@ class Camera:
 
 
 def main_menu(screen):
-    global respawn_x, respawn_y, main_character_money, volume
+    global respawn_cords, main_character_money, volume
     global start_jump_altitude, start_jump_from_wall_position, money_list
     global jump, jump_from_wall, speeds_before_jump, count_fall, counter_fall, game_paused, right, left
 
@@ -175,7 +167,7 @@ def main_menu(screen):
                 if back_button.get_pressed() and how_to_play:
                     how_to_play = False
                 if new_game_button.get_pressed() and not confirm_new_game and not how_to_play:
-                    if respawn_x and respawn_y:
+                    if respawn_cords[0] and respawn_cords[1]:
                         confirm_new_game = True
                     else:
                         start_new_game = True
@@ -198,7 +190,7 @@ def main_menu(screen):
         screen.blit(background, (0, 0))
 
 
-        if respawn_x and respawn_y:
+        if respawn_cords[0] and respawn_cords[1]:
             continue_button.disabled_color = None
 
         if how_to_play:
@@ -224,7 +216,7 @@ def main_menu(screen):
             confirm_new_game = False
 
         if start_new_game:
-            respawn_x, respawn_y = 0, 0
+            respawn_cords[0] ,respawn_cords[1] = 0, 0
             main_character_money = 0
             for coin in money_list:
                 money_list[money_list.index(coin)][4] = False
@@ -273,9 +265,9 @@ def upload_data():
     # перемещение в стороны
     right = left = 0
     main_character.rect.move(-global_cords[0], -global_cords[1])
-    if respawn_x and respawn_y:
-        main_character.rect.x = respawn_x
-        main_character.rect.y = respawn_y
+    if respawn_cords[0] and respawn_cords[1]:
+        main_character.rect.x = respawn_cords[0]
+        main_character.rect.y = respawn_cords[1]
     condition_damage_effects = False
 
     camera.summary_d_x, camera.summary_d_y = 0, 0
@@ -289,7 +281,7 @@ def upload_data():
 def check_dead(camera):
     global start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall, money_list, global_y, global_x
     global speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects
-    global respawn_x, respawn_y, main_character_money
+    global respawn_cords, main_character_money
     if not main_character.health:
         x, y = main_character.rect.x, main_character.rect.y
         lost_money_x, lost_money_y = x + camera.summary_d_x, y + camera.summary_d_y
@@ -379,7 +371,7 @@ if __name__ == '__main__':
                 if keys[pygame.K_e]:
                     for sprite in saving_points:
                         if sprite.can_save:
-                            respawn_x, respawn_y = SAVING_POINTS_CORDS[sprite.point_id]
+                            respawn_cords[0], respawn_cords[1] = SAVING_POINTS_CORDS[sprite.point_id]
                             update_map_after_save(camera)
                             write_data_to_save()
 
@@ -468,6 +460,13 @@ if __name__ == '__main__':
         money.draw(screen)
         money.update()
         character.draw(screen)
+        enemies.update()
+        enemies.draw(screen)
+
+        saving_points.update()
+        saving_points.draw(screen)
+
+        update_walls_for_boss()
 
         if game_paused:
             screen.blit(smooth_surface, (0, 0))
@@ -510,11 +509,7 @@ if __name__ == '__main__':
         if not main_character.stop_screen:
             condition_damage_effects = False
 
-        enemies.update()
-        enemies.draw(screen)
 
-        saving_points.update()
-        saving_points.draw(screen)
 
         check_dead(camera)
 
