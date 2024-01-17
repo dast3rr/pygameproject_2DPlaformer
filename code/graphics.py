@@ -407,7 +407,7 @@ class Vengefly(Enemy):
 
 
 class Crawlid(Enemy):
-    def __init__(self, x, y, distance, graphics, direction, *groups):
+    def __init__(self, x, y, distance, direction, graphics, *groups):
         super().__init__(x, y, graphics, *groups)
 
         self.hp = 2
@@ -564,7 +564,7 @@ def initialization(money_list, main_character_money):
         crawlids_graphics.append((scaled_image, row, 1))
 
     for x, y, d, direction in crawlid_cords:
-        Crawlid(x, y, d, crawlids_graphics, direction, enemies)
+        Crawlid(x, y, d, direction,crawlids_graphics, enemies)
 
     vengefly_graphics = []
     vengefly_images = [(load_image('vengefly\\vengefly_flying.png'), 5),
