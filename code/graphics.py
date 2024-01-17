@@ -330,12 +330,13 @@ class Vengefly(Enemy):
     def __init__(self, x, y, graphics, *groups):
         super().__init__(x, y, graphics, *groups)
 
-        self.hp = 2
+        self.hp = 1
         self.dropping_money = 4
         self.direction = -1
         self.count_reverse = 0
         self.rect = pygame.rect.Rect(self.rect.x, self.rect.y, 120, 120)
         self.cur_sheet = self.cur_frame = 0
+        self.start_x = self.rect.x
 
         self.chase = False
         self.agr_radius = 800
@@ -406,12 +407,12 @@ class Vengefly(Enemy):
 
 
 class Crawlid(Enemy):
-    def __init__(self, x, y, distance, graphics, *groups):
+    def __init__(self, x, y, distance, graphics, direction, *groups):
         super().__init__(x, y, graphics, *groups)
 
         self.hp = 2
         self.dropping_money = 3
-        self.direction = -1
+        self.direction = direction
         self.count_reverse = 0
         self.rect = pygame.rect.Rect(self.rect.x, self.rect.y, 100, 85)
         self.cur_sheet = self.cur_frame = 0
@@ -421,7 +422,6 @@ class Crawlid(Enemy):
 
     def update(self):
         need_reverse = False
-        print(abs(self.rect.x - self.start_x))
         if abs(self.rect.x - self.start_x) >= self.distance:
             if self.rect.x < self.start_x:
                 self.rect.x += 2
@@ -481,7 +481,7 @@ class Money(pygame.sprite.Sprite):
             self.rect = pygame.Rect(x, y, self.image.get_width(), self.image.get_height())
 
     def update(self):
-        if pygame.sprite.spritecollideany(self, character):
+        if pygame.sprite.spritecollideany(self, knight):
             main_character.add_money(self.amount)
             if self.id:
                 money_list[self.id - 1][4] = True
@@ -546,7 +546,7 @@ def initialization(money_list, main_character_money):
         graphics_knight.append((scaled_image, row, 1))
     # главный герой
     if main_character is None:
-        main_character = Knight(0, 0, graphics_knight)
+        main_character = Knight(0, 0, graphics_knight, knight)
     else:
         main_character.rect.y -= 300
         main_character.rect.x += 50
@@ -563,9 +563,8 @@ def initialization(money_list, main_character_money):
             image.get_width() * k, image.get_height() * k))
         crawlids_graphics.append((scaled_image, row, 1))
 
-    crawlid_cords = [(-10, 61, 38)]
-    for x, y, d in crawlid_cords:
-        Crawlid(x, y, d, crawlids_graphics, enemies)
+    for x, y, d, direction in crawlid_cords:
+        Crawlid(x, y, d, crawlids_graphics, direction, enemies)
 
     vengefly_graphics = []
     vengefly_images = [(load_image('vengefly\\vengefly_flying.png'), 5),
@@ -578,7 +577,6 @@ def initialization(money_list, main_character_money):
             image.get_width() * k, image.get_height() * k))
         vengefly_graphics.append((scaled_image, row, 1))
 
-    vengefly_cords = [(0, 50)]
     for x, y in vengefly_cords:
         Vengefly(x, y, vengefly_graphics, enemies)
 
@@ -607,16 +605,16 @@ def update_map_after_save(camera):
         sprite.kill()
 
     crawlids_graphics = []
-    crawlids_images = [(load_image('crawlid\crawlid_walking.png'), 4), (load_image('crawlid\crawlid_reversing.png'), 2)]
+    crawlids_images = [(load_image('crawlid\crawlid_walking.png'), 4), (load_image('crawlid\crawlid_reversing.png'), 2),
+                       (load_image('crawlid\crawlid_diying.png'), 3)]
     for image, row in crawlids_images:
         k = 80 / image.get_height()
         scaled_image = pygame.transform.scale(image, (
             image.get_width() * k, image.get_height() * k))
         crawlids_graphics.append((scaled_image, row, 1))
 
-    crawlid_cords = [(100, 20)]
-    for x, y in crawlid_cords:
-        Crawlid(x, y, crawlids_graphics, enemies)
+    for x, y, d, direction in crawlid_cords:
+        Crawlid(x, y, d, direction, crawlids_graphics, enemies)
 
     vengefly_graphics = []
     vengefly_images = [(load_image('vengefly\\vengefly_flying.png'), 5),
@@ -629,13 +627,13 @@ def update_map_after_save(camera):
             image.get_width() * k, image.get_height() * k))
         vengefly_graphics.append((scaled_image, row, 1))
 
-    vengefly_cords = [(170, -20)]
     for x, y in vengefly_cords:
         Vengefly(x, y, vengefly_graphics, enemies)
 
     for sprite in enemies:
         sprite.rect.x -= camera.summary_d_x
         sprite.rect.y -= camera.summary_d_y
+        sprite.start_x = sprite.rect.x
 
     main_character.health = 5
     main_character.healings = 6
@@ -653,6 +651,7 @@ fps = 60
 # группы спрайтов
 platforms = pygame.sprite.Group()
 character = pygame.sprite.Group()
+knight = pygame.sprite.Group()
 horizontal_platforms = pygame.sprite.Group()
 vertical_platforms = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
@@ -664,4 +663,7 @@ damage_waves = pygame.sprite.Group()
 N = 10
 main_character = None
 money_list = [[-180, 120, 50, 1, False], [75, 350, 50, 2, False],  [720, 720, 50, 3, False]]
+crawlid_cords = [(-10, 61, 45, -1), (25, 181, 45, -1), (25, 346, 45, -1), (100, 396, 100, -1),
+                 (150, 396, 100, -1), (200, 396, 100, 1)]
+vengefly_cords = [(0, 50), (150, 320), (230, 330), (175, 370), (130, 360)]
 initialization(money_list, 0)

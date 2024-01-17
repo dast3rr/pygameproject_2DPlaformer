@@ -1,7 +1,7 @@
 import sys
 
 from graphics import platforms, screen, fps, size, \
-    character, enemies, main_character, menu, money, load_image, initialization, saving_points, \
+    character, knight, enemies, main_character, menu, money, load_image, initialization, saving_points, \
     damage_waves, update_map_after_save, Money, money_list, new_game_confirmation, Crawlid
 from data import move_speed, start_jump_from_wall_position, start_jump_altitude, \
     fall_speed, global_cords
@@ -347,6 +347,8 @@ if __name__ == '__main__':
     running = True
 
     main_menu(screen)
+
+    write_data_to_save()
 
     while running:
         for event in pygame.event.get():
