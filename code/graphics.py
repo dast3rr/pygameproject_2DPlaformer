@@ -417,7 +417,7 @@ class Crawlid(Enemy):
         self.cur_sheet = self.cur_frame = 0
         self.first_update = True
         self.start_x = self.rect.x
-        self.distance = distance
+        self.distance = distance * N
 
     def update(self):
         need_reverse = False
@@ -563,7 +563,7 @@ def initialization(money_list, main_character_money):
             image.get_width() * k, image.get_height() * k))
         crawlids_graphics.append((scaled_image, row, 1))
 
-    crawlid_cords = [(-100, 62, 380)]
+    crawlid_cords = [(-10, 61, 38)]
     for x, y, d in crawlid_cords:
         Crawlid(x, y, d, crawlids_graphics, enemies)
 
