@@ -330,6 +330,9 @@ class Enemy(Character):
         return pygame.sprite.collide_mask(self, main_character)
 
 
+
+
+
 class Vengefly(Enemy):
     def __init__(self, x, y, graphics, *groups):
         super().__init__(x, y, graphics, *groups)
@@ -664,6 +667,7 @@ new_game_confirmation = pygame.sprite.Group()
 money = pygame.sprite.Group()
 saving_points = pygame.sprite.Group()
 damage_waves = pygame.sprite.Group()
+trigger_blocks = pygame.sprite.Group()
 N = 10
 main_character = None
 money_list = [[-180, 120, 50, 1, False], [75, 350, 50, 2, False],  [720, 720, 50, 3, False]]

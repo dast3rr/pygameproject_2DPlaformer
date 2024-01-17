@@ -2,10 +2,10 @@ import sys
 
 from graphics import platforms, screen, fps, size, \
     character, knight, enemies, main_character, menu, money, load_image, initialization, saving_points, \
-    damage_waves, update_map_after_save, Money, money_list, new_game_confirmation, Crawlid
+    damage_waves, update_map_after_save, Money, money_list, new_game_confirmation, Crawlid, trigger_blocks
 from data import move_speed, start_jump_from_wall_position, start_jump_altitude, \
     fall_speed, global_cords, respawn_cords
-from boss_fight import update_walls_for_boss
+import triggers
 from menu import InGameMenu, Button, New_game_confirmation
 import load_music
 from music_volume_controller import volume_controller_filler, volume_controller_slider, volume_controller_base, \
@@ -88,7 +88,7 @@ class Camera:
             self.summary_d_x += (d_x + r * k)
 
             start_jump_from_wall_position -= (d_x + r * k)
-            for group in [platforms, money, enemies, saving_points]:
+            for group in [platforms, money, enemies, saving_points, trigger_blocks]:
                 for sprite in group:
                     if type(sprite) == Crawlid:
                         sprite.start_x -= (d_x + r * k)
@@ -106,7 +106,7 @@ class Camera:
             self.y = main_character.rect.y + r * k
             self.summary_d_y += (d_y + r * k)
             start_jump_altitude -= (d_y + r * k)
-            for group in [platforms, money, enemies, saving_points]:
+            for group in [platforms, money, enemies, saving_points, trigger_blocks]:
                 for sprite in group:
                     sprite.rect.y -= (d_y + r * k)
 
@@ -327,6 +327,8 @@ if __name__ == '__main__':
     start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
     speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects = data[4:]
 
+    triggers.Boss_Wall_Lock()
+
     N = 10
 
     pygame.init()
@@ -470,7 +472,7 @@ if __name__ == '__main__':
         saving_points.update()
         saving_points.draw(screen)
 
-        update_walls_for_boss()
+        trigger_blocks.update()
 
         if game_paused:
             screen.blit(smooth_surface, (0, 0))
@@ -512,8 +514,6 @@ if __name__ == '__main__':
             condition_damage_effects = True
         if not main_character.stop_screen:
             condition_damage_effects = False
-
-
 
         check_dead(camera)
 
