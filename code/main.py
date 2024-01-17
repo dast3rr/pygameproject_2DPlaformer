@@ -38,16 +38,17 @@ def load_data_from_save():
             respawn_y = int(lines[1].split(':')[1].strip())
             main_character_money = int(lines[2].split(':')[1].strip())
             for line in lines[3:-1]:
-                collected = line.split(':')[1].split(', ')[4]
+                collected = line.split(':')[1].split(', ')[4].strip()
                 if collected == 'False':
                     money_list[lines.index(line) - 3][4] = False
-                else:
+                elif collected == 'True':
                     money_list[lines.index(line) - 3][4] = True
 
             volume = float(lines[-1].split(':')[1].strip())
 
 
 def write_data_to_save():
+    global money_list
     with open('../save/save.txt', 'w', encoding='utf-8') as f:
         f.write(f'respawn_x: {str(respawn_x)}\n')
         f.write(f'respawn_y: {str(respawn_y)}\n')
@@ -216,10 +217,10 @@ def main_menu(screen):
             new_game_confirmation.draw(screen)
             confirmation.draw_buttons()
             new_game_confirmation.update()
-        if confirmation.confirm_button.get_pressed():
+        if confirmation.confirm_button.get_pressed() and confirm_new_game:
             start_new_game = True
             confirm_new_game = False
-        if confirmation.reject_button.get_pressed():
+        if confirmation.reject_button.get_pressed() and confirm_new_game:
             confirm_new_game = False
 
         if start_new_game:
@@ -347,8 +348,6 @@ if __name__ == '__main__':
     running = True
 
     main_menu(screen)
-
-    write_data_to_save()
 
     while running:
         for event in pygame.event.get():
