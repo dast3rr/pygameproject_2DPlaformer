@@ -1,7 +1,7 @@
-respawn_x: 0
-respawn_y: 0
-main_character_money: 0
-money: -180, 120, 50, 1, False
+respawn_x: 23000
+respawn_y: 23050
+main_character_money: 53
+money: -180, 120, 50, 1, True
 money: 75, 350, 50, 2, False
 money: 720, 720, 50, 3, False
 volume: 0.0390625

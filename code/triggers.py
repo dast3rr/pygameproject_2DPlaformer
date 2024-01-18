@@ -32,7 +32,7 @@ class Boss_Wall_Lock(pygame.sprite.Sprite):
                     image.get_width() * k, image.get_height() * k))
                 mouthwing_graphics.append((scaled_image, row, 1))
 
-            mouthwing = Vengefly(70, -30, mouthwing_graphics, enemies)
+            mouthwing = Vengefly(30, -30, mouthwing_graphics, enemies)
             mouthwing.rect.h = 400
             mouthwing.rect.w = 500
             mouthwing.agr_radius = 1000
