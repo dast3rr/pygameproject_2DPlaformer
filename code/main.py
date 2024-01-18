@@ -5,7 +5,7 @@ from graphics import platforms, screen, fps, size, \
     damage_waves, update_map_after_save, Money, money_list, new_game_confirmation, Crawlid, trigger_blocks, Sly, npcs, \
     sly_dialogue, sly_shop, background, Elderbug, elderbug_dialogue
 from data import move_speed, start_jump_from_wall_position, start_jump_altitude, \
-    fall_speed, global_cords, respawn_cords
+    fall_speed, global_cords, respawn_cords, FONT
 import triggers
 from menu import InGameMenu, Button, New_game_confirmation
 import load_music
@@ -165,7 +165,7 @@ def main_menu(screen):
                         current_bg = 2
                         background = pygame.transform.scale(load_image('main_menu_background_1.jpg'),
                                                             (screen.get_width(), screen.get_height()))
-                        how_to_play_font_color = (60, 60, 70)
+                        how_to_play_font_color = (30, 30, 30)
                     elif current_bg == 2:
                         current_bg = 1
                         background = pygame.transform.scale(load_image('main_menu_background_2.png'),
@@ -207,7 +207,7 @@ def main_menu(screen):
 
         if how_to_play:
             back_button.draw('Назад', 30)
-            font = pygame.font.Font(None, 35)
+            font = pygame.font.Font(FONT, 35)
             texts = ['A, D - Передвижение', 'ПРОБЕЛ - Прыжок', 'Левая кнопка мыши - Атака', 'H - Лечение',
                      'E - Взаимодействие', 'Деньги остаются на месте смерти.',
                      'Враги возрождаются после смерти и после взаимодействия с точкой сохранения.',
@@ -256,7 +256,7 @@ def main_menu(screen):
             how_to_play_button.draw('Как играть', 30)
             change_bg_button.draw('Сменить задний фон', 30)
 
-            font = pygame.font.Font(None, 40)
+            font = pygame.font.Font(FONT, 35)
             text = font.render('Громкость', True, pygame.Color('White'))
             screen.blit(text, (275, 50))
 
@@ -532,7 +532,7 @@ if __name__ == '__main__':
             menu.draw(screen)
             InGameMenu.draw_menu_buttons(paused_menu)
 
-            font = pygame.font.Font(None, 40)
+            font = pygame.font.Font(FONT, 35)
             text = font.render(f'Урон от атаки: {main_character.attack_damage}', 1, pygame.Color('white'))
             screen.blit(text, (40, screen.get_height() - 200))
 
@@ -571,7 +571,7 @@ if __name__ == '__main__':
                 sly_shop.draw(screen)
                 shop.draw_buttons()
 
-                font = pygame.font.Font(None, 35)
+                font = pygame.font.Font(FONT, 30)
                 text = font.render(f'Ваши деньги: {main_character.money}', 1, pygame.Color('white'))
                 screen.blit(text, (screen.get_width() // 2 - text.get_width() // 2, 40))
                 if shop.close_button.get_pressed():

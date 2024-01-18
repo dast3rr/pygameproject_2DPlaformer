@@ -2,7 +2,7 @@ import pygame
 import os
 import sys
 from screeninfo import get_monitors
-from data import cords, global_cords
+from data import cords, global_cords, FONT
 
 
 def load_image(name, colorkey=None):
@@ -250,7 +250,7 @@ class Knight(Character):
 
     def update_heals(self):
         screen.blit(self.heal_image, (60, 80))
-        font = pygame.font.Font(None, 60)
+        font = pygame.font.Font(FONT, 40)
         text = font.render(str(self.healings), True, pygame.Color('White'))
         screen.blit(text, (130, 80))
 
@@ -259,7 +259,7 @@ class Knight(Character):
 
     def update_money(self):
         screen.blit(self.money_image, (60, 140))
-        font = pygame.font.Font(None, 60)
+        font = pygame.font.Font(FONT, 40)
         text = font.render(str(self.money), True, pygame.Color('White'))
         screen.blit(text, (130, 140))
 
@@ -496,7 +496,7 @@ class Sly(Character):
         self.image = self.frames[self.cur_sheet][self.cur_frame]
         if pygame.sprite.spritecollideany(self, knight):
             self.can_talk = True
-            font = pygame.font.Font(None, 30)
+            font = pygame.font.Font(FONT, 30)
             text = font.render('Поговорить(E)', 1, pygame.Color('white'))
             screen.blit(text, (self.rect.x + self.rect.w // 2 - text.get_width() // 2, self.rect.y - text.get_height()))
         else:
@@ -514,7 +514,7 @@ class Elderbug(Character):
         self.image = self.frames[self.cur_sheet][self.cur_frame]
         if pygame.sprite.spritecollideany(self, knight):
             self.can_talk = True
-            font = pygame.font.Font(None, 30)
+            font = pygame.font.Font(FONT, 30)
             text = font.render('Поговорить(E)', 1, pygame.Color('white'))
             screen.blit(text, (self.rect.x + self.rect.w // 2 - text.get_width() // 2, self.rect.y - text.get_height()))
         else:
@@ -571,7 +571,7 @@ class Saving_point(pygame.sprite.Sprite):
 
     def update(self):
         if self.rect.colliderect(main_character):
-            font = pygame.font.Font(None, 30)
+            font = pygame.font.Font(FONT, 30)
             text = font.render('Установить точку возрождения(E)', 0, pygame.Color('white'))
             screen.blit(text, (self.rect.x + self.rect.w // 2 - text.get_width() // 2, self.rect.y - text.get_height()))
             self.can_save = True

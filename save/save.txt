@@ -1,6 +1,6 @@
-respawn_x: 8780
-respawn_y: 9220
-main_character_money: 34
+respawn_x: 0
+respawn_y: 0
+main_character_money: 0
 money: -180, 120, 50, 1, False
 money: 75, 350, 50, 2, False
 money: 720, 720, 50, 3, False

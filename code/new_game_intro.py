@@ -1,5 +1,6 @@
 import pygame
 from graphics import screen
+from data import FONT
 
 def new_game_intro():
     phrases = ['Чума...', 'Чума поработила нашу деревню.', 'Столько людей погибло в подземелье, пытаясь нас спасти...',
@@ -7,7 +8,7 @@ def new_game_intro():
     c = 0
     cur_phrase = 0
     num_of_showed_letters = 1
-    font = pygame.font.Font(None, 40)
+    font = pygame.font.Font(FONT, 40)
     while True:
         screen.fill(pygame.Color('black'))
         showed_text = phrases[cur_phrase][:num_of_showed_letters]

@@ -1,5 +1,6 @@
 import pygame
 from graphics import menu, screen, new_game_confirmation
+from data import FONT
 
 class InGameMenu(pygame.sprite.Sprite):
     def __init__(self):
@@ -9,18 +10,19 @@ class InGameMenu(pygame.sprite.Sprite):
         pygame.draw.rect(self.image, (0, 0, 0, 100), self.image.get_rect(), border_radius=50)
         self.rect = pygame.Rect(x, y, self.image.get_width(), self.image.get_height())
 
-        self.resume_button = Button(self.rect.width // 2, self.rect.height // 8,
-                                    self.rect.x + self.rect.width // 4, self.rect.y + self.rect.height // 4,
+        self.resume_button = Button(self.rect.width // 1.5, self.rect.height // 8,
+                                    self.rect.x + self.rect.width // 2 - self.rect.w // 1.5 // 2,
+                                    self.rect.y + self.rect.height // 4,
                                     (50, 50, 50), (255, 255, 255, 100))
-        self.back_to_main_menu_button = Button(self.rect.width // 2, self.rect.height // 8,
-                                               self.rect.x + self.rect.width // 4,
+        self.back_to_main_menu_button = Button(self.rect.width // 1.5, self.rect.height // 8,
+                                               self.rect.x + self.rect.width // 2 - self.rect.w // 1.5 // 2,
                                                self.rect.y + self.rect.height - self.rect.height // 5 -
                                                self.rect.height // 8,
                                                (50, 50, 50), (255, 255, 255, 100))
 
     def draw_menu_buttons(self):
-        self.resume_button.draw('Вернуться в игру', 25)
-        self.back_to_main_menu_button.draw('Главное меню', 25)
+        self.resume_button.draw('Вернуться в игру', 20)
+        self.back_to_main_menu_button.draw('Главное меню', 20)
 
 
 class Button:
@@ -53,7 +55,7 @@ class Button:
             screen.blit(self.image, (self.x, self.y))
 
         if message:
-            font = pygame.font.Font(None, font_size)
+            font = pygame.font.Font(FONT, font_size)
             text = font.render(message, True, pygame.Color('White'))
             screen.blit(text, (self.x + (self.width / 2 - text.get_width() / 2),
                                          self.y + (self.height / 2 - text.get_height() / 2)))
@@ -85,20 +87,18 @@ class New_game_confirmation(pygame.sprite.Sprite):
                                 (50, 50, 50), (255, 255, 255, 100))
 
     def update(self):
-        font = pygame.font.Font(None, 25)
+        font = pygame.font.Font(FONT, 22)
         text = font.render('При начале новой игры', 1, pygame.Color('White'))
         screen.blit(text, (self.rect.x + (self.rect.width / 2 - text.get_width() / 2), self.rect.y + self.rect.w // 8))
 
-        font = pygame.font.Font(None, 25)
         text = font.render('текущее сохранение сотрётся.', 1, pygame.Color('White'))
         screen.blit(text, (self.rect.x + (self.rect.width / 2 - text.get_width() / 2),
                            self.rect.y + self.rect.w // 8 + text.get_height() * 1.5))
 
-        font = pygame.font.Font(None, 25)
         text = font.render('Начать новую игру?', 1, pygame.Color('White'))
         screen.blit(text, (self.rect.x + (self.rect.width / 2 - text.get_width() / 2),
-                           self.rect.y + self.rect.w // 2 - text.get_height() * 2))
+                           self.rect.y + self.rect.w // 2 - text.get_height()))
 
     def draw_buttons(self):
-        self.confirm_button.draw('Да', 25)
-        self.reject_button.draw('Нет', 25)
+        self.confirm_button.draw('Да', 20)
+        self.reject_button.draw('Нет', 20)

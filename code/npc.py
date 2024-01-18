@@ -1,6 +1,7 @@
 import pygame
 from graphics import screen, sly_dialogue, sly_shop, elderbug_dialogue
 from menu import Button
+from data import FONT
 
 
 class Sly_dialogue(pygame.sprite.Sprite):
@@ -8,7 +9,7 @@ class Sly_dialogue(pygame.sprite.Sprite):
         super().__init__(sly_dialogue)
         self.image = pygame.Surface((screen.get_width() // 3, screen.get_height() // 8), pygame.SRCALPHA, 32)
         x, y = screen.get_width() // 2 - self.image.get_width() // 2, screen.get_height() // 3
-        pygame.draw.rect(self.image, (255, 255, 255, 100), self.image.get_rect(), border_radius=50)
+        pygame.draw.rect(self.image, (150, 150, 150, 120), self.image.get_rect(), border_radius=50)
         self.rect = pygame.Rect(x, y, self.image.get_width(), self.image.get_height())
 
         self.current_phrase = 0
@@ -29,7 +30,7 @@ class Sly_dialogue(pygame.sprite.Sprite):
 
     def update(self):
         if not self.open_shop:
-            font = pygame.font.Font(None, 25)
+            font = pygame.font.Font(FONT, 20)
             for phrase in self.phrases[self.current_phrase]:
                 text = font.render(phrase, 1, pygame.Color('white'))
                 screen.blit(text, (self.rect.x + 20,
@@ -58,7 +59,7 @@ class Sly_shop(pygame.sprite.Sprite):
         super().__init__(sly_shop)
         self.image = pygame.Surface((screen.get_width() // 6, screen.get_height() // 3), pygame.SRCALPHA, 32)
         x, y = screen.get_width() // 2 - self.image.get_width() // 2, screen.get_height() // 3
-        pygame.draw.rect(self.image, (255, 255, 255, 100), self.image.get_rect(), border_radius=50)
+        pygame.draw.rect(self.image, (150, 150, 150, 120), self.image.get_rect(), border_radius=50)
         self.rect = pygame.Rect(x, y, self.image.get_width(), self.image.get_height())
 
         self.close_button = Button(50, 50, self.rect.x + self.rect.w - 10,
@@ -78,7 +79,7 @@ class Sly_shop(pygame.sprite.Sprite):
         self.maximum_healings_improvement_price = 125
 
     def update(self):
-        font = pygame.font.Font(None, 25)
+        font = pygame.font.Font(FONT, 17)
         text = font.render('Урон от атаки +1', 1, pygame.Color('white'))
         screen.blit(text, (self.rect.x + self.rect.w // 14, self.rect.y + self.rect.h // 10))
 
@@ -100,7 +101,7 @@ class Elderbug_dialogue(pygame.sprite.Sprite):
         super().__init__(elderbug_dialogue)
         self.image = pygame.Surface((screen.get_width() // 3, screen.get_height() // 8), pygame.SRCALPHA, 32)
         x, y = screen.get_width() // 2 - self.image.get_width() // 2, screen.get_height() // 3
-        pygame.draw.rect(self.image, (255, 255, 255, 100), self.image.get_rect(), border_radius=50)
+        pygame.draw.rect(self.image, (150, 150, 150, 120), self.image.get_rect(), border_radius=50)
         self.rect = pygame.Rect(x, y, self.image.get_width(), self.image.get_height())
 
         self.current_phrase = 0
@@ -117,7 +118,7 @@ class Elderbug_dialogue(pygame.sprite.Sprite):
                                     self.rect.y - 50, (50, 50, 50), (255, 255, 255, 100))
 
     def update(self):
-        font = pygame.font.Font(None, 25)
+        font = pygame.font.Font(FONT, 20)
         for phrase in self.phrases[self.current_phrase]:
             text = font.render(phrase, 1, pygame.Color('white'))
             screen.blit(text, (self.rect.x + 20,

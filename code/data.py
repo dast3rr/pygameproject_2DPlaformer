@@ -17,6 +17,7 @@ global_cords = [0, 0]
 respawn_cords = [0, 0]
 
 volume = 0
+FONT =  '..\data\AA-Lumos-Caps.ttf'
 
 
 cords = [(-20, 0, 100, 12),
