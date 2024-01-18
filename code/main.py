@@ -12,6 +12,7 @@ import load_music
 from music_volume_controller import volume_controller_filler, volume_controller_slider, volume_controller_base, \
     Base, Filler, Slider
 from npc import Sly_dialogue, Sly_shop
+from new_game_intro import new_game_intro
 
 import pygame
 import os
