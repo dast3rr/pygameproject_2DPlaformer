@@ -1,5 +1,5 @@
 from graphics import Platform, platforms, vertical_platforms, trigger_blocks, character, screen, load_image, enemies, \
-    Vengefly, main_character
+    Vengefly, main_character, background_image
 from data import global_cords, N, respawn_cords
 import pygame
 from load_music import battle_music, first_loc_music
@@ -36,7 +36,7 @@ class Boss_Wall_Lock(pygame.sprite.Sprite):
             mouthwing.rect.h = 400
             mouthwing.rect.w = 500
             mouthwing.agr_radius = 1000
-            mouthwing.hp = 10
+            mouthwing.hp = 1
             mouthwing.dropping_money = 100
             mouthwing.speed = 1
             self.boss = mouthwing
@@ -61,6 +61,12 @@ class MindSphere(pygame.sprite.Sprite):
 
     def update(self):
         if pygame.sprite.collide_mask(self, main_character):
-            pass
+            print(respawn_cords[0], global_cords[0])
+            print(respawn_cords[1], global_cords[1])
+            main_character.rect.x = 22800 - respawn_cords[0] - global_cords[0] - main_character.rect.x + screen.get_width()
+            if not respawn_cords[0]:
+                main_character.rect.x -= screen.get_width() // 2
+            main_character.rect.y = 23800 - respawn_cords[1] - global_cords[1] - main_character.rect.y + screen.get_height()
 
-
+            # background_image.image = pygame.transform.scale(load_image('astral_word_background.png'),
+            #                                                 (screen.get_width() * 2, screen.get_height()))
