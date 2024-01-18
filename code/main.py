@@ -289,9 +289,9 @@ def upload_data():
     initialization(money_list, main_character_money)
 
     if respawn_cords[0] and respawn_cords[1]:
-
         main_character.rect.x = respawn_cords[0] - main_character.rect.x + screen.get_width() // 2
-        main_character.rect.y = respawn_cords[1] - main_character.rect.y + screen.get_height() // 2 - 350
+        main_character.rect.x -= main_character.rect.x - respawn_cords[0]
+        main_character.rect.y = respawn_cords[1] - main_character.rect.y - screen.get_height() // 2
         global_cords[0], global_cords[1] = 0, 0
     condition_damage_effects = False
 
