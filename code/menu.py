@@ -32,8 +32,8 @@ class Button:
         self.disabled_color = disabled_color
         self.x = x
         self.y = y
+        self.c = 0
 
-        self.clicked = False
 
     def draw(self, message=None, font_size=None):
         mouse = pygame.mouse.get_pos()
@@ -59,14 +59,9 @@ class Button:
                                          self.y + (self.height / 2 - text.get_height() / 2)))
 
     def get_pressed(self):
-        mouse_clicked = pygame.mouse.get_pressed()
-        if not mouse_clicked[0]:
-            self.clicked = False
-
         if not self.disabled_color:
             if self.x < pygame.mouse.get_pos()[0] < self.x + self.width and \
-                    self.y < pygame.mouse.get_pos()[1] < self.y + self.height and mouse_clicked[0] and self.clicked == False:
-                self.clicked = True
+                    self.y < pygame.mouse.get_pos()[1] < self.y + self.height and pygame.mouse.get_pressed()[0]:
                 return True
         return False
 

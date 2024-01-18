@@ -364,6 +364,8 @@ if __name__ == '__main__':
     background_image = load_image('background.png')
     background_image = pygame.transform.scale(background_image, (screen.get_width(), screen.get_height()))
 
+    mouse_clicked_for_dialogues = False  # без этой переменной фразы в диалоге проматываются слишком быстро
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -444,6 +446,9 @@ if __name__ == '__main__':
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1 and not main_character.attack:
                     main_character.start_attacking()
+                mouse_clicked_for_dialogues = True
+            if event.type == pygame.MOUSEBUTTONUP:
+                mouse_clicked_for_dialogues = False
 
         # цвет можно поменять. Это будет цвет фона
         # screen.fill(pygame.color.Color(200, 200, 200))
@@ -533,12 +538,15 @@ if __name__ == '__main__':
                 sly_dialogue.draw(screen)
                 dialogue_with_sly_window.draw_buttons()
 
-                if dialogue_with_sly_window.close_dialogue_button.get_pressed():
-                    dialogue_with_sly = False
-                if dialogue_with_sly_window.next_phrase_button and dialogue_with_sly_window.next_phrase_button.get_pressed():
-                    dialogue_with_sly_window.current_phrase += 1
-                if dialogue_with_sly_window.shop_button and dialogue_with_sly_window.shop_button.get_pressed():
-                    dialogue_with_sly_window.open_shop = True
+                if mouse_clicked_for_dialogues:
+                    if dialogue_with_sly_window.close_dialogue_button.get_pressed():
+                        dialogue_with_sly = False
+                    if dialogue_with_sly_window.next_phrase_button and dialogue_with_sly_window.next_phrase_button.get_pressed():
+                        dialogue_with_sly_window.current_phrase += 1
+                    if dialogue_with_sly_window.shop_button and dialogue_with_sly_window.shop_button.get_pressed():
+                        dialogue_with_sly_window.open_shop = True
+
+                    mouse_clicked_for_dialogues = False
             else:
                 sly_shop.draw(screen)
                 shop.draw_buttons()
@@ -549,18 +557,21 @@ if __name__ == '__main__':
                 if shop.close_button.get_pressed():
                     dialogue_with_sly_window.open_shop = False
 
-                if shop.buy_attack_improvement.get_pressed():
-                    if main_character.money >= shop.damage_improvement_price:
-                        main_character.money -= shop.damage_improvement_price
-                        main_character.attack_damage += 1
-                if shop.buy_maximum_health_improvement.get_pressed():
-                    if main_character.money >= shop.maximum_health_improvement_price:
-                        main_character.money -= shop.maximum_health_improvement_price
-                        main_character.maximum_health += 1
-                if shop.buy_maximum_healings_improvement.get_pressed():
-                    if main_character.money >= shop.maximum_healings_improvement_price:
-                        main_character.money -= shop.maximum_healings_improvement_price
-                        main_character.maximum_healings += 1
+                if mouse_clicked_for_dialogues:
+                    if shop.buy_attack_improvement.get_pressed():
+                        if main_character.money >= shop.damage_improvement_price:
+                            main_character.money -= shop.damage_improvement_price
+                            main_character.attack_damage += 1
+                    if shop.buy_maximum_health_improvement.get_pressed():
+                        if main_character.money >= shop.maximum_health_improvement_price:
+                            main_character.money -= shop.maximum_health_improvement_price
+                            main_character.maximum_health += 1
+                    if shop.buy_maximum_healings_improvement.get_pressed():
+                        if main_character.money >= shop.maximum_healings_improvement_price:
+                            main_character.money -= shop.maximum_healings_improvement_price
+                            main_character.maximum_healings += 1
+
+                    mouse_clicked_for_dialogues = False
 
                 sly_shop.update()
 
