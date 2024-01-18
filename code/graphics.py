@@ -145,6 +145,10 @@ class Knight(Character):
         self.attack_count = 0
         self.attack = False
 
+        self.killed_enemies = 0
+        self.total_damage = 0
+        self.deaths = 0
+
     # рисование
     def update(self, *args):
         move_hor, jump, move_speed, fall_speed = args
@@ -272,6 +276,7 @@ class Knight(Character):
 
         for sprite in enemies:
             if attacking_rect.colliderect(sprite.rect):
+                self.total_damage += self.attack_damage
                 sprite.get_damage(self.attack_damage)
 
     def start_attacking(self):
@@ -415,6 +420,7 @@ class Vengefly(Enemy):
         self.check_needs_of_damage()
 
         if self.hp <= 0:
+            main_character.killed_enemies += 1
             self.kill()
             self.drop_money()
 
@@ -477,6 +483,7 @@ class Crawlid(Enemy):
         self.check_needs_of_damage()
 
         if self.hp <= 0:
+            main_character.killed_enemies += 1
             self.kill()
             self.drop_money()
 

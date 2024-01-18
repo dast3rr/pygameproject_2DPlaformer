@@ -13,6 +13,7 @@ from music_volume_controller import volume_controller_filler, volume_controller_
     Base, Filler, Slider
 from npc import Sly_dialogue, Sly_shop, Elderbug_dialogue
 from new_game_intro import new_game_intro
+import end_game
 
 import pygame
 import os
@@ -24,16 +25,18 @@ FALLING_SHEET = 2
 RUNNING_SHEET = 1
 STANDING_SHEET = 0
 
-SAVING_POINTS_CORDS = {'1': (-570, 7550), '2': (8780, 9220), '3': (9480, 7420), '4': (23000, 23050)}
+SAVING_POINTS_CORDS = {'1': (-570, 7550), '2': (8780, 9220), '3': (9480, 7350), '4': (23000, 23050)}
 
 main_character_money = 0
 volume = 0
+boss_killed = False
 
 lock_script = triggers.Boss_Wall_Lock()
+whitelight = triggers.WhiteLight()
 
 
 def load_data_from_save():
-    global respawn_cords, main_character_money, money_list, volume, main_character, global_cords
+    global respawn_cords, main_character_money, money_list, volume, main_character, global_cords, boss_killed
     with open('../save/save.txt', 'r', encoding='utf-8') as f:
         lines = f.readlines()
         try:
@@ -41,16 +44,24 @@ def load_data_from_save():
             respawn_cords[1] = int(lines[1].split(':')[1].strip())
             global_cords[0], global_cords[1] = 0, 0
             main_character_money = int(lines[2].split(':')[1].strip())
-            for line in lines[3:-4]:
+            for line in lines[3:-8]:
                 collected = line.split(':')[1].split(', ')[4].strip()
                 if collected == 'False':
                      money_list[lines.index(line) - 3][4] = False
                 elif collected == 'True':
                     money_list[lines.index(line) - 3][4] = True
-            volume = float(lines[-4].split(':')[1].strip())
-            main_character.attack_damage = int(lines[-3].split(':')[1].strip())
-            main_character.maximum_health = int(lines[-2].split(':')[1].strip())
-            main_character.maximum_healings = int(lines[-1].split(':')[1].strip())
+            volume = float(lines[-8].split(':')[1].strip())
+            main_character.attack_damage = int(lines[-7].split(':')[1].strip())
+            main_character.maximum_health = int(lines[-6].split(':')[1].strip())
+            main_character.maximum_healings = int(lines[-5].split(':')[1].strip())
+            main_character.killed_enemies = int(lines[-4].split(':')[1].strip())
+            main_character.total_damage = int(lines[-3].split(':')[1].strip())
+            main_character.deaths = int(lines[-2].split(':')[1].strip())
+            boss_killed = lines[-1].split(':')[1].strip()
+            if boss_killed == 'False':
+                boss_killed = False
+            else:
+                boss_killed = True
         except:
             print('Файл сохранения повреждён, начните новую игру.')
             write_data_to_save()
@@ -69,7 +80,10 @@ def write_data_to_save():
         f.write(f'main_character_attack_damage: {str(main_character.attack_damage)}\n')
         f.write(f'main_character_maximum_health: {str(main_character.maximum_health)}\n')
         f.write(f'main_character_maximum_healings: {str(main_character.maximum_healings)}\n')
-
+        f.write(f'main_character_killed_enemies: {str(main_character.killed_enemies)}\n')
+        f.write(f'main_character_total_damage: {str(main_character.total_damage)}\n')
+        f.write(f'main_character_deaths: {str(main_character.deaths)}\n')
+        f.write(f'boss_killed: {str(boss_killed)}')
 
 # класс камеры
 class Camera:
@@ -233,6 +247,9 @@ def main_menu(screen):
             main_character.attack_damage = 1
             main_character.maximum_health = 5
             main_character.maximum_healings = 6
+            main_character.killed_enemies = 0
+            main_character.total_damage = 0
+            main_character.deaths = 0
             for coin in money_list:
                 money_list[money_list.index(coin)][4] = False
             data = upload_data()
@@ -269,7 +286,7 @@ def main_menu(screen):
 
 
 def upload_data():
-    global main_character, global_cords, money_list
+    global main_character, global_cords, money_list, whitelight, lock_script
     start_jump_altitude = -100000
     start_jump_from_wall_position = 0
     jump = False
@@ -279,6 +296,7 @@ def upload_data():
         sprite.kill()
     lock_script = triggers.Boss_Wall_Lock()
     lock_script.lock_wall = False
+    whitelight = triggers.WhiteLight()
 
     count_fall = False
     counter_fall = 0
@@ -339,6 +357,7 @@ def check_dead(camera):
         main_character.update_money()
         main_character.update_healthbar()
 
+        main_character.deaths += 1
 
         lost_money_coin = Money(lost_money_x, lost_money_y, lost_money)
 
@@ -381,7 +400,6 @@ if __name__ == '__main__':
     running = True
 
     main_menu(screen)
-    triggers.WhiteLight()
 
     background_image = load_image('background.png')
     background_image = pygame.transform.scale(background_image, (screen.get_width(), screen.get_height()))
@@ -410,11 +428,13 @@ if __name__ == '__main__':
                     main_character.heal()
 
                 if keys[pygame.K_ESCAPE]:
-                    if not game_paused and not dialogue_with_sly:
+                    if not game_paused and not dialogue_with_sly and not dialogue_with_elderbug:
                         game_paused = True
                     elif dialogue_with_sly:
                         dialogue_with_sly = False
                         dialogue_with_sly_window.open_shop = False
+                    elif dialogue_with_elderbug:
+                        dialogue_with_elderbug = False
                     elif game_paused:
                         game_paused = False
                     write_data_to_save()
@@ -620,6 +640,12 @@ if __name__ == '__main__':
 
                 mouse_clicked_for_dialogues = False
             elderbug_dialogue.update()
+
+        if whitelight.intersect_with_knight:
+            respawn_cords[0], respawn_cords[1] = 0, 0
+            end_game.end_game(main_character.killed_enemies, main_character.total_damage, main_character.deaths)
+            main_menu(screen)
+
 
         elif not condition_damage_effects:
             jump = main_character.update(move_hor, jump, move_speed, fall_speed)

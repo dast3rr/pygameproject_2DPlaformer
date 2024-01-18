@@ -15,7 +15,6 @@ class Boss_Wall_Lock(pygame.sprite.Sprite):
         self.boss = None
         self.block_wall_exist = False
 
-
     def update(self):
         if not self.block_wall_exist:
             self.block_wall = Platform(1050, 1200, 20, 100, platforms, vertical_platforms)
@@ -68,11 +67,13 @@ class WhiteLight(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (20 * N, 30 * N))
         self.image = pygame.transform.flip(self.image, True, False)
         self.rect = pygame.rect.Rect(1460 * N + screen.get_width() // 2, 650 * N + screen.get_height() // 2, 20 * N, 30 * N)
+        self.intersect_with_knight = False
 
     def update(self):
         if pygame.sprite.spritecollideany(self, character):
-            pass
-            #end_of_game()
+            self.intersect_with_knight = True
+        else:
+            self.intersect_with_knight = False
 
 
 
