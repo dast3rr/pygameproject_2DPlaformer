@@ -381,6 +381,7 @@ if __name__ == '__main__':
     running = True
 
     main_menu(screen)
+    triggers.WhiteLight()
 
     background_image = load_image('background.png')
     background_image = pygame.transform.scale(background_image, (screen.get_width(), screen.get_height()))

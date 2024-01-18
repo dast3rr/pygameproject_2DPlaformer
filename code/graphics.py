@@ -217,9 +217,9 @@ class Knight(Character):
         global_cords[1] += (self.rect.y - y)
 
         if self.rect.x > x:
-            background_image.rect.x -= 1
+            background_image.rect.x -= 0.5
         elif self.rect.x < x:
-            background_image.rect.x += 1
+            background_image.rect.x += 0.5
 
         return jump
 
@@ -583,9 +583,9 @@ class Background(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__(background)
         background_image = load_image('background.png')
-        self.image = pygame.transform.scale(background_image, (screen.get_width() * 2, screen.get_height()))
+        self.image = pygame.transform.scale(background_image, (screen.get_width() * 5, screen.get_height()))
         self.rect = self.image.get_rect()
-        self.rect.x = -200
+        self.rect.x = -screen.get_width() * 2.5
 
 
 def initialization(money_list, main_character_money):
