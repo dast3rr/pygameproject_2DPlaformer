@@ -1,6 +1,6 @@
 from graphics import Platform, platforms, vertical_platforms, trigger_blocks, character, screen, load_image, enemies, \
     Vengefly, main_character
-from data import global_cords, N, respawn_cords, volume
+from data import global_cords, N, respawn_cords
 import pygame
 from load_music import battle_music, first_loc_music
 
@@ -41,7 +41,6 @@ class Boss_Wall_Lock(pygame.sprite.Sprite):
             mouthwing.speed = 1
             self.boss = mouthwing
             battle_music()
-            pygame.mixer.music.set_volume(volume)
             pygame.mixer.music.play(-1, fade_ms=50)
 
         if self.boss is not None:
@@ -49,7 +48,6 @@ class Boss_Wall_Lock(pygame.sprite.Sprite):
                 self.boss.hp = 1
                 MindSphere(self.boss.rect.x, self.boss.rect.y - 200)
                 first_loc_music()
-                pygame.mixer.music.set_volume(volume)
                 pygame.mixer.music.play(-1, fade_ms=50)
 
 
@@ -64,6 +62,5 @@ class MindSphere(pygame.sprite.Sprite):
     def update(self):
         if pygame.sprite.collide_mask(self, main_character):
             pass
-            # нужно переместить персонажа на 4 сейвпоинт
 
 

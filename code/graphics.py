@@ -219,11 +219,6 @@ class Knight(Character):
         elif self.rect.x < x:
             background_image.rect.x += 1
 
-        if self.rect.y > y:
-            background_image.rect.y -= 1
-        elif self.rect.y < y:
-            background_image.rect.y += 1
-
         return jump
 
     def update_effects(self):
@@ -568,7 +563,7 @@ class Background(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__(background)
         background_image = load_image('background.png')
-        self.image = pygame.transform.scale(background_image, (screen.get_width() * 2, screen.get_height() * 2))
+        self.image = pygame.transform.scale(background_image, (screen.get_width() * 2, screen.get_height()))
         self.rect = self.image.get_rect()
 
 

@@ -12,7 +12,6 @@ import load_music
 from music_volume_controller import volume_controller_filler, volume_controller_slider, volume_controller_base, \
     Base, Filler, Slider
 from npc import Sly_dialogue, Sly_shop
-from data import volume
 
 import pygame
 import os
@@ -27,7 +26,7 @@ STANDING_SHEET = 0
 SAVING_POINTS_CORDS = {'1': (-570, 7550), '2': (8780, 9220), '3': (9480, 7420), '4': (21500, 23500), '5': (24800, 22200)}
 
 main_character_money = 0
-
+volume = 0
 
 lock_script = triggers.Boss_Wall_Lock()
 
@@ -246,6 +245,7 @@ def main_menu(screen):
 
             slider.kill()
             filler.kill()
+            new_game_intro()
             return
 
         if not confirm_new_game and not how_to_play:
@@ -282,7 +282,6 @@ def upload_data():
     dialogue_with_sly = False
     # перемещение в стороны
     right = left = 0
-    main_character.rect.move(-global_cords[0], -global_cords[1])
     if respawn_cords[0] and respawn_cords[1]:
         main_character.rect.x = respawn_cords[0]
         main_character.rect.y = respawn_cords[1]
@@ -507,8 +506,6 @@ if __name__ == '__main__':
 
         trigger_blocks.update()
         trigger_blocks.draw(screen)
-
-
 
         if game_paused:
             screen.blit(smooth_surface, (0, 0))
