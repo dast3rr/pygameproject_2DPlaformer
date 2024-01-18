@@ -80,6 +80,8 @@ class Character(pygame.sprite.Sprite):
             count = 2
         elif type(self) == Sly:
             count = 6
+        elif type(self) == Elderbug:
+            count = 6
         else:
             count = 1
 
@@ -215,9 +217,9 @@ class Knight(Character):
         global_cords[1] += (self.rect.y - y)
 
         if self.rect.x > x:
-            background_image.rect.x -= 1
+            background_image.rect.x -= 0.2
         elif self.rect.x < x:
-            background_image.rect.x += 1
+            background_image.rect.x += 0.2
 
         return jump
 
@@ -501,6 +503,24 @@ class Sly(Character):
             self.can_talk = False
 
 
+class Elderbug(Character):
+    def __init__(self, x, y, graphics):
+        super().__init__(x, y, graphics, npcs)
+        self.cur_sheet = self.cur_frame = 0
+        self.can_talk = False
+
+    def update(self):
+        self.cur_frame = (self.cur_frame + 1) % len(self.frames[self.cur_sheet])
+        self.image = self.frames[self.cur_sheet][self.cur_frame]
+        if pygame.sprite.spritecollideany(self, knight):
+            self.can_talk = True
+            font = pygame.font.Font(None, 30)
+            text = font.render('Поговорить(E)', 1, pygame.Color('white'))
+            screen.blit(text, (self.rect.x + self.rect.w // 2 - text.get_width() // 2, self.rect.y - text.get_height()))
+        else:
+            self.can_talk = False
+
+
 class Money(pygame.sprite.Sprite):
     def __init__(self, x, y, amount, id=None):
         super().__init__(money)
@@ -567,7 +587,6 @@ class Background(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
 
-
 def initialization(money_list, main_character_money):
     global main_character, platforms, money, vertical_platforms, horizontal_platforms, enemies, saving_points, mouthwing
     background = pygame.Surface(size)
@@ -605,6 +624,15 @@ def initialization(money_list, main_character_money):
             image.get_width() * k, image.get_height() * k))
         sly_graphics.append((scaled_image, row, 1))
     Sly(300, 506.5, sly_graphics)
+
+    elderbug_graphics = []
+    elderbug_images = [(load_image('npcs\elderbug.png', -1), 6)]
+    for image, row in elderbug_images:
+        k = 200 / image.get_height()
+        scaled_image = pygame.transform.scale(image, (
+            image.get_width() * k, image.get_height() * k))
+        elderbug_graphics.append((scaled_image, row, 1))
+    Elderbug(-50, 340, elderbug_graphics)
 
     crawlids_graphics = []
     crawlids_images = [(load_image('crawlid\\crawlid_walking.png'), 4), (load_image('crawlid\\crawlid_reversing.png'), 2),
@@ -710,6 +738,7 @@ enemies = pygame.sprite.Group()
 npcs = pygame.sprite.Group()
 sly_shop = pygame.sprite.Group()
 sly_dialogue = pygame.sprite.Group()
+elderbug_dialogue = pygame.sprite.Group()
 menu = pygame.sprite.Group()
 new_game_confirmation = pygame.sprite.Group()
 money = pygame.sprite.Group()

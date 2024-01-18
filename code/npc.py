@@ -1,5 +1,5 @@
 import pygame
-from graphics import screen, sly_dialogue, sly_shop
+from graphics import screen, sly_dialogue, sly_shop, elderbug_dialogue
 from menu import Button
 
 
@@ -93,4 +93,42 @@ class Sly_shop(pygame.sprite.Sprite):
         self.buy_attack_improvement.draw(str(self.damage_improvement_price), 25)
         self.buy_maximum_health_improvement.draw(str(self.maximum_health_improvement_price), 25)
         self.buy_maximum_healings_improvement.draw(str(self.maximum_healings_improvement_price), 25)
+
+
+class Elderbug_dialogue(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__(elderbug_dialogue)
+        self.image = pygame.Surface((screen.get_width() // 3, screen.get_height() // 8), pygame.SRCALPHA, 32)
+        x, y = screen.get_width() // 2 - self.image.get_width() // 2, screen.get_height() // 3
+        pygame.draw.rect(self.image, (255, 255, 255, 100), self.image.get_rect(), border_radius=50)
+        self.rect = pygame.Rect(x, y, self.image.get_width(), self.image.get_height())
+
+        self.current_phrase = 0
+        self.phrase_is_typing = True
+        self.phrases = [['Ох, неужели ещё один смелый странник?'],
+                        ['Ты, как все остальные, хочешь освободить нас от чумы?'],
+                        ['Я видел множество таких же как и ты. Все они погибли страшной смертью...'],
+                        ['Надеюсь хоть ты сможешь избавить нас от проклятия.'],
+                        ['Источник чумы - огромная муха. Она находится в глубинах подземелья']]
+
+        self.next_phrase_button = Button(50, 50, self.rect.x + self.rect.w - 10,
+                                    self.rect.y + self.rect.h - 10, (50, 50, 50), (255, 255, 255, 100))
+        self.close_dialogue_button = Button(50, 50, self.rect.x + self.rect.w - 10,
+                                    self.rect.y - 50, (50, 50, 50), (255, 255, 255, 100))
+
+    def update(self):
+        font = pygame.font.Font(None, 25)
+        for phrase in self.phrases[self.current_phrase]:
+            text = font.render(phrase, 1, pygame.Color('white'))
+            screen.blit(text, (self.rect.x + 20,
+                                self.rect.y + 50 + text.get_height() * 1.5 *
+                                self.phrases[self.current_phrase].index(phrase)))
+
+        if self.current_phrase + 1 == len(self.phrases):
+            self.next_phrase_button = None
+
+    def draw_buttons(self):
+        if self.next_phrase_button:
+            self.next_phrase_button.draw('>>', 25)
+        self.close_dialogue_button.draw('X', 25)
 

@@ -3,7 +3,7 @@ import sys
 from graphics import platforms, screen, fps, size, \
     character, knight, enemies, main_character, menu, money, load_image, initialization, saving_points, \
     damage_waves, update_map_after_save, Money, money_list, new_game_confirmation, Crawlid, trigger_blocks, Sly, npcs, \
-    sly_dialogue, sly_shop, background
+    sly_dialogue, sly_shop, background, Elderbug, elderbug_dialogue
 from data import move_speed, start_jump_from_wall_position, start_jump_altitude, \
     fall_speed, global_cords, respawn_cords
 import triggers
@@ -11,7 +11,7 @@ from menu import InGameMenu, Button, New_game_confirmation
 import load_music
 from music_volume_controller import volume_controller_filler, volume_controller_slider, volume_controller_base, \
     Base, Filler, Slider
-from npc import Sly_dialogue, Sly_shop
+from npc import Sly_dialogue, Sly_shop, Elderbug_dialogue
 from new_game_intro import new_game_intro
 
 import pygame
@@ -184,7 +184,7 @@ def main_menu(screen):
                     data = upload_data()
                     start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
                     speeds_before_jump, count_fall, counter_fall, game_paused, \
-                        right, left, condition_damage_effects, dialogue_with_sly = data[4:]
+                        right, left, condition_damage_effects = data[4:]
 
                     load_music.first_loc_music()
                     pygame.mixer.music.play(-1, fade_ms=50)
@@ -239,7 +239,7 @@ def main_menu(screen):
 
             start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
             speeds_before_jump, count_fall, counter_fall, game_paused, \
-            right, left, condition_damage_effects, dialogue_with_sly = data[4:]
+            right, left, condition_damage_effects = data[4:]
 
             load_music.first_loc_music()
             pygame.mixer.music.play(-1, fade_ms=50)
@@ -275,12 +275,14 @@ def upload_data():
     jump = False
     jump_from_wall = False
     speeds_before_jump = [0, 0]
+    for sprite in trigger_blocks:
+        sprite.kill()
+    lock_script = triggers.Boss_Wall_Lock()
     lock_script.lock_wall = False
 
     count_fall = False
     counter_fall = 0
     game_paused = False
-    dialogue_with_sly = False
     # перемещение в стороны
     right = left = 0
     if respawn_cords[0] and respawn_cords[1]:
@@ -293,12 +295,12 @@ def upload_data():
     initialization(money_list, main_character_money)
 
     return (start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall, speeds_before_jump, count_fall,
-            counter_fall, game_paused, right, left, condition_damage_effects, dialogue_with_sly)
+            counter_fall, game_paused, right, left, condition_damage_effects)
 
 
 def check_dead(camera):
     global start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall, money_list, global_y, global_x
-    global speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects, dialogue_with_sly
+    global speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects
     global respawn_cords, main_character_money, lock_script
     if not main_character.health:
         x, y = main_character.rect.x, main_character.rect.y
@@ -314,7 +316,7 @@ def check_dead(camera):
 
         start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
         speeds_before_jump, count_fall, counter_fall, game_paused, right, left,\
-        condition_damage_effects, dialogue_with_sly = data[4:]
+        condition_damage_effects = data[4:]
 
         main_character.money = 0
         main_character_money = main_character.money
@@ -327,6 +329,10 @@ def check_dead(camera):
 
 
         lost_money_coin = Money(lost_money_x, lost_money_y, lost_money)
+
+        load_music.first_loc_music()
+        pygame.mixer.music.play(-1, fade_ms=50)
+
         write_data_to_save()
 
 
@@ -340,7 +346,7 @@ if __name__ == '__main__':
     load_data_from_save()
 
     start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
-    speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects, dialogue_with_sly = data[4:]
+    speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects = data[4:]
 
     N = 10
 
@@ -350,8 +356,12 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
 
     paused_menu = InGameMenu()
+    dialogue_with_sly = False
     dialogue_with_sly_window = Sly_dialogue()
     shop = Sly_shop()
+
+    dialogue_with_elderbug = False
+    dialogue_with_elderbug_window = Elderbug_dialogue()
 
     smooth_surface = pygame.Surface(size)
     smooth_surface.set_alpha(60)
@@ -404,8 +414,10 @@ if __name__ == '__main__':
                             update_map_after_save(camera)
                             write_data_to_save()
                     for sprite in npcs:
-                        if sprite.can_talk:
+                        if sprite.can_talk and type(sprite) == Sly:
                             dialogue_with_sly = True
+                        if sprite.can_talk and type(sprite) == Elderbug:
+                            dialogue_with_elderbug = True
 
                 # при нажатии на пробел - прыжок
                 if event.key == pygame.K_SPACE and (main_character.get_hor() or main_character.get_ver()):
@@ -449,9 +461,8 @@ if __name__ == '__main__':
             if event.type == pygame.MOUSEBUTTONUP:
                 mouse_clicked_for_dialogues = False
 
-        # цвет можно поменять. Это будет цвет фона
-        # screen.fill(pygame.color.Color(200, 200, 200))
-        screen.blit(background_image, (0, 0))
+        # screen.blit(background_image, (0, 0))
+        background.draw(screen)
 
         # перемещение в стороны
         move_hor = right + left
@@ -489,7 +500,6 @@ if __name__ == '__main__':
                 speeds_before_jump = [0, 0]
 
         camera.update()
-        background.draw(screen)
         # отрисовываю все группы спрайтов
         platforms.draw(screen)
         platforms.update()
@@ -507,6 +517,8 @@ if __name__ == '__main__':
 
         trigger_blocks.update()
         trigger_blocks.draw(screen)
+
+        knight.draw(screen)
 
         if game_paused:
             screen.blit(smooth_surface, (0, 0))
@@ -527,6 +539,7 @@ if __name__ == '__main__':
                 game_paused = False
             if paused_menu.back_to_main_menu_button.get_pressed():
                 game_paused = False
+                dialogue_with_sly = False
                 main_character_money = main_character.money
                 write_data_to_save()
                 main_menu(screen)
@@ -576,6 +589,22 @@ if __name__ == '__main__':
                 sly_shop.update()
 
             sly_dialogue.update()
+
+        if dialogue_with_elderbug:
+            screen.blit(smooth_surface, (0, 0))
+
+            elderbug_dialogue.draw(screen)
+            dialogue_with_elderbug_window.draw_buttons()
+
+            if mouse_clicked_for_dialogues:
+                if dialogue_with_elderbug_window.close_dialogue_button.get_pressed():
+                     dialogue_with_elderbug = False
+                if dialogue_with_elderbug_window.next_phrase_button and \
+                        dialogue_with_elderbug_window.next_phrase_button.get_pressed():
+                    dialogue_with_elderbug_window.current_phrase += 1
+
+                mouse_clicked_for_dialogues = False
+            elderbug_dialogue.update()
 
         elif not condition_damage_effects:
             jump = main_character.update(move_hor, jump, move_speed, fall_speed)

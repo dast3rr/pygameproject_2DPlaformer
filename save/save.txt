@@ -1,10 +1,10 @@
-respawn_x: 30423
-respawn_y: 42377
-main_character_money: 0
+respawn_x: 8780
+respawn_y: 9220
+main_character_money: 34
 money: -180, 120, 50, 1, False
 money: 75, 350, 50, 2, False
 money: 720, 720, 50, 3, False
-volume: 0.1640625
+volume: 0.0390625
 main_character_attack_damage: 1
 main_character_maximum_health: 5
 main_character_maximum_healings: 6
