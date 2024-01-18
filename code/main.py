@@ -24,7 +24,7 @@ FALLING_SHEET = 2
 RUNNING_SHEET = 1
 STANDING_SHEET = 0
 
-SAVING_POINTS_CORDS = {'1': (-570, 7550), '2': (8780, 9220), '3': (9480, 7420), '4': (21500, 23500), '5': (24800, 22200)}
+SAVING_POINTS_CORDS = {'1': (-570, 7550), '2': (8780, 9220), '3': (9480, 7420), '4': (23000, 23050)}
 
 main_character_money = 0
 volume = 0
@@ -33,12 +33,13 @@ lock_script = triggers.Boss_Wall_Lock()
 
 
 def load_data_from_save():
-    global respawn_cords, main_character_money, money_list, volume, main_character
+    global respawn_cords, main_character_money, money_list, volume, main_character, global_cords
     with open('../save/save.txt', 'r', encoding='utf-8') as f:
         lines = f.readlines()
         try:
             respawn_cords[0] = int(lines[0].split(':')[1].strip())
             respawn_cords[1] = int(lines[1].split(':')[1].strip())
+            global_cords[0], global_cords[1] = 0, 0
             main_character_money = int(lines[2].split(':')[1].strip())
             for line in lines[3:-4]:
                 collected = line.split(':')[1].split(', ')[4].strip()
@@ -111,7 +112,6 @@ class Camera:
 
         if k:
             main_character.rect.y -= d_y + r * k
-            global_cords[1] -= d_y + r * k
             self.y = main_character.rect.y + r * k
             self.summary_d_y += (d_y + r * k)
             start_jump_altitude -= (d_y + r * k)
@@ -285,14 +285,19 @@ def upload_data():
     game_paused = False
     # перемещение в стороны
     right = left = 0
+
+    initialization(money_list, main_character_money)
+
     if respawn_cords[0] and respawn_cords[1]:
-        main_character.rect.x = respawn_cords[0]
-        main_character.rect.y = respawn_cords[1]
+
+        main_character.rect.x = respawn_cords[0] - main_character.rect.x + screen.get_width() // 2
+        main_character.rect.y = respawn_cords[1] - main_character.rect.y - screen.get_height() // 2
+        global_cords[0], global_cords[1] = 0, 0
     condition_damage_effects = False
 
     camera.summary_d_x, camera.summary_d_y = 0, 0
 
-    initialization(money_list, main_character_money)
+
 
     return (start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall, speeds_before_jump, count_fall,
             counter_fall, game_paused, right, left, condition_damage_effects)
@@ -411,6 +416,7 @@ if __name__ == '__main__':
                     for sprite in saving_points:
                         if sprite.can_save:
                             respawn_cords[0], respawn_cords[1] = SAVING_POINTS_CORDS[sprite.point_id]
+                            global_cords[0], global_cords[1] = 0, 0
                             update_map_after_save(camera)
                             write_data_to_save()
                     for sprite in npcs:
@@ -501,6 +507,7 @@ if __name__ == '__main__':
 
         camera.update()
         # отрисовываю все группы спрайтов
+        background.draw(screen)
         platforms.draw(screen)
         platforms.update()
         money.draw(screen)

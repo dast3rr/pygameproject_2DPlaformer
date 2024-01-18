@@ -217,9 +217,9 @@ class Knight(Character):
         global_cords[1] += (self.rect.y - y)
 
         if self.rect.x > x:
-            background_image.rect.x -= 0.2
+            background_image.rect.x -= 1
         elif self.rect.x < x:
-            background_image.rect.x += 0.2
+            background_image.rect.x += 1
 
         return jump
 
@@ -585,6 +585,7 @@ class Background(pygame.sprite.Sprite):
         background_image = load_image('background.png')
         self.image = pygame.transform.scale(background_image, (screen.get_width() * 2, screen.get_height()))
         self.rect = self.image.get_rect()
+        self.rect.x = -200
 
 
 def initialization(money_list, main_character_money):
@@ -659,8 +660,7 @@ def initialization(money_list, main_character_money):
 
     for x, y in vengefly_cords:
         Vengefly(x, y, vengefly_graphics, enemies)
-
-    points = [(-185, 685, '1'), (750, 850, '2'), (820, 670, '3')]
+    points = [(-185, 685, '1'), (750, 850, '2'), (820, 670, '3'), (2300, 2305, '4')]
     for el in points:
         x, y, id = el
         Saving_point(x, y, id)
