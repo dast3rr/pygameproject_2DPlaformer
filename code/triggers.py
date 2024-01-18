@@ -1,12 +1,16 @@
-from graphics import Platform, platforms, vertical_platforms,  trigger_blocks, character, screen, load_image, enemies, Vengefly
-from data import global_cords, N, respawn_cords
+from graphics import Platform, platforms, vertical_platforms, trigger_blocks, character, screen, load_image, enemies, \
+    Vengefly, main_character
+from data import global_cords, N, respawn_cords, volume
 import pygame
+from load_music import battle_music, first_loc_music
 
 
 class Boss_Wall_Lock(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__(trigger_blocks)
         self.rect = pygame.rect.Rect(1050 * N, 900 * N, 100 * N, 200 * N)
+        self.image = pygame.surface.Surface((self.rect.w, self.rect.y))
+        self.image.set_alpha(0)
         self.lock_wall = False
         self.boss = None
 
@@ -32,17 +36,34 @@ class Boss_Wall_Lock(pygame.sprite.Sprite):
             mouthwing.rect.h = 400
             mouthwing.rect.w = 500
             mouthwing.agr_radius = 1000
-            mouthwing.hp = 20
+            mouthwing.hp = 10
             mouthwing.dropping_money = 100
             mouthwing.speed = 1
             self.boss = mouthwing
-#         if self.boss.hp == 0:
-#             MindSphere()
-#
-#
-# class MindSphere(pygame.sprite.Sprite):
-#     def __init__(self):
-#         super().__init__(trigger_blocks)
-#         self.rect = pygame.rect.Rect(1050 * N, 900 * N, 100 * N, 200 * N)
+            battle_music()
+            pygame.mixer.music.set_volume(volume)
+            pygame.mixer.music.play(-1, fade_ms=50)
+
+        if self.boss is not None:
+            if self.boss.hp == 0:
+                self.boss.hp = 1
+                MindSphere(self.boss.rect.x, self.boss.rect.y - 200)
+                first_loc_music()
+                pygame.mixer.music.set_volume(volume)
+                pygame.mixer.music.play(-1, fade_ms=50)
+
+
+class MindSphere(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__(trigger_blocks)
+        self.rect = pygame.rect.Rect(x, y, 50, 50)
+        self.image = load_image('effects\\white_sphere.png')
+        self.image = pygame.transform.scale(self.image, (500, 500))
+        self.mask = pygame.mask.from_surface(self.image)
+
+    def update(self):
+        if pygame.sprite.collide_mask(self, main_character):
+            pass
+            # нужно переместить персонажа на 4 сейвпоинт
 
 

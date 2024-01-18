@@ -6,3 +6,7 @@ def main_menu_music():
 
 def first_loc_music():
     pygame.mixer.music.load(os.path.join("..\data\music", "first_loc.mp3"))
+
+def battle_music():
+    pygame.mixer.music.load(os.path.join("..\data\music", "battle_music.mp3"))
+

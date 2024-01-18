@@ -16,6 +16,8 @@ enemy_attack_radius = 20 * N
 global_cords = [0, 0]
 respawn_cords = [0, 0]
 
+volume = 0
+
 
 cords = [(-20, 0, 100, 12),
          (-200, -100, 190, 200),
