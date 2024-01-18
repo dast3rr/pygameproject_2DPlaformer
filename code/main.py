@@ -3,7 +3,7 @@ import sys
 from graphics import platforms, screen, fps, size, \
     character, knight, enemies, main_character, menu, money, load_image, initialization, saving_points, \
     damage_waves, update_map_after_save, Money, money_list, new_game_confirmation, Crawlid, trigger_blocks, Sly, npcs, \
-    sly_dialogue, sly_shop
+    sly_dialogue, sly_shop, background
 from data import move_speed, start_jump_from_wall_position, start_jump_altitude, \
     fall_speed, global_cords, respawn_cords
 import triggers
@@ -12,6 +12,7 @@ import load_music
 from music_volume_controller import volume_controller_filler, volume_controller_slider, volume_controller_base, \
     Base, Filler, Slider
 from npc import Sly_dialogue, Sly_shop
+from data import volume
 
 import pygame
 import os
@@ -26,7 +27,7 @@ STANDING_SHEET = 0
 SAVING_POINTS_CORDS = {'1': (-570, 7550), '2': (8780, 9220), '3': (9480, 7420), '4': (21500, 23500), '5': (24800, 22200)}
 
 main_character_money = 0
-volume = 0
+
 
 lock_script = triggers.Boss_Wall_Lock()
 
@@ -55,7 +56,7 @@ def load_data_from_save():
 
 
 def write_data_to_save():
-    global money_list, main_character
+    global money_list, main_character, volume
     with open('../save/save.txt', 'w', encoding='utf-8') as f:
         f.write(f'respawn_x: {str(respawn_cords[0])}\n')
         f.write(f'respawn_y: {str(respawn_cords[1])}\n')
@@ -348,8 +349,6 @@ if __name__ == '__main__':
     # таймер для обновления фпс - 60
     clock = pygame.time.Clock()
 
-    # пустое значение
-
     paused_menu = InGameMenu()
     dialogue_with_sly_window = Sly_dialogue()
     shop = Sly_shop()
@@ -490,7 +489,7 @@ if __name__ == '__main__':
                 speeds_before_jump = [0, 0]
 
         camera.update()
-
+        background.draw(screen)
         # отрисовываю все группы спрайтов
         platforms.draw(screen)
         platforms.update()
@@ -507,6 +506,9 @@ if __name__ == '__main__':
         saving_points.draw(screen)
 
         trigger_blocks.update()
+        trigger_blocks.draw(screen)
+
+
 
         if game_paused:
             screen.blit(smooth_surface, (0, 0))

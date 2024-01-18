@@ -211,8 +211,18 @@ class Knight(Character):
         if move_hor:
             self.old_move_hor = move_hor
 
-        global_cords[0] -= (self.rect.x - x)
-        global_cords[1] -= (self.rect.y - y)
+        global_cords[0] += (self.rect.x - x)
+        global_cords[1] += (self.rect.y - y)
+
+        if self.rect.x > x:
+            background_image.rect.x -= 1
+        elif self.rect.x < x:
+            background_image.rect.x += 1
+
+        if self.rect.y > y:
+            background_image.rect.y -= 1
+        elif self.rect.y < y:
+            background_image.rect.y += 1
 
         return jump
 
@@ -554,6 +564,15 @@ class Saving_point(pygame.sprite.Sprite):
             self.can_save = False
 
 
+class Background(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__(background)
+        background_image = load_image('background.png')
+        self.image = pygame.transform.scale(background_image, (screen.get_width() * 2, screen.get_height() * 2))
+        self.rect = self.image.get_rect()
+
+
+
 def initialization(money_list, main_character_money):
     global main_character, platforms, money, vertical_platforms, horizontal_platforms, enemies, saving_points, mouthwing
     background = pygame.Surface(size)
@@ -702,6 +721,7 @@ money = pygame.sprite.Group()
 saving_points = pygame.sprite.Group()
 damage_waves = pygame.sprite.Group()
 trigger_blocks = pygame.sprite.Group()
+background = pygame.sprite.Group()
 N = 10
 main_character = None
 mouthwing = None
@@ -712,3 +732,4 @@ crawlid_cords = [(-10, 61, 45, -1), (25, 181, 45, -1), (25, 346, 45, -1), (100, 
 vengefly_cords = [(0, 20), (150, 320), (230, 330), (175, 370), (130, 360), (290, 365), (355, 350), (335, 290),
                   (-25, 420), (10, 450)]
 initialization(money_list, 0)
+background_image = Background()
