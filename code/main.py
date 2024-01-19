@@ -213,9 +213,6 @@ def main_menu(screen):
             slider.update(event)
             filler.update()
 
-        screen.blit(background, (0, 0))
-
-
         if respawn_cords[0] and respawn_cords[1]:
             continue_button.disabled_color = None
 
@@ -315,7 +312,7 @@ def upload_data():
             main_character.rect.x = respawn_cords[0]
             main_character.rect.y = respawn_cords[1]
         else:
-            main_character.rect.x = respawn_cords[0] - 300
+            main_character.rect.x = respawn_cords[0]
             main_character.rect.y = respawn_cords[1] - 300
         global_cords[0], global_cords[1] = 0, 0
     condition_damage_effects = False
@@ -495,8 +492,6 @@ if __name__ == '__main__':
             if event.type == pygame.MOUSEBUTTONUP:
                 mouse_clicked_for_dialogues = False
 
-        # screen.blit(background_image, (0, 0))
-        background.draw(screen)
 
         # перемещение в стороны
         move_hor = right + left
