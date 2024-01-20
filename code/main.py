@@ -170,6 +170,7 @@ def main_menu(screen):
     back_button = Button(300, 50, screen.get_width() // 2 - 150, screen.get_height() - 75,
                          (0, 0, 0, 100), (255, 255, 255, 100))
     while True:
+        screen.blit(background, (0, 0))
         for event in pygame.event.get():
             if event.type == pygame.MOUSEMOTION:
                 pass
