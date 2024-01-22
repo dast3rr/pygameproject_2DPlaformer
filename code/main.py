@@ -18,6 +18,7 @@ import end_game
 import pygame
 import os
 
+# индексы анимаций гг
 ATTACKING_SHEET = 5
 SLIDING_SHEET = 4
 JUMPING_SHEET = 3
@@ -25,14 +26,16 @@ FALLING_SHEET = 2
 RUNNING_SHEET = 1
 STANDING_SHEET = 0
 
+# точки сохранения
 SAVING_POINTS_CORDS = {'1': (-570, 7550), '2': (8780, 9220), '3': (9480, 7350), '4': (23000, 23050)}
 
+# деньги, звук
 main_character_money = 0
 volume = 0
 boss_killed = False
 
-lock_script = triggers.Boss_Wall_Lock()
-whitelight = triggers.WhiteLight()
+lock_script = triggers.Boss_Wall_Lock()  # дверь, запирающая комнаты с боссом
+whitelight = triggers.WhiteLight() # конец игры
 
 
 def load_data_from_save():
@@ -97,6 +100,7 @@ class Camera:
     def update(self):
         global start_jump_altitude, start_jump_from_wall_position, global_cords
 
+        # разница кординат
         d_x = main_character.rect.x - self.x
         d_y = main_character.rect.y - self.y
 
@@ -108,6 +112,7 @@ class Camera:
         elif d_x < -r:
             k = 1
         if k:
+            # передвижение всех спрайтов при движении главного героя
             main_character.rect.x -= d_x + r * k
             self.x = main_character.rect.x + r * k
             self.summary_d_x += (d_x + r * k)
@@ -282,7 +287,7 @@ def main_menu(screen):
 
         pygame.display.flip()
 
-
+# обновление данных при новой игре
 def upload_data():
     global main_character, global_cords, money_list, whitelight, lock_script
     start_jump_altitude = -100000
@@ -305,10 +310,6 @@ def upload_data():
     initialization(money_list, main_character_money)
 
     if respawn_cords[0] and respawn_cords[1]:
-        # main_character.rect.x = respawn_cords[0] - main_character.rect.x + screen.get_width() // 2
-        # main_character.rect.x -= main_character.rect.x - respawn_cords[0]
-        # main_character.rect.y = respawn_cords[1] - main_character.rect.y - screen.get_height() // 2
-        # main_character.rect.y -= main_character.rect.y - respawn_cords[1]
         if size[0] == 2560 and size[1] == 1440:
             main_character.rect.x = respawn_cords[0]
             main_character.rect.y = respawn_cords[1]
@@ -320,12 +321,11 @@ def upload_data():
 
     camera.summary_d_x, camera.summary_d_y = 0, 0
 
-
-
     return (start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall, speeds_before_jump, count_fall,
             counter_fall, game_paused, right, left, condition_damage_effects)
 
 
+# при смерти обновление всех данных до нуля и перемещение на точку сохранения
 def check_dead(camera):
     global start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall, money_list, global_y, global_x
     global speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects
@@ -365,6 +365,7 @@ def check_dead(camera):
         write_data_to_save()
 
 
+# главный цикл
 if __name__ == '__main__':
     # Перемещаю экран на центр
     os.environ['SDL_VIDEO_CENTERED'] = '1'
@@ -377,13 +378,16 @@ if __name__ == '__main__':
     start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
     speeds_before_jump, count_fall, counter_fall, game_paused, right, left, condition_damage_effects = data[4:]
 
+    # коэффциент увеличения
     N = 10
 
+    # инициализация окна pygame
     pygame.init()
     pygame.display.set_mode(size)
     # таймер для обновления фпс - 60
     clock = pygame.time.Clock()
 
+    # меню паузы и диалоги
     paused_menu = InGameMenu()
     dialogue_with_sly = False
     dialogue_with_sly_window = Sly_dialogue()
@@ -396,15 +400,17 @@ if __name__ == '__main__':
     smooth_surface.set_alpha(60)
 
     running = True
-
+    # главное меню
     main_menu(screen)
 
+    # фон
     background_image = load_image('background.png')
     background_image = pygame.transform.scale(background_image, (screen.get_width(), screen.get_height()))
 
     mouse_clicked_for_dialogues = False  # без этой переменной фразы в диалоге проматываются слишком быстро
 
     while running:
+        # события мыши и клавиатуры
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -412,6 +418,7 @@ if __name__ == '__main__':
             # если нажаты клавиши
             elif event.type == pygame.KEYDOWN:
                 keys = pygame.key.get_pressed()
+                # перемещение
                 if keys[pygame.K_d]:
                     if not jump_from_wall:
                         right = 1
@@ -425,6 +432,7 @@ if __name__ == '__main__':
                 if keys[pygame.K_h]:
                     main_character.heal()
 
+                # внутриигровое меню
                 if keys[pygame.K_ESCAPE]:
                     if not game_paused and not dialogue_with_sly and not dialogue_with_elderbug:
                         game_paused = True
@@ -437,7 +445,7 @@ if __name__ == '__main__':
                         game_paused = False
                     write_data_to_save()
 
-
+                # взаимодействие
                 if keys[pygame.K_e]:
                     for sprite in saving_points:
                         if sprite.can_save:
@@ -551,6 +559,7 @@ if __name__ == '__main__':
 
         knight.draw(screen)
 
+        # пауза
         if game_paused:
             screen.blit(smooth_surface, (0, 0))
             menu.draw(screen)
@@ -575,9 +584,11 @@ if __name__ == '__main__':
                 write_data_to_save()
                 main_menu(screen)
 
+        # диалог с торговцем
         if dialogue_with_sly:
             screen.blit(smooth_surface, (0, 0))
 
+            # сам диалог
             if not dialogue_with_sly_window.open_shop:
                 sly_dialogue.draw(screen)
                 dialogue_with_sly_window.draw_buttons()
@@ -592,6 +603,7 @@ if __name__ == '__main__':
 
                     mouse_clicked_for_dialogues = False
             else:
+                # магазин
                 sly_shop.draw(screen)
                 shop.draw_buttons()
 
@@ -621,6 +633,7 @@ if __name__ == '__main__':
 
             sly_dialogue.update()
 
+        # диалог со старцем
         if dialogue_with_elderbug:
             screen.blit(smooth_surface, (0, 0))
 
@@ -637,18 +650,19 @@ if __name__ == '__main__':
                 mouse_clicked_for_dialogues = False
             elderbug_dialogue.update()
 
+        # конец игры
         if whitelight.intersect_with_knight:
             respawn_cords[0], respawn_cords[1] = 0, 0
             end_game.end_game(main_character.killed_enemies, main_character.total_damage, main_character.deaths)
             main_menu(screen)
-
-
+        # эффекты урона
         elif not condition_damage_effects:
             jump = main_character.update(move_hor, jump, move_speed, fall_speed)
             enemies.update()
         else:
             main_character.update_damage_resistant()
 
+        # ускорение при падении
         if count_fall:
             counter_fall += 6
             if counter_fall == 6:
@@ -661,18 +675,22 @@ if __name__ == '__main__':
         else:
             main_character.cur_sheet = RUNNING_SHEET
 
+        # при прыжке
         if jump:
             main_character.cur_sheet = JUMPING_SHEET
 
+        # при атаке
         if main_character.attack:
             main_character.cur_sheet = ATTACKING_SHEET
 
+        # остановка экрана на полсекунды при получении урона
         if main_character.stop_screen and not condition_damage_effects:
             stop_screen = screen.copy()
             condition_damage_effects = True
         if not main_character.stop_screen:
             condition_damage_effects = False
 
+        # проверка смерти
         check_dead(camera)
 
         if main_character.stop_screen:
@@ -681,5 +699,6 @@ if __name__ == '__main__':
 
         pygame.display.flip()
         clock.tick(fps)
+    # выход программы
     write_data_to_save()
     pygame.quit()
