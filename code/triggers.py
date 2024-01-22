@@ -41,7 +41,7 @@ class Boss_Wall_Lock(pygame.sprite.Sprite): # класс-триггер, кот�
             mouthwing.rect.h = 400
             mouthwing.rect.w = 500
             mouthwing.agr_radius = 1000
-            mouthwing.hp = 1
+            mouthwing.hp = 20
             mouthwing.dropping_money = 100
             mouthwing.speed = 1
             self.boss = mouthwing
