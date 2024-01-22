@@ -5,7 +5,7 @@ import pygame
 from load_music import battle_music, first_loc_music
 
 
-class Boss_Wall_Lock(pygame.sprite.Sprite):
+class Boss_Wall_Lock(pygame.sprite.Sprite): # класс-триггер, который при пересечении с главным героем закрывает проход к боссу и спавнит этого босса
     def __init__(self):
         super().__init__(trigger_blocks)
         self.rect = pygame.rect.Rect(1050 * N, 900 * N, 100 * N, 200 * N)

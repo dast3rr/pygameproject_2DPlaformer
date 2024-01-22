@@ -3,6 +3,7 @@ from graphics import screen
 from data import FONT
 from menu import Button
 
+# отрисовываем конечную заставку так же, как начальную
 def end_game(killed_enemies, total_damage, deaths_amounts):
     killed_enemies, total_damage, deaths_amounts =  killed_enemies, total_damage, deaths_amounts
     phrases = ['Спасибо, храбрый рыцарь, ты спас нас!', 'Наша деревня навсегда запомнит тебя']
@@ -35,6 +36,7 @@ def end_game(killed_enemies, total_damage, deaths_amounts):
         pygame.display.flip()
 
 
+# отображаем статистику, которую собирали в игре
 def draw_statistics(killed_enemies, total_damage, deaths_amounts):
     font = pygame.font.Font(FONT, 40)
     to_menu_button = Button(300, 40, screen.get_width() // 2 - 150, screen.get_height() - 60,

@@ -38,7 +38,7 @@ lock_script = triggers.Boss_Wall_Lock()  # дверь, запирающая ко
 whitelight = triggers.WhiteLight() # конец игры
 
 
-def load_data_from_save():
+def load_data_from_save(): # загружаем из файла сохранения всю информацию в нужные нам переменные
     global respawn_cords, main_character_money, money_list, volume, main_character, global_cords, boss_killed
     with open('../save/save.txt', 'r', encoding='utf-8') as f:
         lines = f.readlines()
@@ -70,7 +70,7 @@ def load_data_from_save():
             write_data_to_save()
 
 
-def write_data_to_save():
+def write_data_to_save(): # записываем инфу из переменных в файл
     global money_list, main_character, volume
     with open('../save/save.txt', 'w', encoding='utf-8') as f:
         f.write(f'respawn_x: {str(respawn_cords[0])}\n')
@@ -139,24 +139,27 @@ class Camera:
                     sprite.rect.y -= (d_y + r * k)
 
 
-def main_menu(screen):
+def main_menu(screen): # функция главного меню
     global respawn_cords, main_character_money, volume
     global start_jump_altitude, start_jump_from_wall_position, money_list
     global jump, jump_from_wall, speeds_before_jump, count_fall, counter_fall, game_paused, right, left
 
-    load_music.main_menu_music()
+    load_music.main_menu_music() # включаем музыку для главного меню, устанавливаем громкость
     pygame.mixer.music.set_volume(volume)
     pygame.mixer.music.play(-1, fade_ms=50)
 
+    # инициализируем некоторые элементы
     confirmation = New_game_confirmation()
 
     base = Base()
     slider = Slider()
     filler = Filler()
 
+    # фон главного меню
     background = pygame.transform.scale(load_image('main_menu_background_2.png'),
                                         (screen.get_width(), screen.get_height()))
-    current_bg = 1
+    current_bg = 1 # текущий задний фон(его можно менять)
+    # кнопочки
     change_bg_button = Button(400, 50, screen.get_width() // 2 - 200, screen.get_height() - 75,
                               (0, 0, 0, 0), (255, 255, 255, 100))
 
@@ -165,10 +168,10 @@ def main_menu(screen):
                              (50, 50, 50), (255, 255, 255, 20), (0, 0, 0, 100))
     exit_game_button = Button(300, 100, screen.get_width() // 2 - 150, 600, (50, 50, 50), (255, 255, 255, 100))
 
-    start_new_game = False
-    confirm_new_game = False
+    start_new_game = False # если True, начинается новая игра
+    confirm_new_game = False # если True, отображается подтверждение начала новой игры
 
-    how_to_play = False
+    how_to_play = False # если True, отображается гайд по игре
     how_to_play_button = Button(200, 50, screen.get_width() - 250, 25,
                                 (0, 0, 0, 100), (255, 255, 255, 100))
     how_to_play_font_color = pygame.Color('white')
@@ -180,7 +183,7 @@ def main_menu(screen):
             if event.type == pygame.MOUSEMOTION:
                 pass
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if change_bg_button.get_pressed() and not confirm_new_game and not how_to_play:
+                if change_bg_button.get_pressed() and not confirm_new_game and not how_to_play: # смена фона
                     if current_bg == 1:
                         current_bg = 2
                         background = pygame.transform.scale(load_image('main_menu_background_1.jpg'),
@@ -191,16 +194,17 @@ def main_menu(screen):
                         background = pygame.transform.scale(load_image('main_menu_background_2.png'),
                                                             (screen.get_width(), screen.get_height()))
                         how_to_play_font_color = pygame.Color('White')
-                if how_to_play_button.get_pressed() and not confirm_new_game and not how_to_play:
+                if how_to_play_button.get_pressed() and not confirm_new_game and not how_to_play: # как играть
                     how_to_play = True
-                if back_button.get_pressed() and how_to_play:
+                if back_button.get_pressed() and how_to_play: # закрыть гайд
                     how_to_play = False
-                if new_game_button.get_pressed() and not confirm_new_game and not how_to_play:
-                    if respawn_cords[0] and respawn_cords[1]:
+                if new_game_button.get_pressed() and not confirm_new_game and not how_to_play: # новая игра
+                    if respawn_cords[0] and respawn_cords[1]: # если есть корды для возрождения, открываем меню подтверждения новой игры
                         confirm_new_game = True
-                    else:
+                    else: # если координат нет, сразу запускаем новую игру
                         start_new_game = True
                 if continue_button.get_pressed() and not confirm_new_game and not how_to_play:
+                    # продолжить игру, кнопка активна только если есть координаты респавна
                     data = upload_data()
                     start_jump_altitude, start_jump_from_wall_position, jump, jump_from_wall = data[:4]
                     speeds_before_jump, count_fall, counter_fall, game_paused, \
@@ -213,16 +217,17 @@ def main_menu(screen):
                     filler.kill()
                     return
                 if exit_game_button.get_pressed() and not confirm_new_game and not how_to_play:
+                    # выход из игры
                     write_data_to_save()
                     pygame.quit()
                     sys.exit()
             slider.update(event)
             filler.update()
 
-        if respawn_cords[0] and respawn_cords[1]:
+        if respawn_cords[0] and respawn_cords[1]: # активность кнопки "продолжить"
             continue_button.disabled_color = None
 
-        if how_to_play:
+        if how_to_play: # отрисовка гайда по игре
             back_button.draw('Назад', 30)
             font = pygame.font.Font(FONT, 35)
             texts = ['A, D - Передвижение', 'ПРОБЕЛ - Прыжок', 'Левая кнопка мыши - Атака', 'H - Лечение',
@@ -234,7 +239,7 @@ def main_menu(screen):
                 screen.blit(text, (screen.get_width() // 2 - text.get_width() // 2,
                                    screen.get_height() // 4 + text.get_height() * 2 * texts.index(el)))
 
-        if confirm_new_game:
+        if confirm_new_game: # подтверждение новой игры
             new_game_confirmation.draw(screen)
             confirmation.draw_buttons()
             new_game_confirmation.update()
@@ -244,7 +249,7 @@ def main_menu(screen):
         if confirmation.reject_button.get_pressed() and confirm_new_game:
             confirm_new_game = False
 
-        if start_new_game:
+        if start_new_game: # сбрасываем переменные к исходным значениям при новой игре
             respawn_cords[0] ,respawn_cords[1] = 0, 0
             main_character_money = 0
             main_character.attack_damage = 1
@@ -266,10 +271,10 @@ def main_menu(screen):
 
             slider.kill()
             filler.kill()
-            new_game_intro()
+            new_game_intro() # заставка начальная
             return
 
-        if not confirm_new_game and not how_to_play:
+        if not confirm_new_game and not how_to_play: # отрисовка основного главного меню, если не открыты другие разделы
             new_game_button.draw('Новая игра', 40)
             continue_button.draw('Продолжить', 40)
             exit_game_button.draw('Выйти из игры', 40)

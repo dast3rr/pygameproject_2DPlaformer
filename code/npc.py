@@ -4,7 +4,10 @@ from menu import Button
 from data import FONT
 
 
-class Sly_dialogue(pygame.sprite.Sprite):
+# файл с классами, реализующими отображение диалогов с нпс и в случае с жуком-торгашом отображение магазина
+# так же частично реализованы некоторые функции взаимодействия с диалоговыми окнами
+
+class Sly_dialogue(pygame.sprite.Sprite): # диалог со Слаем(торговцем)
     def __init__(self):
         super().__init__(sly_dialogue)
         self.image = pygame.Surface((screen.get_width() // 3, screen.get_height() // 8), pygame.SRCALPHA, 32)
@@ -54,7 +57,7 @@ class Sly_dialogue(pygame.sprite.Sprite):
             self.shop_button.draw('Магазин', 25)
 
 
-class Sly_shop(pygame.sprite.Sprite):
+class Sly_shop(pygame.sprite.Sprite): # магазин Слая(для удобства сделан отдельным классом)
     def __init__(self):
         super().__init__(sly_shop)
         self.image = pygame.Surface((screen.get_width() // 6, screen.get_height() // 3), pygame.SRCALPHA, 32)
@@ -96,7 +99,7 @@ class Sly_shop(pygame.sprite.Sprite):
         self.buy_maximum_healings_improvement.draw(str(self.maximum_healings_improvement_price), 25)
 
 
-class Elderbug_dialogue(pygame.sprite.Sprite):
+class Elderbug_dialogue(pygame.sprite.Sprite): # диалог со стариком, который рассказывает историю
     def __init__(self):
         super().__init__(elderbug_dialogue)
         self.image = pygame.Surface((screen.get_width() // 3, screen.get_height() // 8), pygame.SRCALPHA, 32)
