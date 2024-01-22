@@ -6,12 +6,13 @@ from data import cords, global_cords, FONT
 
 
 def load_image(name, colorkey=None):
+    # путь до изображения
     fullname = os.path.join('..\data', name)
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
         sys.exit()
     image = pygame.image.load(fullname)
-
+    # создание прозрачности изображению
     if colorkey is not None:
         image = image.convert()
         if colorkey == -1:
@@ -22,24 +23,30 @@ def load_image(name, colorkey=None):
     return image
 
 
+# эффект после получения урона
 class DamageWaves(pygame.sprite.Sprite):
     def __init__(self, direction_x, direction_y):
         super().__init__(damage_waves)
 
+        # направление движения эффектов относительно главного героя
         self.direction_x = direction_x
         self.direction_y = direction_y
 
+        # картинка
         self.image = pygame.transform.flip(load_image('effects\damage_waves_1.png'), direction_x, direction_y)
         self.image = pygame.transform.scale(self.image, (300, 300))
         self.rect = self.image.get_rect()
 
+        # координаты относительно главного героя
         x = main_character.rect.x + main_character.rect.w // 2 - self.rect.w * ((direction_x + 1) % 2)
         y = main_character.rect.y + main_character.rect.h // 2 - self.rect.h * direction_y
 
         self.rect.x = x
         self.rect.y = y
 
+    # перемещение
     def update(self):
+        # пока действует невосприятие урона у главного героя перемещение в сторону от гг
         if main_character.resist_count:
             if main_character.resist_count > 25:
                 self.rect.x += 2400 / fps if self.direction_x else -2400 / fps
@@ -47,21 +54,24 @@ class DamageWaves(pygame.sprite.Sprite):
                 self.image.set_alpha(80 - main_character.resist_count, False)
 
 
-# класс для горизонтальных пересечений и картинки
+# базовый класс для перемещающихся объектов
 class Character(pygame.sprite.Sprite):
     def __init__(self, x, y, graphics, *groups):
         # всякие кординаты
         super().__init__(character, *groups)
+        # размеры спрайта
         w, h = screen.get_size()
         x *= N
         y *= N
 
+        # кадры для анимации
         self.frames = []
         # графика
         for i in range(len(graphics)):
             sheet, columns, rows = graphics[i]
             self.cut_sheet(sheet, columns, rows, x, y)
 
+        # размеры объекта и неободимые для работы атрибуты
         self.cur_frame = 0
         self.cur_sheet = 0
         self.image = self.frames[self.cur_sheet][self.cur_frame]
@@ -71,6 +81,7 @@ class Character(pygame.sprite.Sprite):
 
     # создание анимации
     def cut_sheet(self, sheet, columns, rows, x, y):
+        # при некоторых условиях количество кадров в короткой анимации увеличивается
         res = []
         if len(self.frames) == 1 and type(self) == Knight:
             count = 2
@@ -85,8 +96,10 @@ class Character(pygame.sprite.Sprite):
         else:
             count = 1
 
+        # квадрат по картинке
         self.rect = pygame.Rect(x, y, sheet.get_width() // columns,
                                 sheet.get_height() // rows)
+        # у класса рыцаря обрезается картинка
         if type(self) == Knight:
             if len(self.frames) == 4:
                 z = 1.6
@@ -96,6 +109,7 @@ class Character(pygame.sprite.Sprite):
         else:
             z = 0
             x = 0
+        # обрезка кадров
         for j in range(rows):
             for i in range(columns):
                 frame_location = (self.rect.w * i + 20 * x, self.rect.h * j)
@@ -106,27 +120,35 @@ class Character(pygame.sprite.Sprite):
 
         self.frames.append(res)
 
+    # возвращает истину, если объект пересекается с горизонтальными платформами
     def get_hor(self):
         return pygame.sprite.spritecollideany(self, horizontal_platforms)
 
+    # возвращает истину, если объект пересекается с вертикальными платформами
     def get_ver(self):
         return pygame.sprite.spritecollideany(self, vertical_platforms)
 
 
+# спрайт главного героя
 class Knight(Character):
     def __init__(self, x, y, graphics, *groups):
         super().__init__(x, y, graphics, *groups)
+        # здоровье и лечилки, деньги и хэпулина
         self.health = 5
         self.maximum_health = 5
         self.healings = 6
         self.maximum_healings = 6
         self.money = 0
+
+        # картинки монет, сердечек и денег
         heart_image = load_image('heart.png')
         heal_image = load_image('heal.png')
         money_image = load_image('money.png')
         self.heart_image = pygame.transform.scale(heart_image, (100, 60))
         self.heal_image = pygame.transform.scale(heal_image, (60, 60))
         self.money_image = pygame.transform.scale(money_image, (60, 60))
+
+        # необходимые переменные
         self.non_damage_count = 0
         self.damage = False
         self.old_move_hor = 0
@@ -192,6 +214,7 @@ class Knight(Character):
                         self.rect.y -= fall_speed // abs(fall_speed)
                     break
 
+        # обновление всех условий
         self.update_healthbar()
         self.update_heals()
         self.update_money()
@@ -199,15 +222,19 @@ class Knight(Character):
         self.update_effects()
         self.update_attack_condition()
 
+        # счётки кадров и обновление
         if self.count_flip == 3:
+            # счётчик при атаке
             if self.attack:
                 self.attack_count += 1
             self.count_flip = 0
+            # смена картинки
             if move_hor == 0 and self.cur_sheet == 0:
                 self.cur_frame = 0
             else:
                 self.cur_frame = (self.cur_frame + 1) % len(self.frames[self.cur_sheet])
             self.image = self.frames[self.cur_sheet][self.cur_frame]
+            # разворот картинки взависимости от направления движения гг
             if move_hor == -1 or self.old_move_hor == -1:
                 self.image = pygame.transform.flip(self.image, True, False)
 
@@ -217,9 +244,11 @@ class Knight(Character):
         if move_hor:
             self.old_move_hor = move_hor
 
+        # изменение отслеживания координат персонажа
         global_cords[0] += (self.rect.x - x)
         global_cords[1] += (self.rect.y - y)
 
+        # изменения координат фона
         if self.rect.x > x:
             background_image.rect.x -= 0.5
         elif self.rect.x < x:
@@ -227,15 +256,19 @@ class Knight(Character):
 
         return jump
 
+    # обновление эффектов
     def update_effects(self):
         if self.resist:
+            # обновление эффектов
             damage_waves.update()
             damage_waves.draw(screen)
         else:
+            # если вышло время, то удаляю эффекты
             for sprite in damage_waves:
                 sprite.kill()
             damage_waves.draw(screen)
 
+    # обновление шкалы здоровья
     def update_healthbar(self):
         for i in range(self.health):
             x = 50 + i * 30
@@ -247,38 +280,46 @@ class Knight(Character):
             self.damage = False
             self.non_damage_count = 0
 
+    # лечение главного героя
     def heal(self):
         if self.healings > 0 and self.health < self.maximum_health:
             self.health += 1
             self.healings -= 1
 
+    # обновление количества здоровья и отрисовка
     def update_heals(self):
         screen.blit(self.heal_image, (60, 80))
         font = pygame.font.Font(FONT, 40)
         text = font.render(str(self.healings), True, pygame.Color('White'))
         screen.blit(text, (130, 80))
 
+    # получение монет
     def add_money(self, amount):
         self.money += amount
 
+    # обновление отображения денег
     def update_money(self):
         screen.blit(self.money_image, (60, 140))
         font = pygame.font.Font(FONT, 40)
         text = font.render(str(self.money), True, pygame.Color('White'))
         screen.blit(text, (130, 140))
 
+    # атака
     def attacking(self):
+        # в зависимости от направления движения персонажа
         if self.view_direcion == 1:
             attacking_rect = pygame.Rect(self.rect.topright[0], self.rect.y, self.attack_radius, self.rect.width)
         else:
             attacking_rect = pygame.Rect(self.rect.x - self.attack_radius, self.rect.y,
                                          self.attack_radius, self.rect.height)
 
+        # всем, кто находится в радиусе атаки наносится урон
         for sprite in enemies:
             if attacking_rect.colliderect(sprite.rect):
                 self.total_damage += self.attack_damage
                 sprite.get_damage(self.attack_damage)
 
+    # создание условий для начала атаки
     def start_attacking(self):
         self.cur_frame = 0
         self.cur_sheet = 5
@@ -286,6 +327,7 @@ class Knight(Character):
         self.attack_count = 0
         self.attack = True
 
+    # обновление условий для атаки
     def update_attack_condition(self):
         if self.attack and self.attack_count == 5 and self.count_flip == 1:
             self.attacking()
@@ -295,31 +337,39 @@ class Knight(Character):
             self.attack_count = 0
             self.attack = False
 
+    # получение урона
     def get_damage(self, damage, enemy):
         if not self.resist:
+            # нужные переменные
             self.health -= damage
             self.resist = True
             self.stop_screen = True
+
+            # эффекты получения урона
             DamageWaves(0, 0)
             DamageWaves(0, 1)
             DamageWaves(1, 0)
             DamageWaves(1, 1)
+
+            # направление отбрасывания
             damage_waves.draw(screen)
             if enemy.rect.x < self.rect.x:
                 self.drop_direction = -1
             else:
                 self.drop_direction = 1
 
+    # обновление защиты от урона
     def update_damage_resistant(self):
         if self.resist:
             self.resist_count += 1
 
-            if self.resist_count == 100:
+            # при некоторых значения счётчика происходят нужные события:
+            if self.resist_count == 100:  # завершение защиты
                 self.resist = False
                 self.resist_count = 0
-            if self.resist_count == 25:
+            if self.resist_count == 25:  # завершение стоп-экрана
                 self.stop_screen = False
-            if 50 > self.resist_count > 25:
+            if 50 > self.resist_count > 25:  # отбрасывание
                 self.rect.y -= 800 / fps
                 if self.get_ver():
                     self.rect.y += 800 / fps
@@ -328,63 +378,77 @@ class Knight(Character):
                     self.rect.x += (300 / fps) * self.drop_direction
 
 
-
+# класс врага
 class Enemy(Character):
     def __init__(self, x, y, graphics, *groups):
         super().__init__(x, y, graphics, *groups)
+        # здоровье, деньги и системная переменная
         self.hp = 3
         self.dropping_money = 10
         self.reverse_count = 0
 
+    # получение урона
     def get_damage(self, damage):
         self.hp -= damage
 
+    # выпадение денег
     def drop_money(self):
         Money(self.rect.x, self.rect.y, self.dropping_money)
 
+    # возвращает истину, если маски гг и врага пересекаются
     def intersect_with_knight(self):
         return pygame.sprite.collide_mask(self, main_character)
 
 
+# муха
 class Vengefly(Enemy):
     def __init__(self, x, y, graphics, *groups):
         super().__init__(x, y, graphics, *groups)
-
+        # здоровье, деньги, направление
         self.hp = 1
         self.dropping_money = 4
         self.direction = -1
+
+        # всякие штуки для работы
         self.count_reverse = 0
         self.rect = pygame.rect.Rect(self.rect.x, self.rect.y, 120, 120)
         self.cur_sheet = self.cur_frame = 0
         self.start_x = self.rect.x
-
+        # скорость
         self.speed = 2
 
-
+        # преследование и радиус атаки
         self.chase = False
         self.agr_radius = 650
 
+    # обновление
     def update(self):
+        # нужда разворота
         need_reverse = False
         if self.direction == 1 and self.rect.x > main_character.rect.x or \
                 self.direction == -1 and self.rect.x < main_character.rect.x:
             need_reverse = True
 
+        # при нужде разворота
         if need_reverse:
             self.direction *= -1
             self.cur_sheet = 1
             self.count_reverse = 1
             self.cur_frame = 0
 
+        # завершение разворота
         if self.cur_sheet == 1 and self.count_reverse == 3:
             self.count_reverse = 0
             self.count_flip = 0
             self.cur_sheet = self.cur_frame = 0
 
+        # счётчик смены кадров
         if self.count_flip == 10:
             self.count_flip = 0
+            # смена картинки
             self.cur_frame = (self.cur_frame + 1) % len(self.frames[self.cur_sheet])
             self.image = self.frames[self.cur_sheet][self.cur_frame]
+            # при смене направления
             if self.direction == 1:
                 self.image = pygame.transform.flip(self.image, True, False)
 
@@ -393,9 +457,11 @@ class Vengefly(Enemy):
             if self.count_reverse:
                 self.count_reverse += 1
 
+        # преследование
         if ((self.rect.x - main_character.rect.x) ** 2 + (self.rect.y - main_character.rect.y) ** 2) ** 0.5 <= self.agr_radius:
             self.chase = True
 
+        # преследование
         if self.chase:
             if self.rect.x < main_character.rect.x:
                 self.rect.x += self.speed
@@ -419,32 +485,39 @@ class Vengefly(Enemy):
 
         self.check_needs_of_damage()
 
+        # умертвление :(
         if self.hp <= 0:
             main_character.killed_enemies += 1
             self.kill()
             self.drop_money()
 
-
+    # при соприкоснавении с гг он получает урон
     def check_needs_of_damage(self):
         if self.intersect_with_knight():
             main_character.get_damage(1, self)
 
 
+# ползучий
 class Crawlid(Enemy):
     def __init__(self, x, y, distance, direction, graphics, *groups):
         super().__init__(x, y, graphics, *groups)
 
+        # урон, здоровье и деньги
         self.hp = 2
         self.dropping_money = 3
         self.direction = direction
         self.count_reverse = 0
+
+        # нужные переменные
         self.rect = pygame.rect.Rect(self.rect.x, self.rect.y, 100, 85)
         self.cur_sheet = self.cur_frame = 0
         self.first_update = True
         self.start_x = self.rect.x
         self.distance = distance * N
 
+    # обновление
     def update(self):
+        # нужда разворота
         need_reverse = False
         if abs(self.rect.x - self.start_x) >= self.distance:
             if self.rect.x < self.start_x:
@@ -452,21 +525,27 @@ class Crawlid(Enemy):
             else:
                 self.rect.x -= 2
             need_reverse = True
+
+        # при нужде разворота
         if need_reverse:
             self.direction *= -1
             self.cur_sheet = 1
             self.count_reverse = 1
             self.cur_frame = 0
 
+        # завершение разворота
         if self.cur_sheet == 1 and self.count_reverse == 3:
             self.count_reverse = 0
             self.count_flip = 0
             self.cur_sheet = self.cur_frame = 0
 
+        # счётчик кадров
         if self.count_flip == 10:
             self.count_flip = 0
+            # смена картинки
             self.cur_frame = (self.cur_frame + 1) % len(self.frames[self.cur_sheet])
             self.image = self.frames[self.cur_sheet][self.cur_frame]
+            # разворот
             if self.direction == 1:
                 self.image = pygame.transform.flip(self.image, True, False)
 
@@ -482,22 +561,26 @@ class Crawlid(Enemy):
 
         self.check_needs_of_damage()
 
+        # умертвление
         if self.hp <= 0:
             main_character.killed_enemies += 1
             self.kill()
             self.drop_money()
 
+    # при взаимодействии с гг он получает урон
     def check_needs_of_damage(self):
         if self.intersect_with_knight():
             main_character.get_damage(1, self)
 
 
+# торговец
 class Sly(Character):
     def __init__(self, x, y, graphics):
         super().__init__(x, y, graphics, npcs)
         self.cur_sheet = self.cur_frame = 0
         self.can_talk = False
 
+    # обновление
     def update(self):
         self.cur_frame = (self.cur_frame + 1) % len(self.frames[self.cur_sheet])
         self.image = self.frames[self.cur_sheet][self.cur_frame]
@@ -510,12 +593,14 @@ class Sly(Character):
             self.can_talk = False
 
 
+# старец, повествующий легенду
 class Elderbug(Character):
     def __init__(self, x, y, graphics):
         super().__init__(x, y, graphics, npcs)
         self.cur_sheet = self.cur_frame = 0
         self.can_talk = False
 
+    # обновление
     def update(self):
         self.cur_frame = (self.cur_frame + 1) % len(self.frames[self.cur_sheet])
         self.image = self.frames[self.cur_sheet][self.cur_frame]
@@ -528,6 +613,7 @@ class Elderbug(Character):
             self.can_talk = False
 
 
+# деньги
 class Money(pygame.sprite.Sprite):
     def __init__(self, x, y, amount, id=None):
         super().__init__(money)
@@ -566,6 +652,7 @@ class Platform(pygame.sprite.Sprite):
         pygame.draw.rect(self.image, 'black', self.rect)
 
 
+# точка сохранения
 class Saving_point(pygame.sprite.Sprite):
     def __init__(self, x, y, point_id):
         super().__init__(saving_points)
@@ -573,9 +660,11 @@ class Saving_point(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(image, (50, 50))
         self.rect = pygame.Rect(x * N + screen.get_width() // 2, y * N + screen.get_height() // 2,
                                 self.image.get_width(), self.image.get_height())
+        # возможность сохранения и ай ди точки
         self.can_save = False
         self.point_id = point_id
 
+    # обновление
     def update(self):
         if self.rect.colliderect(main_character):
             font = pygame.font.Font(FONT, 30)
@@ -586,6 +675,7 @@ class Saving_point(pygame.sprite.Sprite):
             self.can_save = False
 
 
+# задний фон
 class Background(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__(background)
@@ -595,6 +685,7 @@ class Background(pygame.sprite.Sprite):
         self.rect.x = -screen.get_width() * 2.5
 
 
+# инициализация всего
 def initialization(money_list, main_character_money):
     global main_character, platforms, money, vertical_platforms, horizontal_platforms, enemies, saving_points, mouthwing
     background = pygame.Surface(size)
@@ -604,6 +695,7 @@ def initialization(money_list, main_character_money):
             group.clear(screen, background)
             group.draw(screen)
 
+    # главный герой
     images = [(load_image('knight\knight_standing.png'), 1), (load_image('knight\knight_running.png'), 6),
               (load_image('knight\knight_falling.png'), 7),
               (load_image('knight\knight_in_jump.png', 'white'), 1),
@@ -624,6 +716,7 @@ def initialization(money_list, main_character_money):
         main_character.healings = main_character.maximum_healings
         main_character.money = main_character_money
 
+    # торговец
     sly_graphics = []
     sly_images = [(load_image('npcs\sly.png'), 6)]
     for image, row in sly_images:
@@ -633,6 +726,7 @@ def initialization(money_list, main_character_money):
         sly_graphics.append((scaled_image, row, 1))
     Sly(300, 506.5, sly_graphics)
 
+    # старец
     elderbug_graphics = []
     elderbug_images = [(load_image('npcs\elderbug.png', -1), 6)]
     for image, row in elderbug_images:
@@ -642,6 +736,7 @@ def initialization(money_list, main_character_money):
         elderbug_graphics.append((scaled_image, row, 1))
     Elderbug(-50, 340, elderbug_graphics)
 
+    # ползучий
     crawlids_graphics = []
     crawlids_images = [(load_image('crawlid\\crawlid_walking.png'), 4), (load_image('crawlid\\crawlid_reversing.png'), 2),
                        (load_image('crawlid\\crawlid_diying.png'), 3)]
@@ -659,6 +754,7 @@ def initialization(money_list, main_character_money):
                        (load_image('vengefly\\vengefly_turning.png'), 2),
                        (load_image('vengefly\\vengefly_diying.png'), 3)]
 
+    # муха
     for image, row in vengefly_images:
         k = 120 / image.get_height()
         scaled_image = pygame.transform.scale(image, (
@@ -667,18 +763,21 @@ def initialization(money_list, main_character_money):
 
     for x, y in vengefly_cords:
         Vengefly(x, y, vengefly_graphics, enemies)
+
+    # точки сохранения
     points = [(-185, 685, '1'), (750, 850, '2'), (820, 670, '3'), (2300, 2305, '4')]
     for el in points:
         x, y, id = el
         Saving_point(x, y, id)
 
-
+    # монеты
     list_of_money = money_list
     for coin in list_of_money:
         x, y, value, id, collected = coin
         if not collected:
             Money(x, y, value, id)
 
+    # платформы
     for cord in cords:
         x, y, a, b = cord
         Platform(x + 1 / N, y, a - 2 / N, b, platforms, horizontal_platforms)
@@ -756,6 +855,8 @@ background = pygame.sprite.Group()
 N = 10
 main_character = None
 mouthwing = None
+
+# кординаты
 money_list = [[-180, 120, 50, 1, False], [75, 350, 50, 2, False],  [720, 720, 50, 3, False]]
 crawlid_cords = [(-10, 61, 45, -1), (25, 181, 45, -1), (25, 346, 45, -1), (100, 396, 100, -1),
                  (150, 396, 100, -1), (200, 396, 100, 1), (360, 386, 50, -1), (310, 428.5, 40, 1), (355, 306, 25, 1),
